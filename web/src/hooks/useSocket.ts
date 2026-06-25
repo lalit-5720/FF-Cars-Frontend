@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../store/useAuthStore';
 import { useNotificationStore } from '../store/useNotificationStore';
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:5000';
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL;
 
 export const useSocket = () => {
   const socketRef = useRef<Socket | null>(null);
@@ -46,7 +46,7 @@ export const useSocket = () => {
     socket.on('notification', (data) => {
       console.log('Notification received in socket client:', data);
       addNotification(data);
-      
+
       // Dispatch custom event for browser toast/toast systems
       const event = new CustomEvent('app_toast_notification', { detail: data });
       window.dispatchEvent(event);
