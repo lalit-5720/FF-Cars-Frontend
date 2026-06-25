@@ -119,7 +119,7 @@ export default function AdminDashboard() {
   const fetchAllBookings = async () => {
     setLoadingBookings(true);
     try {
-      const response = await api.get('/bookings');
+      const response = await api.get('/bookings?all=true');
       setBookings(response.data);
     } catch (error) {
       console.error('Failed to load bookings', error);
