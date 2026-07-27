@@ -4,11 +4,13 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api } from '../services/api';
-import { ShieldCheck, Calendar, Zap, Sparkles, ArrowRight, Heart, Star } from 'lucide-react';
+import { ShieldCheck, Calendar, Zap, ArrowRight, Heart, Star, MapPin } from 'lucide-react';
 import { useWishlistStore } from '../store/useWishlistStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { showLocalToast } from '../components/Toast';
 import { ThreeDCard } from '../components/ThreeDCard';
+
+const FALLBACK_IMG = 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&q=80&w=1200';
 
 export default function HomePage() {
   const router = useRouter();
@@ -20,8 +22,9 @@ export default function HomePage() {
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        const response = await api.get('/cars?limit=3');
-        setFeaturedCars(response.data.data);
+        const response = await api.get('/vehicles?limit=3');
+        const list = Array.isArray(response.data) ? response.data : (response.data.data || []);
+        setFeaturedCars(list);
       } catch (error) {
         console.error('Failed to load featured cars', error);
       } finally {
@@ -35,353 +38,777 @@ export default function HomePage() {
     e.preventDefault();
     e.stopPropagation();
     if (!isAuthenticated) {
-      showLocalToast('Please log in to wishlist cars');
+      showLocalToast('Please log in to save vehicles');
       router.push('/login');
       return;
     }
     const added = await toggleWishlist(carId);
-    showLocalToast(added ? 'Added to wishlist!' : 'Removed from wishlist.');
+    showLocalToast(added ? 'Saved to your collection' : 'Removed from collection');
   };
 
   const brands = [
-    { name: 'Porsche', logo: 'P' },
-    { name: 'BMW', logo: 'B' },
-    { name: 'Mercedes-Benz', logo: 'M' },
-    { name: 'Audi', logo: 'A' },
-    { name: 'Tesla', logo: 'T' },
-    { name: 'Land Rover', logo: 'L' },
-    { name: 'Jaguar', logo: 'J' },
-    { name: 'Aston Martin', logo: 'AM' },
+    { name: 'BMW', abbr: 'BMW' },
+    { name: 'Mercedes', abbr: 'MB' },
+    { name: 'Audi', abbr: 'Audi' },
+    { name: 'Porsche', abbr: 'Pors' },
+    { name: 'Tata', abbr: 'Tata' },
+    { name: 'Hyundai', abbr: 'Hyun' },
+    { name: 'Land Rover', abbr: 'LR' },
+    { name: 'Jaguar', abbr: 'Jag' },
+  ];
+
+  const guarantees = [
+    {
+      icon: ShieldCheck,
+      title: '200-Point Inspection',
+      desc: 'Every vehicle undergoes a rigorous mechanical, structural, and electrical certification by our master technicians.',
+    },
+    {
+      icon: Calendar,
+      title: '5-Day Return Assurance',
+      desc: 'Complete peace of mind. Return any vehicle within 5 days for a full refund — no conditions, no questions.',
+    },
+    {
+      icon: Zap,
+      title: 'Secure Transaction Engine',
+      desc: 'Military-grade booking locks ensure your reservation is protected from the moment you initiate.',
+    },
   ];
 
   return (
-    <div className="flex flex-col flex-1 bg-black text-white">
-      {/* 3D Interactive Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center py-20 px-4 sm:px-6 lg:px-8 overflow-hidden border-b border-zinc-900 bg-radial-[circle_at_top,_var(--tw-gradient-stops)] from-zinc-900 via-black to-black">
-        {/* Dot Matrix Wireframe Grid Backdrop */}
+    <div className="flex flex-col flex-1" style={{ backgroundColor: 'var(--midnight)' }}>
+
+      {/* ═══════════════════════════════════════
+          HERO SECTION — Cinematic Full Bleed
+      ══════════════════════════════════════ */}
+      <section className="relative min-h-[92vh] flex items-center justify-center overflow-hidden">
+        {/* Background: Deep gradient + dot grid */}
         <div
-          className="absolute inset-0 opacity-25 pointer-events-none"
+          className="absolute inset-0"
           style={{
-            backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
+            background: 'radial-gradient(ellipse 120% 80% at 60% 40%, rgba(201,169,110,0.05) 0%, transparent 70%), var(--midnight)',
           }}
         />
-        
-        {/* Soft Radial Ambient Lighting */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-white/5 rounded-full blur-[120px] pointer-events-none" />
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: 'radial-gradient(rgba(201,169,110,0.15) 1px, transparent 1px)',
+            backgroundSize: '36px 36px',
+          }}
+        />
 
-        <div className="relative max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          
-          {/* Left Column: Premium Pitch */}
-          <div className="lg:col-span-7 flex flex-col gap-6 text-left items-start z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.2em] bg-white/10 text-white border border-white/20 uppercase backdrop-blur-md">
-              <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-              Next-Gen Luxury Car Marketplace
+        {/* Ambient gold orbs */}
+        <div
+          className="absolute top-1/4 right-1/4 w-[500px] h-[500px] rounded-full pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, rgba(201,169,110,0.06) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+          }}
+        />
+        <div
+          className="absolute bottom-1/4 left-1/3 w-[300px] h-[300px] rounded-full pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle, rgba(201,169,110,0.04) 0%, transparent 70%)',
+            filter: 'blur(80px)',
+          }}
+        />
+
+        <div className="relative max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center py-20">
+
+          {/* ── Left: Editorial Copy ── */}
+          <div className="flex flex-col gap-8 z-10">
+
+            {/* Section label */}
+            <div className="section-label">
+              <span>Chennai's Premier Dealership</span>
             </div>
-            
-            <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.05]">
-              DRIVE THE <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-b from-white via-zinc-200 to-zinc-600">
-                ULTIMATE CHOICE
-              </span>
-            </h1>
-            
-            <p className="max-w-xl text-base sm:text-lg text-zinc-400 leading-relaxed font-light">
-              Direct peer-to-peer secure transaction locks. 200-point inspected certifications. 
-              Zero hidden fees. Reimagining premium automotive trading with absolute transparency.
+
+            {/* Display Heading */}
+            <div>
+              <h1
+                className="leading-none"
+                style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, serif",
+                  fontSize: 'clamp(3.5rem, 8vw, 6.5rem)',
+                  fontWeight: 600,
+                  letterSpacing: '-0.02em',
+                  color: 'var(--platinum)',
+                  lineHeight: 1.0,
+                }}
+              >
+                Own The{' '}
+                <em
+                  className="block"
+                  style={{
+                    fontStyle: 'italic',
+                    fontWeight: 300,
+                    color: 'var(--gold)',
+                    lineHeight: 1.05,
+                  }}
+                >
+                  Extraordinary
+                </em>
+              </h1>
+
+              {/* Gold ornamental divider */}
+              <div
+                className="mt-6 h-px"
+                style={{
+                  width: '6rem',
+                  background: 'linear-gradient(90deg, var(--gold), transparent)',
+                }}
+              />
+            </div>
+
+            <p
+              className="max-w-lg leading-relaxed"
+              style={{
+                color: 'var(--silver)',
+                fontSize: '1rem',
+                fontFamily: "'DM Sans', sans-serif",
+                fontWeight: 300,
+              }}
+            >
+              A curated collection of certified luxury and premium vehicles. 
+              Transparent pricing, white-glove service, and our signature 
+              200-point assurance — at every FF-Cars showroom.
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 mt-4 w-full sm:w-auto">
-              <Link
-                href="/cars"
-                className="px-8 py-4 rounded-full bg-white text-black font-extrabold text-sm tracking-wider uppercase hover:bg-zinc-200 transition-all shadow-[0_4px_20px_rgba(255,255,255,0.15)] flex items-center justify-center gap-2 group cursor-pointer"
-              >
-                Browse Inventory 
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+
+            {/* Location pills */}
+            <div className="flex flex-wrap gap-3">
+              {['Anna Nagar Showroom', 'Velachery Showroom'].map((loc) => (
+                <div
+                  key={loc}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs"
+                  style={{
+                    background: 'rgba(201,169,110,0.08)',
+                    border: '1px solid rgba(201,169,110,0.2)',
+                    color: 'var(--gold)',
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontWeight: 500,
+                    letterSpacing: '0.04em',
+                  }}
+                >
+                  <MapPin className="w-3 h-3" />
+                  {loc}
+                </div>
+              ))}
+            </div>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link href="/cars" className="btn-gold">
+                Browse Inventory
+                <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link
-                href="/register"
-                className="px-8 py-4 rounded-full border border-zinc-800 text-white bg-black/40 backdrop-blur-md font-extrabold text-sm tracking-wider uppercase hover:bg-white hover:text-black hover:border-white transition-all flex items-center justify-center cursor-pointer"
-              >
-                Join FF-Cars
+              <Link href="/register" className="btn-outline-gold">
+                Become a Member
               </Link>
             </div>
 
-            {/* Quick Metrics */}
-            <div className="grid grid-cols-3 gap-8 mt-8 pt-8 border-t border-zinc-900 w-full max-w-md">
-              <div>
-                <span className="block text-2xl font-black text-white font-mono">250+</span>
-                <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Premium Cars</span>
-              </div>
-              <div>
-                <span className="block text-2xl font-black text-white font-mono">0.0s</span>
-                <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Lock Latency</span>
-              </div>
-              <div>
-                <span className="block text-2xl font-black text-white font-mono">100%</span>
-                <span className="text-[10px] text-zinc-500 uppercase tracking-wider">Guaranteed</span>
-              </div>
+            {/* Stats row */}
+            <div
+              className="grid grid-cols-3 gap-8 pt-8"
+              style={{ borderTop: '1px solid var(--onyx-border)' }}
+            >
+              {[
+                { value: '250+', label: 'Curated Vehicles' },
+                { value: '2', label: 'Premium Showrooms' },
+                { value: '100%', label: 'Certified Quality' },
+              ].map(({ value, label }) => (
+                <div key={label}>
+                  <span
+                    className="block text-3xl font-bold"
+                    style={{
+                      fontFamily: "'DM Mono', monospace",
+                      color: 'var(--gold)',
+                      letterSpacing: '-0.02em',
+                    }}
+                  >
+                    {value}
+                  </span>
+                  <span
+                    className="text-[10px] uppercase tracking-widest mt-1 block"
+                    style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
+                  >
+                    {label}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Right Column: 3D Parallax Showcase Hero Card */}
-          <div className="lg:col-span-5 flex justify-center items-center z-10">
-            <ThreeDCard maxTilt={12} className="w-full max-w-[420px] aspect-[3/4]">
-              <div className="relative w-full h-full rounded-3xl border border-zinc-800 bg-zinc-950 p-6 flex flex-col justify-between overflow-hidden shadow-2xl preserve-3d">
-                {/* Background grid */}
+          {/* ── Right: 3D Showcase Card ── */}
+          <div className="flex justify-center items-center z-10">
+            <ThreeDCard maxTilt={10} className="w-full max-w-[440px] aspect-[4/5]">
+              <div
+                className="relative w-full h-full rounded-3xl p-7 flex flex-col justify-between overflow-hidden shadow-2xl preserve-3d"
+                style={{
+                  background: 'var(--obsidian)',
+                  border: '1px solid var(--onyx-border)',
+                  boxShadow: '0 40px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,169,110,0.08)',
+                }}
+              >
+                {/* Background micro-grid */}
                 <div
                   className="absolute inset-0 opacity-10 pointer-events-none"
                   style={{
-                    backgroundImage: 'radial-gradient(rgba(255,255,255,0.2) 1px, transparent 1px)',
-                    backgroundSize: '16px 16px',
+                    backgroundImage: 'radial-gradient(rgba(201,169,110,0.25) 1px, transparent 1px)',
+                    backgroundSize: '20px 20px',
                   }}
                 />
-                
-                {/* Floating Glow */}
-                <div className="absolute -top-16 -right-16 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+                {/* Gold ambient glow */}
+                <div
+                  className="absolute -top-20 -right-20 w-48 h-48 rounded-full pointer-events-none"
+                  style={{
+                    background: 'radial-gradient(circle, rgba(201,169,110,0.12) 0%, transparent 70%)',
+                    filter: 'blur(40px)',
+                  }}
+                />
 
-                {/* Top details */}
+                {/* Card top */}
                 <div className="flex justify-between items-start z-10 preserve-3d">
                   <div style={{ transform: 'translateZ(30px)' }}>
-                    <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Showcase</span>
-                    <h3 className="font-display font-black text-2xl text-white mt-1">Porsche 911</h3>
-                    <p className="text-xs text-zinc-400">GT3 RS Coupe</p>
+                    <span
+                      className="text-[9px] uppercase tracking-[0.2em] font-semibold block"
+                      style={{ color: 'var(--gold)', fontFamily: "'DM Sans', sans-serif" }}
+                    >
+                      Showcase · 2026 Collection
+                    </span>
+                    <h3
+                      className="mt-1"
+                      style={{
+                        fontFamily: "'Cormorant Garamond', Georgia, serif",
+                        fontSize: '1.75rem',
+                        fontWeight: 600,
+                        color: 'var(--platinum)',
+                        lineHeight: 1.1,
+                        letterSpacing: '-0.01em',
+                      }}
+                    >
+                      Porsche 911
+                    </h3>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--silver-dim)' }}>GT3 RS · Weissach Package</p>
                   </div>
                   <span
-                    className="px-3 py-1 rounded bg-white text-black font-mono text-xs font-black"
-                    style={{ transform: 'translateZ(40px)' }}
+                    className="px-3 py-1 rounded-lg text-xs font-bold"
+                    style={{
+                      background: 'var(--gold)',
+                      color: 'var(--midnight)',
+                      transform: 'translateZ(40px)',
+                      fontFamily: "'DM Mono', monospace",
+                      display: 'block',
+                    }}
                   >
-                    MY26
+                    MY 2026
                   </span>
                 </div>
 
-                {/* Center Image Container with 3D Depth */}
-                <div 
-                  className="relative w-full aspect-[16/10] my-4 flex items-center justify-center z-20 preserve-3d"
-                  style={{ transform: 'translateZ(50px) scale(1.1)' }}
+                {/* Car Image */}
+                <div
+                  className="relative w-full my-4 flex items-center justify-center z-20 preserve-3d"
+                  style={{ transform: 'translateZ(50px) scale(1.08)', aspectRatio: '16/9' }}
                 >
                   <img
-                    src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=800"
-                    alt="Porsche GT3"
-                    className="w-full h-full object-contain filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.85)]"
+                    src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=900"
+                    alt="Porsche GT3 RS"
+                    className="w-full h-full object-contain"
+                    style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.9))' }}
                   />
                 </div>
 
-                {/* Bottom Spec Floating Tags */}
+                {/* Spec grid + price */}
                 <div className="flex flex-col gap-4 z-10 preserve-3d">
-                  <div className="grid grid-cols-3 gap-2 text-center" style={{ transform: 'translateZ(35px)' }}>
-                    <div className="bg-zinc-900/80 border border-zinc-800 p-2.5 rounded-xl">
-                      <span className="block text-[8px] uppercase tracking-wider text-zinc-500">0-100 km/h</span>
-                      <span className="font-mono text-xs font-bold text-white">3.2s</span>
-                    </div>
-                    <div className="bg-zinc-900/80 border border-zinc-800 p-2.5 rounded-xl">
-                      <span className="block text-[8px] uppercase tracking-wider text-zinc-500">Max Power</span>
-                      <span className="font-mono text-xs font-bold text-white">525 HP</span>
-                    </div>
-                    <div className="bg-zinc-900/80 border border-zinc-800 p-2.5 rounded-xl">
-                      <span className="block text-[8px] uppercase tracking-wider text-zinc-500">Top Speed</span>
-                      <span className="font-mono text-xs font-bold text-white">296 km/h</span>
-                    </div>
+                  <div
+                    className="grid grid-cols-3 gap-2 text-center"
+                    style={{ transform: 'translateZ(35px)' }}
+                  >
+                    {[
+                      { label: '0–100 km/h', value: '3.2s' },
+                      { label: 'Max Power', value: '525 HP' },
+                      { label: 'Top Speed', value: '296 km/h' },
+                    ].map(({ label, value }) => (
+                      <div
+                        key={label}
+                        className="p-2.5 rounded-xl"
+                        style={{
+                          background: 'rgba(255,255,255,0.03)',
+                          border: '1px solid var(--onyx-border)',
+                        }}
+                      >
+                        <span
+                          className="block text-[8px] uppercase tracking-wider"
+                          style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
+                        >
+                          {label}
+                        </span>
+                        <span
+                          className="text-sm font-bold mt-0.5 block"
+                          style={{ color: 'var(--platinum)', fontFamily: "'DM Mono', monospace" }}
+                        >
+                          {value}
+                        </span>
+                      </div>
+                    ))}
                   </div>
-                  
-                  <div className="flex justify-between items-center" style={{ transform: 'translateZ(25px)' }}>
+
+                  <div
+                    className="flex justify-between items-center"
+                    style={{ transform: 'translateZ(25px)' }}
+                  >
                     <div>
-                      <span className="text-[9px] uppercase tracking-wider text-zinc-500">Direct Lock Price</span>
-                      <span className="block text-lg font-black text-white font-mono">₹24,500,000</span>
+                      <span
+                        className="text-[9px] uppercase tracking-widest block"
+                        style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
+                      >
+                        Starting Price
+                      </span>
+                      <span
+                        className="text-xl font-bold block mt-0.5"
+                        style={{ color: 'var(--gold)', fontFamily: "'DM Mono', monospace", letterSpacing: '-0.02em' }}
+                      >
+                        ₹2.45 Cr
+                      </span>
                     </div>
-                    <button 
+                    <button
                       onClick={() => router.push('/cars')}
-                      className="px-4 py-2 bg-white text-black font-extrabold text-[10px] uppercase tracking-widest rounded-lg hover:bg-zinc-200 transition-colors"
+                      className="btn-gold"
+                      style={{ padding: '0.625rem 1rem', fontSize: '0.65rem' }}
                     >
-                      Inspect Live
+                      View Inventory
                     </button>
                   </div>
                 </div>
-
               </div>
             </ThreeDCard>
           </div>
-
         </div>
       </section>
 
-      {/* Quick Brand Filter */}
-      <section className="py-16 bg-zinc-950 border-b border-zinc-900">
+      {/* ═══════════════════════════════════════
+          BRAND FILTER STRIP
+      ══════════════════════════════════════ */}
+      <section
+        className="py-16"
+        style={{ borderTop: '1px solid var(--onyx-border)', background: 'var(--obsidian)' }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-center text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-8">
-            Filter by Premium Brand
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+          {/* Ornamental heading */}
+          <div className="flex items-center justify-center gap-6 mb-10">
+            <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, var(--onyx-border))' }} />
+            <span
+              className="text-[10px] uppercase tracking-[0.3em] font-semibold"
+              style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
+            >
+              Filter by Marque
+            </span>
+            <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, var(--onyx-border), transparent)' }} />
+          </div>
+
+          <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
             {brands.map((brand) => (
               <button
                 key={brand.name}
                 onClick={() => router.push(`/cars?brand=${brand.name}`)}
-                className="flex flex-col items-center justify-center gap-3 p-5 rounded-2xl border border-zinc-900 bg-zinc-950/40 hover:bg-white hover:text-black hover:border-white transition-all duration-300 cursor-pointer text-center group"
+                className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-2xl transition-all duration-300 group cursor-pointer"
+                style={{
+                  background: 'transparent',
+                  border: '1px solid var(--onyx-border)',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(201,169,110,0.4)';
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(201,169,110,0.05)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--onyx-border)';
+                  (e.currentTarget as HTMLElement).style.background = 'transparent';
+                }}
               >
-                <div className="w-12 h-12 rounded-full border border-zinc-800 bg-zinc-900 text-white flex items-center justify-center font-display font-extrabold text-sm group-hover:bg-black group-hover:border-zinc-900 transition-colors">
-                  {brand.logo}
+                <div
+                  className="w-11 h-11 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300"
+                  style={{
+                    background: 'var(--onyx)',
+                    border: '1px solid var(--charcoal)',
+                    color: 'var(--silver)',
+                    fontFamily: "'DM Sans', sans-serif",
+                  }}
+                >
+                  {brand.abbr}
                 </div>
-                <span className="text-xs font-semibold tracking-wide truncate max-w-full">{brand.name}</span>
+                <span
+                  className="text-[10px] font-medium text-center leading-tight"
+                  style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
+                >
+                  {brand.name}
+                </span>
               </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Featured Listings Section */}
-      <section className="py-24 bg-black">
+      {/* ═══════════════════════════════════════
+          FEATURED VEHICLES — Editorial Drop
+      ══════════════════════════════════════ */}
+      <section className="py-28" style={{ backgroundColor: 'var(--midnight)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-14">
+
+          {/* Section Header */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-16">
             <div>
-              <span className="text-zinc-500 font-extrabold text-xs uppercase tracking-[0.25em]">Handpicked Options</span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mt-2 font-display">Featured Cars</h2>
+              <div className="section-label mb-4">Featured Selections</div>
+              <h2
+                style={{
+                  fontFamily: "'Cormorant Garamond', Georgia, serif",
+                  fontSize: 'clamp(2.25rem, 5vw, 3.5rem)',
+                  fontWeight: 500,
+                  color: 'var(--platinum)',
+                  lineHeight: 1.05,
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                Handpicked{' '}
+                <em style={{ fontStyle: 'italic', fontWeight: 300, color: 'var(--gold)' }}>
+                  Excellence
+                </em>
+              </h2>
             </div>
             <Link
               href="/cars"
-              className="text-white hover:text-zinc-300 font-extrabold text-xs uppercase tracking-widest flex items-center gap-2 group border-b border-white/20 pb-1"
+              className="flex items-center gap-2 text-xs font-medium uppercase tracking-widest transition-colors group"
+              style={{ color: 'var(--gold)', fontFamily: "'DM Sans', sans-serif", letterSpacing: '0.14em' }}
             >
-              View All Cars 
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              View Full Inventory
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
 
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[1, 2, 3].map((n) => (
-                <div key={n} className="rounded-3xl border border-zinc-950 bg-zinc-950/80 overflow-hidden h-[420px] skeleton-shimmer" />
+                <div
+                  key={n}
+                  className="rounded-3xl skeleton-shimmer"
+                  style={{ height: '460px', border: '1px solid var(--onyx-border)' }}
+                />
               ))}
             </div>
           ) : featuredCars.length === 0 ? (
-            <div className="text-center py-16 text-zinc-500 border border-dashed border-zinc-800 rounded-2xl">
-              No cars currently listed in database. Seeding failed or table empty.
+            <div
+              className="text-center py-20 rounded-3xl"
+              style={{
+                border: '1px dashed var(--charcoal)',
+                color: 'var(--silver-dim)',
+              }}
+            >
+              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.5rem', fontStyle: 'italic' }}>
+                No vehicles currently available
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {featuredCars.map((car) => (
-                <ThreeDCard key={car.id} maxTilt={6} className="h-full">
-                  <Link
-                    href={`/cars/${car.id}`}
-                    className="group rounded-3xl border border-zinc-900 bg-zinc-950 overflow-hidden flex flex-col h-full hover:border-zinc-700 transition-colors shadow-xl preserve-3d"
-                  >
-                    {/* Photo Container */}
-                    <div className="relative aspect-video w-full overflow-hidden bg-zinc-900 preserve-3d">
-                      <img
-                        src={car.thumbnail}
-                        alt={`${car.brand} ${car.model}`}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                      <button
-                        onClick={(e) => handleWishlistToggle(e, car.id)}
-                        className={`absolute top-4 right-4 p-2.5 rounded-full backdrop-blur-md shadow-md transition-all border ${
-                          isWishlisted(car.id)
-                            ? 'bg-white border-white text-black'
-                            : 'bg-black/45 border-white/10 text-white hover:bg-black/75'
-                        }`}
-                        style={{ transform: 'translateZ(30px)' }}
-                      >
-                        <Heart className="w-4 h-4" fill={isWishlisted(car.id) ? 'currentColor' : 'none'} />
-                      </button>
-                      <div 
-                        className="absolute bottom-4 left-4 px-3 py-1 rounded-md text-[10px] font-bold tracking-widest uppercase backdrop-blur-md bg-black/60 text-white border border-white/10"
-                        style={{ transform: 'translateZ(25px)' }}
-                      >
-                        {car.year}
-                      </div>
-                    </div>
+              {featuredCars.map((car) => {
+                const id = car.vehicle_id || car.id;
+                const make = car.make || car.brand;
+                const image = car.image_url || car.thumbnail || FALLBACK_IMG;
+                const year = car.manufacture_year || car.year || 2022;
+                const km = car.kilometers_driven || car.kmDriven || 0;
+                const fuel = car.fuel_type || car.fuelType || 'Petrol';
+                const owner = car.owner_type || car.ownership || '1st Owner';
+                const price = car.price ? Number(car.price) : 0;
 
-                    {/* Description Box */}
-                    <div className="p-6 flex-1 flex flex-col justify-between preserve-3d">
-                      <div className="preserve-3d">
-                        <div className="flex justify-between items-start gap-2 mb-2" style={{ transform: 'translateZ(20px)' }}>
-                          <div>
-                            <h3 className="font-semibold text-lg leading-tight text-white group-hover:text-zinc-300 transition-colors">
-                              {car.brand} {car.model}
-                            </h3>
-                            <p className="text-xs text-zinc-500 mt-1">{car.variant}</p>
+                return (
+                  <ThreeDCard key={id} maxTilt={5} className="h-full">
+                    <Link
+                      href={`/vehicles/${id}`}
+                      className="group flex flex-col h-full rounded-3xl overflow-hidden transition-all duration-500 preserve-3d"
+                      style={{
+                        background: 'var(--obsidian)',
+                        border: '1px solid var(--onyx-border)',
+                      }}
+                      onMouseEnter={e => {
+                        (e.currentTarget as HTMLElement).style.borderColor = 'rgba(201,169,110,0.3)';
+                        (e.currentTarget as HTMLElement).style.boxShadow = '0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,169,110,0.1)';
+                      }}
+                      onMouseLeave={e => {
+                        (e.currentTarget as HTMLElement).style.borderColor = 'var(--onyx-border)';
+                        (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+                      }}
+                    >
+                      {/* Image */}
+                      <div className="relative aspect-video w-full overflow-hidden" style={{ background: 'var(--onyx)' }}>
+                        <img
+                          src={image}
+                          alt={`${make} ${car.model}`}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
+                          style={{ transition: 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)' }}
+                        />
+                        {/* Gold overlay on hover */}
+                        <div
+                          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(201,169,110,0.06) 0%, transparent 60%)',
+                          }}
+                        />
+                        {/* Wishlist */}
+                        <button
+                          onClick={(e) => handleWishlistToggle(e, String(id))}
+                          className="absolute top-4 right-4 p-2.5 rounded-full transition-all duration-200 preserve-3d"
+                          style={{
+                            background: isWishlisted(String(id)) ? 'var(--gold)' : 'rgba(5,6,10,0.7)',
+                            border: '1px solid rgba(201,169,110,0.3)',
+                            backdropFilter: 'blur(8px)',
+                            transform: 'translateZ(30px)',
+                            color: isWishlisted(String(id)) ? 'var(--midnight)' : 'var(--silver)',
+                          }}
+                        >
+                          <Heart
+                            className="w-4 h-4"
+                            fill={isWishlisted(String(id)) ? 'currentColor' : 'none'}
+                          />
+                        </button>
+                        {/* Year badge */}
+                        <div
+                          className="absolute bottom-4 left-4 px-3 py-1 rounded-lg text-[10px] font-bold tracking-widest uppercase preserve-3d"
+                          style={{
+                            background: 'rgba(5,6,10,0.8)',
+                            border: '1px solid rgba(201,169,110,0.2)',
+                            backdropFilter: 'blur(8px)',
+                            color: 'var(--gold)',
+                            transform: 'translateZ(25px)',
+                            fontFamily: "'DM Mono', monospace",
+                          }}
+                        >
+                          {year}
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-6 flex-1 flex flex-col justify-between preserve-3d">
+                        <div>
+                          <div
+                            className="flex justify-between items-start gap-2 mb-3"
+                            style={{ transform: 'translateZ(20px)' }}
+                          >
+                            <div>
+                              <h3
+                                style={{
+                                  fontFamily: "'Cormorant Garamond', Georgia, serif",
+                                  fontSize: '1.3rem',
+                                  fontWeight: 600,
+                                  color: 'var(--platinum)',
+                                  lineHeight: 1.2,
+                                  letterSpacing: '-0.01em',
+                                }}
+                              >
+                                {make} {car.model}
+                              </h3>
+                              <p
+                                className="text-xs mt-0.5"
+                                style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
+                              >
+                                {car.color || 'Premium Edition'}
+                              </p>
+                            </div>
+                            <span
+                              className="flex-shrink-0 px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase tracking-wider"
+                              style={{
+                                background: 'rgba(201,169,110,0.1)',
+                                border: '1px solid rgba(201,169,110,0.2)',
+                                color: 'var(--gold)',
+                                fontFamily: "'DM Sans', sans-serif",
+                              }}
+                            >
+                              {car.transmission || 'Auto'}
+                            </span>
                           </div>
-                          <span className="flex-shrink-0 inline-block px-2.5 py-0.5 rounded text-[9px] font-black bg-zinc-900 text-zinc-400 border border-zinc-800 uppercase tracking-wider">
-                            {car.transmission}
-                          </span>
+
+                          {/* Spec row */}
+                          <div
+                            className="grid grid-cols-3 gap-3 py-4 text-xs"
+                            style={{
+                              borderTop: '1px solid var(--onyx-border)',
+                              borderBottom: '1px solid var(--onyx-border)',
+                              transform: 'translateZ(15px)',
+                            }}
+                          >
+                            {[
+                              { label: 'Driven', value: `${km.toLocaleString()} km` },
+                              { label: 'Fuel', value: fuel },
+                              { label: 'Owner', value: owner },
+                            ].map(({ label, value }) => (
+                              <div key={label}>
+                                <span
+                                  className="block text-[8px] uppercase tracking-wider font-semibold"
+                                  style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
+                                >
+                                  {label}
+                                </span>
+                                <span
+                                  className="font-medium mt-0.5 block"
+                                  style={{ color: 'var(--platinum)', fontFamily: "'DM Sans', sans-serif" }}
+                                >
+                                  {value}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
 
-                        <div 
-                          className="grid grid-cols-3 gap-2 py-4 border-y border-zinc-900 my-4 text-xs text-zinc-400"
-                          style={{ transform: 'translateZ(15px)' }}
+                        {/* Price + CTA */}
+                        <div
+                          className="flex items-end justify-between mt-4 pt-2"
+                          style={{ transform: 'translateZ(25px)' }}
                         >
                           <div>
-                            <span className="block text-[9px] uppercase font-bold text-zinc-600 tracking-wider">Driven</span>
-                            <span className="font-semibold text-white mt-0.5 block">{(car.kmDriven).toLocaleString()} km</span>
+                            <span
+                              className="text-[9px] uppercase tracking-widest block"
+                              style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
+                            >
+                              Price
+                            </span>
+                            <span
+                              className="text-2xl font-bold block mt-0.5"
+                              style={{
+                                color: 'var(--gold)',
+                                fontFamily: "'DM Mono', monospace",
+                                letterSpacing: '-0.03em',
+                              }}
+                            >
+                              ₹{price.toLocaleString()}
+                            </span>
                           </div>
-                          <div>
-                            <span className="block text-[9px] uppercase font-bold text-zinc-600 tracking-wider">Fuel</span>
-                            <span className="font-semibold text-white mt-0.5 block">{car.fuelType}</span>
-                          </div>
-                          <div>
-                            <span className="block text-[9px] uppercase font-bold text-zinc-600 tracking-wider">Owner</span>
-                            <span className="font-semibold text-white mt-0.5 block">{car.ownership}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Price and Action */}
-                      <div className="flex items-end justify-between mt-auto pt-2 preserve-3d" style={{ transform: 'translateZ(25px)' }}>
-                        <div>
-                          <span className="text-[9px] uppercase text-zinc-600 font-bold tracking-wider block">Price</span>
-                          <span className="text-xl font-black text-white font-mono mt-1 block">
-                            ₹{(car.price).toLocaleString()}
+                          <span
+                            className="text-[10px] font-bold uppercase tracking-widest transition-all duration-300 group-hover:translate-x-1"
+                            style={{ color: 'var(--gold)', fontFamily: "'DM Sans', sans-serif" }}
+                          >
+                            View Details →
                           </span>
                         </div>
-                        <div className="text-[11px] font-black uppercase tracking-widest text-white flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                          Details / Test Ride <ArrowRight className="w-3.5 h-3.5" />
-                        </div>
                       </div>
-                    </div>
-                  </Link>
-                </ThreeDCard>
-              ))}
+                    </Link>
+                  </ThreeDCard>
+                );
+              })}
             </div>
           )}
         </div>
       </section>
 
-      {/* Assurances Banner */}
-      <section className="py-24 bg-zinc-950 border-t border-zinc-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <span className="text-zinc-500 font-extrabold text-xs uppercase tracking-[0.25em]">Our Guarantees</span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight mt-2 mb-16 font-display">The FF-Cars Difference</h2>
-          
+      {/* ═══════════════════════════════════════
+          THE FF-CARS DIFFERENCE
+      ══════════════════════════════════════ */}
+      <section
+        className="py-28"
+        style={{
+          background: 'var(--obsidian)',
+          borderTop: '1px solid var(--onyx-border)',
+        }}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+          {/* Section Header */}
+          <div className="text-center mb-20">
+            <div className="flex items-center justify-center mb-5">
+              <div className="section-label">Our Commitment</div>
+            </div>
+            <h2
+              style={{
+                fontFamily: "'Cormorant Garamond', Georgia, serif",
+                fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+                fontWeight: 500,
+                color: 'var(--platinum)',
+                lineHeight: 1.0,
+                letterSpacing: '-0.02em',
+              }}
+            >
+              The FF-Cars{' '}
+              <em style={{ fontStyle: 'italic', fontWeight: 300, color: 'var(--gold)' }}>
+                Difference
+              </em>
+            </h2>
+            <p
+              className="mt-4 mx-auto max-w-lg"
+              style={{ color: 'var(--silver)', fontFamily: "'DM Sans', sans-serif", fontWeight: 300 }}
+            >
+              Every aspect of the FF-Cars experience is engineered around trust,
+              transparency, and excellence.
+            </p>
+          </div>
+
+          {/* Guarantee Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-3xl border border-zinc-900 bg-zinc-950 hover:border-zinc-700 transition-colors flex flex-col items-center text-center">
-              <div className="p-4 rounded-2xl bg-zinc-900 text-white mb-6 border border-zinc-800">
-                <ShieldCheck className="w-8 h-8" />
-              </div>
-              <h3 className="text-lg font-bold">200-Point Inspection</h3>
-              <p className="text-sm text-zinc-400 mt-3 leading-relaxed font-light">
-                Every vehicle undergoes a rigorous 200-point mechanical, structural, and electrical inspection 
-                by our expert technicians before certification.
-              </p>
-            </div>
+            {guarantees.map(({ icon: Icon, title, desc }, idx) => (
+              <div
+                key={title}
+                className="group relative p-8 rounded-3xl flex flex-col transition-all duration-500"
+                style={{
+                  background: 'var(--midnight)',
+                  border: '1px solid var(--onyx-border)',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(201,169,110,0.3)';
+                  (e.currentTarget as HTMLElement).style.boxShadow = '0 20px 60px rgba(0,0,0,0.4)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--onyx-border)';
+                  (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+                }}
+              >
+                {/* Index */}
+                <span
+                  className="absolute top-6 right-7 text-6xl font-bold opacity-5"
+                  style={{
+                    fontFamily: "'DM Mono', monospace",
+                    color: 'var(--gold)',
+                  }}
+                >
+                  0{idx + 1}
+                </span>
 
-            <div className="p-8 rounded-3xl border border-zinc-900 bg-zinc-950 hover:border-zinc-700 transition-colors flex flex-col items-center text-center">
-              <div className="p-4 rounded-2xl bg-zinc-900 text-white mb-6 border border-zinc-800">
-                <Calendar className="w-8 h-8" />
-              </div>
-              <h3 className="text-lg font-bold">5-Day Money-Back</h3>
-              <p className="text-sm text-zinc-400 mt-3 leading-relaxed font-light">
-                Change your mind? No worries. We offer a full 100% money-back guarantee within 5 days of purchase 
-                if you aren't completely satisfied.
-              </p>
-            </div>
+                {/* Icon */}
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center mb-7 transition-all duration-300"
+                  style={{
+                    background: 'rgba(201,169,110,0.08)',
+                    border: '1px solid rgba(201,169,110,0.2)',
+                    color: 'var(--gold)',
+                  }}
+                >
+                  <Icon className="w-6 h-6" />
+                </div>
 
-            <div className="p-8 rounded-3xl border border-zinc-900 bg-zinc-950 hover:border-zinc-700 transition-colors flex flex-col items-center text-center">
-              <div className="p-4 rounded-2xl bg-zinc-900 text-white mb-6 border border-zinc-800">
-                <Zap className="w-8 h-8" />
+                <h3
+                  className="mb-3"
+                  style={{
+                    fontFamily: "'Cormorant Garamond', Georgia, serif",
+                    fontSize: '1.4rem',
+                    fontWeight: 600,
+                    color: 'var(--platinum)',
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {title}
+                </h3>
+                <p
+                  style={{
+                    color: 'var(--silver)',
+                    fontSize: '0.875rem',
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontWeight: 300,
+                    lineHeight: 1.7,
+                  }}
+                >
+                  {desc}
+                </p>
+
+                {/* Gold bottom accent */}
+                <div
+                  className="mt-8 h-px w-10 transition-all duration-500 group-hover:w-full"
+                  style={{ background: 'linear-gradient(90deg, var(--gold), transparent)' }}
+                />
               </div>
-              <h3 className="text-lg font-bold">Secure Concurrency Queue</h3>
-              <p className="text-sm text-zinc-400 mt-3 leading-relaxed font-light">
-                Our transaction engine processes test ride requests securely, ensuring seamless concurrency management prior to admin approval.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>

@@ -19,6 +19,7 @@ export const Navbar: React.FC = () => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -30,15 +31,16 @@ export const Navbar: React.FC = () => {
     }
   }, [isAuthenticated, fetchWishlist, fetchNotifications]);
 
-  // Click outside handlers
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   useEffect(() => {
     const clickOutside = (e: MouseEvent) => {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setIsNotifOpen(false);
-      }
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
-        setIsProfileOpen(false);
-      }
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setIsNotifOpen(false);
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) setIsProfileOpen(false);
     };
     document.addEventListener('mousedown', clickOutside);
     return () => document.removeEventListener('mousedown', clickOutside);
@@ -52,284 +54,374 @@ export const Navbar: React.FC = () => {
     router.push('/');
   };
 
-  const activeLinkClass = (path: string) =>
-    pathname === path
-      ? 'text-primary font-bold border-b-2 border-primary pb-1'
-      : 'text-muted-foreground hover:text-foreground transition-colors font-medium pb-1';
+  const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="sticky top-0 z-40 w-full border-b border-border/80 glass-panel">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <Logo size={36} circular={true} className="transition-transform duration-300 group-hover:scale-105" />
+    <>
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
+        style={{
+          backgroundColor: scrolled ? 'rgba(5, 6, 10, 0.95)' : 'rgba(5, 6, 10, 0.7)',
+          backdropFilter: 'blur(24px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+          borderBottom: scrolled ? '1px solid rgba(26, 28, 38, 0.9)' : '1px solid rgba(26, 28, 38, 0.4)',
+          boxShadow: scrolled ? '0 8px 40px rgba(0,0,0,0.4)' : 'none',
+        }}
+      >
+        {/* Ultra-thin gold top line */}
+        <div
+          style={{
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(201, 169, 110, 0.6) 30%, rgba(232, 201, 122, 0.8) 50%, rgba(201, 169, 110, 0.6) 70%, transparent 100%)',
+          }}
+        />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-[68px]">
+
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
+              <Logo size={38} circular={true} className="transition-transform duration-300 group-hover:scale-105" />
               <div className="flex flex-col leading-none">
-                <span className="font-display text-lg font-black tracking-tight text-foreground">
+                <span
+                  className="font-black tracking-widest uppercase text-sm"
+                  style={{
+                    fontFamily: "'DM Sans', sans-serif",
+                    color: 'var(--platinum)',
+                    letterSpacing: '0.15em',
+                  }}
+                >
                   FF-CARS
                 </span>
-                <span className="text-[8px] text-muted-foreground uppercase font-bold tracking-widest mt-0.5">
-                  Direct Buy & Sell
+                <span
+                  className="text-[8px] uppercase tracking-widest mt-0.5"
+                  style={{ color: 'var(--gold)', letterSpacing: '0.2em', fontFamily: "'DM Sans', sans-serif" }}
+                >
+                  Automotive Concierge
                 </span>
               </div>
             </Link>
-          </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            <Link href="/cars" className={activeLinkClass('/cars')}>
-              Browse Cars
-            </Link>
-            {isAuthenticated && (
-              <>
-                <Link href="/dashboard" className={activeLinkClass('/dashboard')}>
-                  My Test Rides
-                </Link>
-                {user?.role === 'ADMIN' && (
-                  <Link href="/admin" className={activeLinkClass('/admin')}>
-                    Admin Panel
-                  </Link>
-                )}
-              </>
-            )}
-          </div>
-
-          {/* Right Action Icons */}
-          <div className="hidden md:flex items-center gap-4">
-            {isAuthenticated ? (
-              <>
-                {/* Wishlist Link */}
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-8">
+              {[
+                { href: '/cars', label: 'Inventory' },
+                ...(isAuthenticated ? [{ href: '/dashboard', label: 'My Bookings' }] : []),
+                ...(isAuthenticated && user?.role === 'ADMIN' ? [{ href: '/admin', label: 'Admin' }] : []),
+              ].map(({ href, label }) => (
                 <Link
-                  href="/dashboard?tab=wishlist"
-                  className="relative p-2 rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                  key={href}
+                  href={href}
+                  className="relative text-sm font-medium transition-colors duration-200 group"
+                  style={{
+                    color: isActive(href) ? 'var(--gold)' : 'var(--silver)',
+                    fontFamily: "'DM Sans', sans-serif",
+                    letterSpacing: '0.02em',
+                  }}
                 >
-                  <Heart className="w-5 h-5" />
-                  {wishlistIds.length > 0 && (
-                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-bold bg-primary text-primary-foreground transform translate-x-1/3 -translate-y-1/3">
-                      {wishlistIds.length}
-                    </span>
-                  )}
-                </Link>
-
-                {/* Notifications Bell */}
-                <div className="relative" ref={notifRef}>
-                  <button
-                    onClick={() => {
-                      setIsNotifOpen(!isNotifOpen);
-                      setIsProfileOpen(false);
+                  {label}
+                  {/* Gold underline */}
+                  <span
+                    className="absolute -bottom-1 left-0 h-px transition-all duration-300"
+                    style={{
+                      width: isActive(href) ? '100%' : '0%',
+                      background: 'linear-gradient(90deg, var(--gold-dim), var(--gold-light))',
                     }}
-                    className="p-2 rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                  />
+                  <span
+                    className="absolute -bottom-1 left-0 h-px transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:w-full"
+                    style={{
+                      width: '0%',
+                      background: 'linear-gradient(90deg, var(--gold-dim), var(--gold-light))',
+                    }}
+                  />
+                </Link>
+              ))}
+            </div>
+
+            {/* Right Actions */}
+            <div className="hidden md:flex items-center gap-3">
+              {isAuthenticated ? (
+                <>
+                  {/* Wishlist */}
+                  <Link
+                    href="/dashboard?tab=wishlist"
+                    className="relative p-2.5 rounded-full transition-all duration-200 group"
+                    style={{ color: 'var(--silver)' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--silver)')}
                   >
-                    <Bell className="w-5 h-5" />
-                    {unreadCount > 0 && (
-                      <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-bold bg-primary text-primary-foreground transform translate-x-1/3 -translate-y-1/3">
-                        {unreadCount}
+                    <Heart className="w-[18px] h-[18px]" />
+                    {wishlistIds.length > 0 && (
+                      <span
+                        className="absolute top-0.5 right-0.5 w-4 h-4 flex items-center justify-center rounded-full text-[9px] font-bold"
+                        style={{ background: 'var(--gold)', color: 'var(--midnight)' }}
+                      >
+                        {wishlistIds.length}
                       </span>
                     )}
-                  </button>
+                  </Link>
 
-                  {/* Notifications Dropdown */}
-                  {isNotifOpen && (
-                    <div className="absolute right-0 mt-2 w-80 rounded-xl border border-border bg-card p-2 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="flex items-center justify-between p-2 border-b border-border">
-                        <span className="font-semibold text-sm">Notifications</span>
-                        {unreadCount > 0 && (
-                          <button
-                            onClick={() => markAllAsRead()}
-                            className="text-xs text-primary font-medium hover:underline"
-                          >
-                            Mark all read
-                          </button>
-                        )}
-                      </div>
-                      <div className="max-h-60 overflow-y-auto mt-1 flex flex-col gap-1">
-                        {notifications.length === 0 ? (
-                          <div className="p-4 text-center text-xs text-muted-foreground">
-                            No notifications yet
-                          </div>
-                        ) : (
-                          notifications.map((notif) => (
-                            <div
-                              key={notif.id}
-                              className={`p-2 rounded-lg text-xs transition-colors flex items-start gap-2 ${
-                                notif.readStatus ? 'bg-transparent text-muted-foreground' : 'bg-secondary/50 font-medium'
-                              }`}
-                            >
-                              <div className="flex-1">
-                                <p>{notif.message}</p>
-                                <span className="text-[10px] text-muted-foreground block mt-1">
-                                  {new Date(notif.createdAt).toLocaleDateString()}
-                                </span>
-                              </div>
-                              {!notif.readStatus && (
-                                <button
-                                  onClick={() => markAsRead(notif.id)}
-                                  className="p-1 rounded hover:bg-secondary text-primary transition-colors flex-shrink-0"
-                                >
-                                  <Check className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Profile Dropdown */}
-                <div className="relative" ref={profileRef}>
-                  <button
-                    onClick={() => {
-                      setIsProfileOpen(!isProfileOpen);
-                      setIsNotifOpen(false);
-                    }}
-                    className="flex items-center gap-1.5 p-1 rounded-full hover:bg-secondary transition-colors"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold">
-                      {user?.name.charAt(0).toUpperCase()}
-                    </div>
-                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                  </button>
-
-                  {isProfileOpen && (
-                    <div className="absolute right-0 mt-2 w-56 rounded-xl border border-border bg-card p-2 shadow-xl animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="p-3 border-b border-border">
-                        <p className="font-semibold text-sm leading-none">{user?.name}</p>
-                        <p className="text-xs text-muted-foreground mt-1 truncate">{user?.email}</p>
-                        <span className="inline-block mt-2 px-1.5 py-0.5 rounded text-[9px] font-bold bg-primary/15 text-primary uppercase">
-                          {user?.role}
+                  {/* Notifications */}
+                  <div className="relative" ref={notifRef}>
+                    <button
+                      onClick={() => { setIsNotifOpen(!isNotifOpen); setIsProfileOpen(false); }}
+                      className="relative p-2.5 rounded-full transition-all duration-200"
+                      style={{ color: 'var(--silver)' }}
+                      onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
+                      onMouseLeave={e => (e.currentTarget.style.color = 'var(--silver)')}
+                    >
+                      <Bell className="w-[18px] h-[18px]" />
+                      {unreadCount > 0 && (
+                        <span
+                          className="absolute top-0.5 right-0.5 w-4 h-4 flex items-center justify-center rounded-full text-[9px] font-bold"
+                          style={{ background: 'var(--gold)', color: 'var(--midnight)' }}
+                        >
+                          {unreadCount}
                         </span>
-                      </div>
-                      <div className="mt-1">
-                        <Link
-                          href="/dashboard"
-                          onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center gap-2 w-full p-2 text-sm text-left rounded-lg hover:bg-secondary text-foreground transition-colors"
-                        >
-                          <UserIcon className="w-4 h-4 text-muted-foreground" />
-                          My Dashboard
-                        </Link>
-                        <button
-                          onClick={handleLogout}
-                          className="flex items-center gap-2 w-full p-2 text-sm text-left rounded-lg hover:bg-destructive/10 text-destructive transition-colors mt-1"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          Log Out
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/login"
-                  className="px-4 py-2 text-sm font-medium text-foreground hover:text-primary transition-colors"
-                >
-                  Log In
-                </Link>
-                <Link
-                  href="/register"
-                  className="px-4 py-2 text-sm font-medium rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
-                >
-                  Sign Up
-                </Link>
-              </div>
-            )}
-          </div>
+                      )}
+                    </button>
 
-          {/* Mobile Menu Button */}
-          <div className="flex items-center md:hidden gap-3">
-            {isAuthenticated && (
-              <Link
-                href="/dashboard?tab=wishlist"
-                className="relative p-2 rounded-full text-muted-foreground"
-              >
-                <Heart className="w-5 h-5" />
-                {wishlistIds.length > 0 && (
-                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-bold bg-primary text-primary-foreground transform translate-x-1/3 -translate-y-1/3">
-                    {wishlistIds.length}
-                  </span>
-                )}
-              </Link>
-            )}
+                    {isNotifOpen && (
+                      <div
+                        className="absolute right-0 mt-3 w-80 rounded-2xl p-1 shadow-2xl"
+                        style={{
+                          background: 'var(--obsidian)',
+                          border: '1px solid var(--onyx-border)',
+                          boxShadow: '0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,169,110,0.08)',
+                        }}
+                      >
+                        <div
+                          className="flex items-center justify-between px-4 py-3"
+                          style={{ borderBottom: '1px solid var(--onyx-border)' }}
+                        >
+                          <span className="text-sm font-semibold" style={{ color: 'var(--platinum)', fontFamily: "'DM Sans', sans-serif" }}>
+                            Notifications
+                          </span>
+                          {unreadCount > 0 && (
+                            <button
+                              onClick={() => markAllAsRead()}
+                              className="text-xs font-medium transition-colors"
+                              style={{ color: 'var(--gold)' }}
+                            >
+                              Mark all read
+                            </button>
+                          )}
+                        </div>
+                        <div className="max-h-60 overflow-y-auto mt-1 flex flex-col gap-0.5 p-1">
+                          {notifications.length === 0 ? (
+                            <div className="p-4 text-center text-xs" style={{ color: 'var(--silver-dim)' }}>
+                              No notifications yet
+                            </div>
+                          ) : (
+                            notifications.map((notif) => (
+                              <div
+                                key={notif.id}
+                                className="p-3 rounded-xl text-xs flex items-start gap-2 transition-colors"
+                                style={{
+                                  background: notif.readStatus ? 'transparent' : 'rgba(201,169,110,0.06)',
+                                  color: notif.readStatus ? 'var(--silver)' : 'var(--platinum)',
+                                }}
+                              >
+                                <div className="flex-1">
+                                  <p>{notif.message}</p>
+                                  <span className="text-[10px] mt-1 block" style={{ color: 'var(--silver-dim)' }}>
+                                    {new Date(notif.createdAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                                {!notif.readStatus && (
+                                  <button
+                                    onClick={() => markAsRead(notif.id)}
+                                    className="p-1 rounded-lg transition-colors"
+                                    style={{ color: 'var(--gold)' }}
+                                  >
+                                    <Check className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Profile */}
+                  <div className="relative" ref={profileRef}>
+                    <button
+                      onClick={() => { setIsProfileOpen(!isProfileOpen); setIsNotifOpen(false); }}
+                      className="flex items-center gap-2 p-1.5 pl-2.5 pr-3 rounded-full transition-all duration-200"
+                      style={{
+                        border: '1px solid var(--onyx-border)',
+                        background: isProfileOpen ? 'rgba(201,169,110,0.06)' : 'transparent',
+                      }}
+                    >
+                      <div
+                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                        style={{ background: 'var(--gold-muted)', color: 'var(--gold)' }}
+                      >
+                        {user?.name.charAt(0).toUpperCase()}
+                      </div>
+                      <ChevronDown className="w-3.5 h-3.5" style={{ color: 'var(--silver)' }} />
+                    </button>
+
+                    {isProfileOpen && (
+                      <div
+                        className="absolute right-0 mt-3 w-56 rounded-2xl shadow-2xl overflow-hidden"
+                        style={{
+                          background: 'var(--obsidian)',
+                          border: '1px solid var(--onyx-border)',
+                          boxShadow: '0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,169,110,0.08)',
+                        }}
+                      >
+                        <div className="p-4" style={{ borderBottom: '1px solid var(--onyx-border)' }}>
+                          <p className="font-semibold text-sm" style={{ color: 'var(--platinum)' }}>{user?.name}</p>
+                          <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--silver-dim)' }}>{user?.email}</p>
+                          <span
+                            className="inline-block mt-2 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider"
+                            style={{ background: 'rgba(201,169,110,0.12)', color: 'var(--gold)' }}
+                          >
+                            {user?.role}
+                          </span>
+                        </div>
+                        <div className="p-2">
+                          <Link
+                            href="/dashboard"
+                            onClick={() => setIsProfileOpen(false)}
+                            className="flex items-center gap-2.5 w-full p-2.5 text-sm rounded-xl transition-colors"
+                            style={{ color: 'var(--silver)' }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; (e.currentTarget as HTMLElement).style.color = 'var(--platinum)'; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--silver)'; }}
+                          >
+                            <UserIcon className="w-4 h-4" />
+                            My Dashboard
+                          </Link>
+                          <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-2.5 w-full p-2.5 text-sm rounded-xl transition-colors mt-0.5"
+                            style={{ color: '#E87070' }}
+                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(155,35,53,0.1)'; }}
+                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                          >
+                            <LogOut className="w-4 h-4" />
+                            Sign Out
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/login"
+                    className="text-sm font-medium transition-colors duration-200 px-4 py-2"
+                    style={{ color: 'var(--silver)', fontFamily: "'DM Sans', sans-serif" }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--platinum)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--silver)')}
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="btn-gold text-xs"
+                    style={{ padding: '0.6rem 1.25rem' }}
+                  >
+                    Get Started
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+              className="md:hidden p-2.5 rounded-xl transition-colors"
+              style={{ color: 'var(--silver)', border: '1px solid var(--onyx-border)' }}
             >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
-      </div>
+      </nav>
 
       {/* Mobile Drawer */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-border bg-card p-4 animate-in slide-in-from-top duration-300">
-          <div className="flex flex-col gap-3">
-            <Link
-              href="/cars"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-lg font-medium p-2 rounded-lg hover:bg-secondary"
-            >
-              Browse Cars
-            </Link>
-            {isAuthenticated ? (
-              <>
+        <div
+          className="md:hidden fixed top-[69px] left-0 right-0 z-40 p-4 flex flex-col gap-2"
+          style={{
+            background: 'rgba(5, 6, 10, 0.98)',
+            backdropFilter: 'blur(24px)',
+            borderBottom: '1px solid var(--onyx-border)',
+          }}
+        >
+          <Link
+            href="/cars"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="p-3 rounded-xl text-sm font-medium transition-colors"
+            style={{ color: 'var(--silver)', fontFamily: "'DM Sans', sans-serif" }}
+          >
+            Inventory
+          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link
+                href="/dashboard"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-3 rounded-xl text-sm font-medium"
+                style={{ color: 'var(--silver)' }}
+              >
+                My Bookings
+              </Link>
+              {user?.role === 'ADMIN' && (
                 <Link
-                  href="/dashboard"
+                  href="/admin"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-lg font-medium p-2 rounded-lg hover:bg-secondary"
+                  className="p-3 rounded-xl text-sm font-medium"
+                  style={{ color: 'var(--silver)' }}
                 >
-                  My Test Rides
+                  Admin Panel
                 </Link>
-                {user?.role === 'ADMIN' && (
-                  <Link
-                    href="/admin"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-lg font-medium p-2 rounded-lg hover:bg-secondary"
-                  >
-                    Admin Panel
-                  </Link>
-                )}
-                <div className="border-t border-border my-2 pt-2">
-                  <div className="px-2 pb-3">
-                    <p className="font-semibold text-sm">{user?.name}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{user?.email}</p>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-2 w-full p-2 rounded-lg text-destructive hover:bg-destructive/10 text-left text-sm font-medium"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Log Out
-                  </button>
+              )}
+              <div className="pt-3 mt-1" style={{ borderTop: '1px solid var(--onyx-border)' }}>
+                <div className="px-3 pb-3">
+                  <p className="font-semibold text-sm" style={{ color: 'var(--platinum)' }}>{user?.name}</p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--silver-dim)' }}>{user?.email}</p>
                 </div>
-              </>
-            ) : (
-              <div className="flex flex-col gap-2 pt-2 border-t border-border">
-                <Link
-                  href="/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-center py-2.5 rounded-lg border border-border text-sm font-medium"
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 w-full p-3 rounded-xl text-sm font-medium"
+                  style={{ color: '#E87070' }}
                 >
-                  Log In
-                </Link>
-                <Link
-                  href="/register"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-center py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
-                >
-                  Sign Up
-                </Link>
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className="flex flex-col gap-2 pt-3 mt-1" style={{ borderTop: '1px solid var(--onyx-border)' }}>
+              <Link
+                href="/login"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="text-center py-3 rounded-xl text-sm font-medium"
+                style={{ border: '1px solid var(--onyx-border)', color: 'var(--silver)' }}
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/register"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="btn-gold text-center"
+              >
+                Get Started
+              </Link>
+            </div>
+          )}
         </div>
       )}
-    </nav>
+
+      {/* Spacer for fixed nav */}
+      <div className="h-[69px]" />
+    </>
   );
 };

@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../store/useAuthStore';
 import { useNotificationStore } from '../store/useNotificationStore';
 
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL;
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:5000';
 
 export const useSocket = () => {
   const socketRef = useRef<Socket | null>(null);
@@ -20,49 +20,59 @@ export const useSocket = () => {
       return;
     }
 
-    // Initialize socket connection with JWT authorization header/auth token
-    const socket = io(WS_URL, {
-      auth: {
-        token: accessToken,
-      },
-      transports: ['websocket'],
-    });
+    let socket: Socket | null = null;
 
-    socketRef.current = socket;
+    try {
+      // Initialize socket connection with token and safe reconnection options
+      socket = io(WS_URL, {
+        auth: {
+          token: accessToken,
+        },
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 2,
+        timeout: 5000,
+      });
 
-    socket.on('connect', () => {
-      console.log('Socket.IO connected successfully');
-    });
+      socketRef.current = socket;
 
-    socket.on('disconnect', () => {
-      console.log('Socket.IO disconnected');
-    });
+      socket.on('connect', () => {
+        // Socket.IO connected cleanly
+      });
 
-    socket.on('connect_error', (error) => {
-      console.error('Socket.IO connection error', error);
-    });
+      socket.on('disconnect', () => {
+        // Socket.IO disconnected
+      });
 
-    // Listen for custom real-time notifications
-    socket.on('notification', (data) => {
-      console.log('Notification received in socket client:', data);
-      addNotification(data);
+      socket.on('connect_error', () => {
+        // Gracefully handle backend WS server absence without throwing browser errors
+      });
 
-      // Dispatch custom event for browser toast/toast systems
-      const event = new CustomEvent('app_toast_notification', { detail: data });
-      window.dispatchEvent(event);
-    });
+      // Listen for custom real-time notifications
+      socket.on('notification', (data) => {
+        if (data) {
+          addNotification(data);
+          const event = new CustomEvent('app_toast_notification', { detail: data });
+          window.dispatchEvent(event);
+        }
+      });
 
-    // Listen for live car availability updates
-    socket.on('car_availability_updated', (data: { carId: string; status: string }) => {
-      console.log('Car availability updated in socket client:', data);
-      // Dispatch browser custom event for instant UI rerendering on detail/listing page
-      const event = new CustomEvent('car_availability_changed', { detail: data });
-      window.dispatchEvent(event);
-    });
+      // Listen for live car availability updates
+      socket.on('car_availability_updated', (data: { carId: string; status: string }) => {
+        if (data) {
+          const event = new CustomEvent('car_availability_changed', { detail: data });
+          window.dispatchEvent(event);
+        }
+      });
+    } catch (err) {
+      // Silent error handler
+    }
 
     return () => {
-      socket.disconnect();
-      socketRef.current = null;
+      if (socket) {
+        socket.disconnect();
+        socketRef.current = null;
+      }
     };
   }, [isAuthenticated, accessToken, addNotification]);
 

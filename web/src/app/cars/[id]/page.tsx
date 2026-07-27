@@ -50,7 +50,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
   useEffect(() => {
     const fetchCarDetails = async () => {
       try {
-        const response = await api.get(`/cars/${carId}`);
+        const response = await api.get(`/vehicles/${carId}`);
         setCar(response.data);
       } catch (error: any) {
         console.error('Failed to load car details', error);
@@ -101,6 +101,13 @@ export default function CarDetailPage({ params }: CarDetailProps) {
 
   if (!car) return null;
 
+  const make = car.make || car.brand || 'Vehicle';
+  const year = car.manufacture_year || car.year || 2022;
+  const km = car.kilometers_driven || car.kmDriven || 0;
+  const fuel = car.fuel_type || car.fuelType || 'Petrol';
+  const owner = car.owner_type || car.ownership || '1st Owner';
+  const price = car.price ? Number(car.price) : 0;
+
   // Process Images Json array
   let imagesList: string[] = [];
   try {
@@ -113,16 +120,16 @@ export default function CarDetailPage({ params }: CarDetailProps) {
     imagesList = [];
   }
 
-  // Include thumbnail as primary option if empty
+  // Include thumbnail/image_url as primary option if empty
   if (imagesList.length === 0) {
-    imagesList = [car.thumbnail];
+    imagesList = [car.image_url || car.thumbnail || 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800'];
   }
 
-  const isAvailable = car.status === 'AVAILABLE';
+  const isAvailable = car.status === 'Available' || car.status === 'AVAILABLE';
 
   // EMI Calculator logic
-  const downPayment = Math.round((car.price * downPaymentPct) / 100);
-  const loanPrincipal = car.price - downPayment;
+  const downPayment = Math.round((price * downPaymentPct) / 100);
+  const loanPrincipal = price - downPayment;
   const monthlyRate = annualInterestRate / 12 / 100;
   const emi = loanPrincipal > 0
     ? Math.round(
@@ -140,7 +147,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
 
     setIsBooking(true);
     try {
-      await api.post('/bookings', { carId });
+      await api.post('/test-drives', { vehicleId: Number(carId) });
       showLocalToast('Test Ride Request submitted successfully!', 'success');
       router.push('/dashboard');
     } catch (error: any) {
@@ -157,7 +164,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
       router.push('/login');
       return;
     }
-    const added = await toggleWishlist(car.id);
+    const added = await toggleWishlist(String(car.vehicle_id || car.id));
     showLocalToast(added ? 'Added to wishlist!' : 'Removed from wishlist.');
   };
 
@@ -176,12 +183,12 @@ export default function CarDetailPage({ params }: CarDetailProps) {
           </button>
           <div className="flex items-baseline gap-3 flex-wrap">
             <h1 className="text-3xl font-display font-extrabold tracking-tight">
-              {car.brand} {car.model}
+              {make} {car.model}
             </h1>
-            <span className="text-muted-foreground text-sm font-semibold">{car.variant}</span>
+            <span className="text-muted-foreground text-sm font-semibold">{car.color || car.variant || 'Standard'}</span>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            Listed on {new Date(car.createdAt).toLocaleDateString()} &bull; Fully Inspected &amp; Certified
+            Registration: {car.registration_number || 'TN Registration'} &bull; Fully Inspected &amp; Certified
           </p>
         </div>
 
@@ -190,18 +197,18 @@ export default function CarDetailPage({ params }: CarDetailProps) {
           <div>
             <span className="text-xs text-muted-foreground uppercase font-semibold">Total Price (GST Incl.)</span>
             <div className="text-3xl font-extrabold text-foreground mt-0.5">
-              ₹{(car.price).toLocaleString()}
+              ₹{price.toLocaleString()}
             </div>
           </div>
           <button
             onClick={handleWishlist}
             className={`p-3 rounded-full border transition-all cursor-pointer ${
-              isWishlisted(car.id)
+              isWishlisted(String(car.vehicle_id || car.id))
                 ? 'bg-primary border-primary text-primary-foreground shadow-md'
                 : 'border-border bg-secondary/15 text-foreground hover:bg-secondary/30'
             }`}
           >
-            <Heart className="w-5 h-5" fill={isWishlisted(car.id) ? 'currentColor' : 'none'} />
+            <Heart className="w-5 h-5" fill={isWishlisted(String(car.vehicle_id || car.id)) ? 'currentColor' : 'none'} />
           </button>
         </div>
       </div>
@@ -216,7 +223,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
           <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-border bg-black/40 group">
             <img
               src={imagesList[activeImageIndex]}
-              alt={`${car.brand} ${car.model} image`}
+              alt={`${make} ${car.model} image`}
               className="w-full h-full object-cover select-none"
             />
 
@@ -224,7 +231,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
             {!isAvailable && (
               <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-xs select-none">
                 <span className="px-6 py-3 border border-red-500 rounded-xl bg-red-950/70 text-red-400 font-display font-extrabold tracking-widest text-lg uppercase shadow-xl">
-                  {car.status === 'BOOKED' ? 'Booked & Sold Out' : car.status}
+                  {car.status}
                 </span>
               </div>
             )}
@@ -277,28 +284,28 @@ export default function CarDetailPage({ params }: CarDetailProps) {
                 <Calendar className="w-3.5 h-3.5 text-primary" />
                 Year
               </span>
-              <span className="font-extrabold text-foreground">{car.year}</span>
+              <span className="font-extrabold text-foreground">{year}</span>
             </div>
             <div className="p-4 rounded-xl border border-border bg-card flex flex-col gap-1.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
                 <Gauge className="w-3.5 h-3.5 text-primary" />
                 Driven
               </span>
-              <span className="font-extrabold text-foreground">{(car.kmDriven).toLocaleString()} km</span>
+              <span className="font-extrabold text-foreground">{km.toLocaleString()} km</span>
             </div>
             <div className="p-4 rounded-xl border border-border bg-card flex flex-col gap-1.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
                 <Fuel className="w-3.5 h-3.5 text-primary" />
                 Fuel Type
               </span>
-              <span className="font-extrabold text-foreground">{car.fuelType}</span>
+              <span className="font-extrabold text-foreground">{fuel}</span>
             </div>
             <div className="p-4 rounded-xl border border-border bg-card flex flex-col gap-1.5">
               <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
                 <Wrench className="w-3.5 h-3.5 text-primary" />
                 Gearbox
               </span>
-              <span className="font-extrabold text-foreground">{car.transmission}</span>
+              <span className="font-extrabold text-foreground">{car.transmission || 'Manual'}</span>
             </div>
           </div>
 
@@ -318,36 +325,36 @@ export default function CarDetailPage({ params }: CarDetailProps) {
             <h2 className="text-base font-bold mb-4">Complete Specifications Sheet</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-8 text-xs">
               <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Brand</span>
-                <span className="font-semibold text-foreground">{car.brand}</span>
+                <span className="text-muted-foreground">Make</span>
+                <span className="font-semibold text-foreground">{make}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-border">
                 <span className="text-muted-foreground">Model</span>
                 <span className="font-semibold text-foreground">{car.model}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Variant / Version</span>
-                <span className="font-semibold text-foreground">{car.variant}</span>
+                <span className="text-muted-foreground">Color</span>
+                <span className="font-semibold text-foreground">{car.color || 'Standard'}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-border">
                 <span className="text-muted-foreground">Ownership History</span>
-                <span className="font-semibold text-foreground">{car.ownership} Owner</span>
+                <span className="font-semibold text-foreground">{owner}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-border">
                 <span className="text-muted-foreground">Transmission Type</span>
-                <span className="font-semibold text-foreground">{car.transmission}</span>
+                <span className="font-semibold text-foreground">{car.transmission || 'Manual'}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-border">
                 <span className="text-muted-foreground">Fuel Type</span>
-                <span className="font-semibold text-foreground">{car.fuelType}</span>
+                <span className="font-semibold text-foreground">{fuel}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Registration Year</span>
-                <span className="font-semibold text-foreground">{car.year}</span>
+                <span className="text-muted-foreground">Manufacture Year</span>
+                <span className="font-semibold text-foreground">{year}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-border">
                 <span className="text-muted-foreground">Odometer reading</span>
-                <span className="font-semibold text-foreground">{(car.kmDriven).toLocaleString()} km</span>
+                <span className="font-semibold text-foreground">{km.toLocaleString()} km</span>
               </div>
             </div>
           </div>
