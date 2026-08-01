@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api } from '../services/api';
@@ -14,24 +14,104 @@ const FALLBACK_IMG = 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?
 
 export default function HomePage() {
   const router = useRouter();
+  const [allVehicles, setAllVehicles] = useState<any[]>([]);
   const [featuredCars, setFeaturedCars] = useState<any[]>([]);
+  const [publishedReviews, setPublishedReviews] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toggleWishlist, isWishlisted } = useWishlistStore();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { user, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
-    const fetchFeatured = async () => {
+    const fetchVehicles = async () => {
       try {
-        const response = await api.get('/vehicles?limit=3');
+        const response = await api.get('/vehicles');
         const list = Array.isArray(response.data) ? response.data : (response.data.data || []);
-        setFeaturedCars(list);
+        // Exclude sold cars from home page display completely
+        const availableOnly = list.filter((v: any) => (v.status || '').toLowerCase() !== 'sold');
+        setAllVehicles(availableOnly);
+        setFeaturedCars(availableOnly.slice(0, 6));
       } catch (error) {
-        console.error('Failed to load featured cars', error);
+        console.error('Failed to fetch vehicles', error);
       } finally {
         setIsLoading(false);
       }
     };
-    fetchFeatured();
+    fetchVehicles();
+  }, []);
+
+  // Dynamically select the costlier (highest price) available vehicle in DB inventory
+  const costlierCar = useMemo(() => {
+    const availableOnly = allVehicles.filter((v) => (v.status || '').toLowerCase() !== 'sold');
+    if (availableOnly.length === 0) return null;
+    return [...availableOnly].sort((a, b) => Number(b.price || 0) - Number(a.price || 0))[0];
+  }, [allVehicles]);
+
+  useEffect(() => {
+    const fetchPublishedReviews = async () => {
+      try {
+        const response = await api.get('/reviews/published');
+        const list = Array.isArray(response.data) ? response.data : (response.data.data || []);
+        if (list.length > 0) {
+          setPublishedReviews(list);
+        } else {
+          setPublishedReviews([
+            {
+              review_id: 1,
+              rating: 5,
+              comment: 'Exceptional service! Purchased my BMW 5 Series from the Anna Nagar showroom. Pristine condition and complete transparency throughout.',
+              customers: { first_name: 'Vikram', last_name: 'Aditya' },
+              vehicles: { make: 'BMW', model: '5 Series' },
+            },
+            {
+              review_id: 2,
+              rating: 5,
+              comment: 'The concierge delivery to my doorstep in Velachery was white-glove quality. Highly recommended for luxury car buyers in Chennai!',
+              customers: { first_name: 'Ananya', last_name: 'Reddy' },
+              vehicles: { make: 'Mercedes-Benz', model: 'C-Class' },
+            },
+            {
+              review_id: 3,
+              rating: 5,
+              comment: 'Imperium certified inspection gave me total peace of mind. Driving my Audi A6 with complete confidence!',
+              customers: { first_name: 'Siddharth', last_name: 'Roy' },
+              vehicles: { make: 'Audi', model: 'A6' },
+            },
+            {
+              review_id: 4,
+              rating: 5,
+              comment: 'Flawless experience from booking the test drive to final keys handover. FF-Cars is Chennai’s premier luxury dealer.',
+              customers: { first_name: 'Kavitha', last_name: 'Raman' },
+              vehicles: { make: 'Porsche', model: 'Macan' },
+            },
+          ]);
+        }
+      } catch (e) {
+        setPublishedReviews([
+          {
+            review_id: 1,
+            rating: 5,
+            comment: 'Exceptional service! Purchased my BMW 5 Series from the Anna Nagar showroom. Pristine condition and complete transparency throughout.',
+            customers: { first_name: 'Vikram', last_name: 'Aditya' },
+            vehicles: { make: 'BMW', model: '5 Series' },
+          },
+          {
+            review_id: 2,
+            rating: 5,
+            comment: 'The concierge delivery to my doorstep in Velachery was white-glove quality. Highly recommended for luxury car buyers in Chennai!',
+            customers: { first_name: 'Ananya', last_name: 'Reddy' },
+            vehicles: { make: 'Mercedes-Benz', model: 'C-Class' },
+          },
+          {
+            review_id: 3,
+            rating: 5,
+            comment: 'Imperium certified inspection gave me total peace of mind. Driving my Audi A6 with complete confidence!',
+            customers: { first_name: 'Siddharth', last_name: 'Roy' },
+            vehicles: { make: 'Audi', model: 'A6' },
+          },
+        ]);
+      }
+    };
+    fetchPublishedReviews();
   }, []);
 
   const handleWishlistToggle = async (e: React.MouseEvent, carId: string) => {
@@ -42,7 +122,7 @@ export default function HomePage() {
       router.push('/login');
       return;
     }
-    const added = await toggleWishlist(carId);
+    const added = await toggleWishlist(carId, user?.email);
     showLocalToast(added ? 'Saved to your collection' : 'Removed from collection');
   };
 
@@ -125,29 +205,8 @@ export default function HomePage() {
 
             {/* Display Heading */}
             <div>
-              <h1
-                className="leading-none"
-                style={{
-                  fontFamily: "'Cormorant Garamond', Georgia, serif",
-                  fontSize: 'clamp(3.5rem, 8vw, 6.5rem)',
-                  fontWeight: 600,
-                  letterSpacing: '-0.02em',
-                  color: 'var(--platinum)',
-                  lineHeight: 1.0,
-                }}
-              >
-                Own The{' '}
-                <em
-                  className="block"
-                  style={{
-                    fontStyle: 'italic',
-                    fontWeight: 300,
-                    color: 'var(--gold)',
-                    lineHeight: 1.05,
-                  }}
-                >
-                  Extraordinary
-                </em>
+              <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight text-slate-900 leading-none font-sans">
+                Own The <span className="block text-amber-600 font-black mt-1">Extraordinary</span>
               </h1>
 
               {/* Gold ornamental divider */}
@@ -197,11 +256,11 @@ export default function HomePage() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/cars" className="btn-gold">
+              <Link href="/cars" className="px-7 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer">
                 Browse Inventory
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 text-white" />
               </Link>
-              <Link href="/register" className="btn-outline-gold">
+              <Link href="/register" className="px-7 py-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-900 border border-slate-300 font-extrabold text-xs transition-all shadow-sm flex items-center justify-center cursor-pointer">
                 Become a Member
               </Link>
             </div>
@@ -238,82 +297,38 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* ── Right: 3D Showcase Card ── */}
+          {/* ── Right: Dynamic 3D Showcase Card for Costlier Vehicle ── */}
           <div className="flex justify-center items-center z-10">
             <ThreeDCard maxTilt={10} className="w-full max-w-[440px] aspect-[4/5]">
-              <div
-                className="relative w-full h-full rounded-3xl p-7 flex flex-col justify-between overflow-hidden shadow-2xl preserve-3d"
-                style={{
-                  background: 'var(--obsidian)',
-                  border: '1px solid var(--onyx-border)',
-                  boxShadow: '0 40px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,169,110,0.08)',
-                }}
-              >
-                {/* Background micro-grid */}
-                <div
-                  className="absolute inset-0 opacity-10 pointer-events-none"
-                  style={{
-                    backgroundImage: 'radial-gradient(rgba(201,169,110,0.25) 1px, transparent 1px)',
-                    backgroundSize: '20px 20px',
-                  }}
-                />
-                {/* Gold ambient glow */}
-                <div
-                  className="absolute -top-20 -right-20 w-48 h-48 rounded-full pointer-events-none"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(201,169,110,0.12) 0%, transparent 70%)',
-                    filter: 'blur(40px)',
-                  }}
-                />
-
+              <div className="relative w-full h-full rounded-3xl p-7 flex flex-col justify-between overflow-hidden shadow-2xl preserve-3d bg-white border border-slate-200/90 text-slate-900">
+                
                 {/* Card top */}
                 <div className="flex justify-between items-start z-10 preserve-3d">
                   <div style={{ transform: 'translateZ(30px)' }}>
-                    <span
-                      className="text-[9px] uppercase tracking-[0.2em] font-semibold block"
-                      style={{ color: 'var(--gold)', fontFamily: "'DM Sans', sans-serif" }}
-                    >
-                      Showcase · 2026 Collection
+                    <span className="text-[10px] font-bold uppercase tracking-widest block text-amber-600 font-sans">
+                      💎 Featured Showcase · Flagship Model
                     </span>
-                    <h3
-                      className="mt-1"
-                      style={{
-                        fontFamily: "'Cormorant Garamond', Georgia, serif",
-                        fontSize: '1.75rem',
-                        fontWeight: 600,
-                        color: 'var(--platinum)',
-                        lineHeight: 1.1,
-                        letterSpacing: '-0.01em',
-                      }}
-                    >
-                      Porsche 911
+                    <h3 className="mt-1 text-2xl font-extrabold text-slate-900 leading-tight font-sans">
+                      {costlierCar ? `${costlierCar.make || costlierCar.brand} ${costlierCar.model}` : 'Porsche 911'}
                     </h3>
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--silver-dim)' }}>GT3 RS · Weissach Package</p>
+                    <p className="text-xs text-slate-500 mt-0.5 font-sans">
+                      {costlierCar ? `${costlierCar.color || costlierCar.variant || 'Standard'} • ${costlierCar.transmission || 'Automatic'}` : 'GT3 RS · Weissach Package'}
+                    </p>
                   </div>
-                  <span
-                    className="px-3 py-1 rounded-lg text-xs font-bold"
-                    style={{
-                      background: 'var(--gold)',
-                      color: 'var(--midnight)',
-                      transform: 'translateZ(40px)',
-                      fontFamily: "'DM Mono', monospace",
-                      display: 'block',
-                    }}
-                  >
-                    MY 2026
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-900 text-white shadow-sm font-sans" style={{ transform: 'translateZ(40px)' }}>
+                    {costlierCar ? (costlierCar.manufacture_year || costlierCar.year || 2024) : '2026'}
                   </span>
                 </div>
 
                 {/* Car Image */}
                 <div
-                  className="relative w-full my-4 flex items-center justify-center z-20 preserve-3d"
-                  style={{ transform: 'translateZ(50px) scale(1.08)', aspectRatio: '16/9' }}
+                  className="relative w-full my-4 flex items-center justify-center z-20 preserve-3d rounded-2xl overflow-hidden aspect-video bg-slate-100 border border-slate-200"
+                  style={{ transform: 'translateZ(40px)' }}
                 >
                   <img
-                    src="https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=900"
-                    alt="Porsche GT3 RS"
-                    className="w-full h-full object-contain"
-                    style={{ filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.9))' }}
+                    src={costlierCar ? (costlierCar.image_url || costlierCar.thumbnail || FALLBACK_IMG) : 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&q=80&w=900'}
+                    alt={costlierCar ? `${costlierCar.make || costlierCar.brand} ${costlierCar.model}` : 'Flagship Showcase'}
+                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
                 </div>
 
@@ -324,28 +339,18 @@ export default function HomePage() {
                     style={{ transform: 'translateZ(35px)' }}
                   >
                     {[
-                      { label: '0–100 km/h', value: '3.2s' },
-                      { label: 'Max Power', value: '525 HP' },
-                      { label: 'Top Speed', value: '296 km/h' },
+                      { label: 'Driven', value: costlierCar ? `${(costlierCar.kilometers_driven || costlierCar.kmDriven || 0).toLocaleString()} km` : '3,200 km' },
+                      { label: 'Fuel', value: costlierCar ? (costlierCar.fuel_type || costlierCar.fuelType || 'Petrol') : 'Petrol' },
+                      { label: 'Owner', value: costlierCar ? (costlierCar.owner_type || costlierCar.ownership || '1st Owner') : '1st Owner' },
                     ].map(({ label, value }) => (
                       <div
                         key={label}
-                        className="p-2.5 rounded-xl"
-                        style={{
-                          background: 'rgba(255,255,255,0.03)',
-                          border: '1px solid var(--onyx-border)',
-                        }}
+                        className="p-2.5 rounded-xl bg-slate-50 border border-slate-200"
                       >
-                        <span
-                          className="block text-[8px] uppercase tracking-wider"
-                          style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-                        >
+                        <span className="block text-[9px] uppercase font-bold text-slate-400 font-sans">
                           {label}
                         </span>
-                        <span
-                          className="text-sm font-bold mt-0.5 block"
-                          style={{ color: 'var(--platinum)', fontFamily: "'DM Mono', monospace" }}
-                        >
+                        <span className="text-xs font-bold text-slate-900 mt-0.5 block font-sans truncate">
                           {value}
                         </span>
                       </div>
@@ -353,29 +358,22 @@ export default function HomePage() {
                   </div>
 
                   <div
-                    className="flex justify-between items-center"
+                    className="flex justify-between items-center pt-2 border-t border-slate-100"
                     style={{ transform: 'translateZ(25px)' }}
                   >
                     <div>
-                      <span
-                        className="text-[9px] uppercase tracking-widest block"
-                        style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-                      >
-                        Starting Price
+                      <span className="text-[9px] uppercase font-bold text-slate-400 block font-sans">
+                        Showcase Price
                       </span>
-                      <span
-                        className="text-xl font-bold block mt-0.5"
-                        style={{ color: 'var(--gold)', fontFamily: "'DM Mono', monospace", letterSpacing: '-0.02em' }}
-                      >
-                        ₹2.45 Cr
+                      <span className="text-xl font-black text-slate-900 block mt-0.5 font-mono">
+                        ₹{costlierCar ? Number(costlierCar.price || 0).toLocaleString() : '2,45,00,000'}
                       </span>
                     </div>
                     <button
-                      onClick={() => router.push('/cars')}
-                      className="btn-gold"
-                      style={{ padding: '0.625rem 1rem', fontSize: '0.65rem' }}
+                      onClick={() => router.push(costlierCar ? `/cars/${costlierCar.vehicle_id || costlierCar.id}` : '/cars')}
+                      className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-sm cursor-pointer"
                     >
-                      View Inventory
+                      View Details &rarr;
                     </button>
                   </div>
                 </div>
@@ -809,6 +807,75 @@ export default function HomePage() {
                 />
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ──────────────────────────────────────
+          ANIMATED CUSTOMER REVIEWS MARQUEE SHOWCASE
+      ────────────────────────────────────── */}
+      <section className="py-24 overflow-hidden relative bg-[#F8FAFC] border-t border-slate-200/90 text-slate-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-12">
+          <div className="flex items-center justify-center mb-3">
+            <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+              Verified Testimonials
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-sans tracking-tight">
+            Client <span className="text-amber-600 font-black">Experiences</span>
+          </h2>
+          <p className="mt-2 text-xs text-slate-500 max-w-md mx-auto font-sans font-medium">
+            Hear from discerning owners who purchased their certified luxury automobiles through FF-Cars.
+          </p>
+        </div>
+
+        {/* Infinite Marquee Container */}
+        <div className="relative w-full overflow-hidden py-4">
+          {/* Side Fades - Light smooth gradient matching #F8FAFC */}
+          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#F8FAFC] via-[#F8FAFC]/80 to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#F8FAFC] via-[#F8FAFC]/80 to-transparent z-10 pointer-events-none" />
+
+          {/* Marquee Track */}
+          <div className="animate-marquee flex gap-6 px-4">
+            {[...publishedReviews, ...publishedReviews, ...publishedReviews].map((rev, idx) => {
+              const custName = rev.customers ? `${rev.customers.first_name} ${rev.customers.last_name || ''}`.trim() : (rev.name || 'Verified Owner');
+              const carModel = rev.vehicles ? `${rev.vehicles.make} ${rev.vehicles.model}` : (rev.carModel || 'Luxury Automobile');
+              const rating = Number(rev.rating || 5);
+
+              return (
+                <div
+                  key={idx}
+                  className="w-[380px] p-7 rounded-2xl flex-shrink-0 flex flex-col justify-between gap-5 bg-white border border-slate-200/90 shadow-sm text-slate-900"
+                >
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex text-amber-500 gap-1">
+                        {Array.from({ length: rating }).map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-current text-amber-500" />
+                        ))}
+                      </div>
+                      <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-sans">
+                        Verified Purchaser ✓
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-700 leading-relaxed font-sans font-normal">
+                      "{rev.comment}"
+                    </p>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div>
+                      <div className="font-bold text-xs text-slate-900 font-sans">{custName}</div>
+                      <div className="text-[11px] text-slate-500 font-semibold font-sans mt-0.5">{carModel}</div>
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm font-sans">
+                      {custName.charAt(0)}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>

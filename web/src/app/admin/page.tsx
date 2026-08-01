@@ -124,6 +124,58 @@ export default function AdminDashboard() {
   const [isCarModalOpen, setIsCarModalOpen] = useState(false);
   const [editingCarId, setEditingCarId] = useState<string | null>(null);
 
+  // Add Employee State
+  const [isEmployeeModalOpen, setIsEmployeeModalOpen] = useState(false);
+  const [submittingEmp, setSubmittingEmp] = useState(false);
+  const [empForm, setEmpForm] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone: '',
+    role: 'Sales Executive',
+    branch_id: 1,
+    salary: 45000,
+  });
+
+  const openAddEmployeeModal = () => {
+    setEmpForm({
+      first_name: '',
+      last_name: '',
+      email: '',
+      phone: '',
+      role: 'Sales Executive',
+      branch_id: selectedBranch !== 'all' ? Number(selectedBranch) : 1,
+      salary: 45000,
+    });
+    setIsEmployeeModalOpen(true);
+  };
+
+  const handleCreateEmployee = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!empForm.first_name || !empForm.email) {
+      showLocalToast('First name and email are required.', 'error');
+      return;
+    }
+    setSubmittingEmp(true);
+    try {
+      const payload = {
+        ...empForm,
+        branch_id: Number(empForm.branch_id),
+        salary: Number(empForm.salary),
+        password: 'password123',
+      };
+      await api.post('/employees', payload);
+      showLocalToast('Employee added successfully! Default password set to password123 (Encrypted).', 'success');
+      setIsEmployeeModalOpen(false);
+      fetchOverviewData();
+    } catch (error: any) {
+      const msg = error.response?.data?.message || 'Failed to add employee.';
+      showLocalToast(msg, 'error');
+    } finally {
+      setSubmittingEmp(false);
+    }
+  };
+
   // Form State for Add / Edit Vehicle Modal
   const [carForm, setCarForm] = useState({
     make: '',
@@ -266,6 +318,7 @@ export default function AdminDashboard() {
   const [deliveriesList, setDeliveriesList] = useState<any[]>([]);
   const [leadsList, setLeadsList] = useState<any[]>([]);
   const [branchesList, setBranchesList] = useState<any[]>([]);
+  const [reviewsList, setReviewsList] = useState<any[]>([]);
   const [updatingEmpId, setUpdatingEmpId] = useState<number | null>(null);
 
   // Helper to determine if user is System Admin / Founder vs Branch Manager / Staff
@@ -286,7 +339,6 @@ export default function AdminDashboard() {
         showLocalToast('Access denied. Staff or System Admin privileges required.');
         router.push('/dashboard');
       } else if (!isSystemAdmin && user) {
-        // Automatically set active branch for Sales Executives and Branch Managers
         const assignedBranch = String((user as any).branch_id || (user as any).branchId || 1);
         if (selectedBranch === 'all' || selectedBranch !== assignedBranch) {
           setSelectedBranch(assignedBranch);
@@ -300,7 +352,7 @@ export default function AdminDashboard() {
     setLoadingAnalytics(true);
     try {
       const branchParam = selectedBranch !== 'all' ? `?branchId=${selectedBranch}` : '';
-      const [vehRes, salesRes, testRes, empRes, custRes, delRes, leadRes, branchRes] = await Promise.all([
+      const [vehRes, salesRes, testRes, empRes, custRes, delRes, leadRes, branchRes, revRes] = await Promise.all([
         api.get(`/vehicles${branchParam}`).catch(() => ({ data: [] })),
         api.get(`/sales${branchParam}`).catch(() => ({ data: [] })),
         api.get(`/test-drives${branchParam}`).catch(() => ({ data: [] })),
@@ -309,6 +361,7 @@ export default function AdminDashboard() {
         api.get(`/deliveries${branchParam}`).catch(() => ({ data: [] })),
         api.get(`/leads${branchParam}`).catch(() => ({ data: [] })),
         api.get(`/branches`).catch(() => ({ data: [] })),
+        api.get(`/reviews`).catch(() => ({ data: [] })),
       ]);
 
       const vehicles = Array.isArray(vehRes.data) ? vehRes.data : (vehRes.data.data || []);
@@ -319,6 +372,7 @@ export default function AdminDashboard() {
       const deliveries = Array.isArray(delRes.data) ? delRes.data : (delRes.data.data || []);
       const leads = Array.isArray(leadRes.data) ? leadRes.data : (leadRes.data.data || []);
       const branches = Array.isArray(branchRes.data) ? branchRes.data : (branchRes.data.data || []);
+      const reviews = Array.isArray(revRes.data) ? revRes.data : (revRes.data.data || []);
 
       const availableCount = vehicles.filter((v: any) => v.status === 'Available' || v.status === 'AVAILABLE').length;
       const soldCount = vehicles.filter((v: any) => v.status === 'Sold' || v.status === 'SOLD' || v.status === 'Reserved').length;
@@ -335,6 +389,7 @@ export default function AdminDashboard() {
       setDeliveriesList(deliveries);
       setLeadsList(leads);
       setBranchesList(branches);
+      setReviewsList(reviews);
 
       setAnalytics({
         totalVehicles: vehicles.length,
@@ -479,14 +534,17 @@ export default function AdminDashboard() {
   const computedBranchPerf = useMemo(() => {
     const thisMonthRev = computedMonthlyPoints[computedMonthlyPoints.length - 1]?.val || 2450000;
     const lastMonthRev = computedMonthlyPoints[computedMonthlyPoints.length - 2]?.val || 2065000;
-    const growth = lastMonthRev > 0 ? (((thisMonthRev - lastMonthRev) / lastMonthRev) * 100).toFixed(1) : '18.6';
-    const target = thisMonthRev * 1.15;
+    const rawGrowth = lastMonthRev > 0 ? (((thisMonthRev - lastMonthRev) / lastMonthRev) * 100) : 18.6;
+    const growth = Math.abs(rawGrowth).toFixed(1);
+    const isPositive = rawGrowth >= 0;
+    const target = Math.max(thisMonthRev * 1.15, 100000);
     const achievement = Math.min(100, Math.round((thisMonthRev / target) * 100));
 
     return {
       thisMonthRev,
       lastMonthRev,
       growth,
+      isPositive,
       target,
       achievement,
     };
@@ -1008,27 +1066,23 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row flex-1 bg-slate-950 text-slate-100 min-h-screen font-sans relative selection:bg-indigo-500 selection:text-white">
+    <div className="flex flex-col lg:flex-row flex-1 bg-[#F8FAFC] text-slate-900 min-h-screen font-sans relative">
       
-      {/* AMBIENT MESH GRADIENT LIGHTING BACKGROUNDS */}
-      <div className="fixed top-0 left-1/4 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="fixed bottom-1/3 right-1/4 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] pointer-events-none" />
-
-      {/* LEFT SIDEBAR PANEL WITH NEON HYPER-LUXURY NAVIGATION */}
-      <aside className="w-full lg:w-72 bg-slate-900/90 border-r border-slate-800/80 p-6 flex flex-col justify-between gap-6 flex-shrink-0 backdrop-blur-2xl z-20">
+      {/* LEFT SIDEBAR PANEL WITH EXECUTIVE NAVIGATION */}
+      <aside className="w-full lg:w-72 bg-white border-r border-slate-200 p-6 flex flex-col justify-between gap-6 flex-shrink-0 z-20 shadow-sm">
         <div className="flex flex-col gap-6">
           
           {/* Back to Dashboard */}
           <button
             onClick={() => router.push('/dashboard')}
-            className="flex items-center gap-2.5 text-xs font-bold text-slate-400 hover:text-indigo-400 transition-all cursor-pointer group"
+            className="flex items-center gap-2.5 text-xs font-bold text-slate-600 hover:text-slate-900 transition-all cursor-pointer group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back to Customer Dashboard
           </button>
 
           {/* SELECT BRANCH DROPDOWN */}
           <div>
-            <label className="block text-xs font-black text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
               <Building2 className="w-3.5 h-3.5" /> SELECT BRANCH LOCATION
             </label>
             <div className="relative">
@@ -1037,8 +1091,8 @@ export default function AdminDashboard() {
                 disabled={!isSystemAdmin}
                 onChange={(e) => setSelectedBranch(e.target.value)}
                 aria-label="Select active branch"
-                className={`w-full pl-3.5 pr-8 py-3 rounded-2xl border border-slate-700/80 bg-slate-950 text-xs font-bold text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none shadow-lg ${
-                  !isSystemAdmin ? 'opacity-90 cursor-not-allowed border-purple-500/40' : 'cursor-pointer'
+                className={`w-full pl-3.5 pr-8 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 appearance-none shadow-sm ${
+                  !isSystemAdmin ? 'opacity-90 cursor-not-allowed border-slate-300' : 'cursor-pointer'
                 }`}
               >
                 {isSystemAdmin && <option value="all">🌟 All Branches (Founder View)</option>}
@@ -1047,13 +1101,13 @@ export default function AdminDashboard() {
                 <option value="3">Coimbatore Branch</option>
                 <option value="4">Madurai Branch</option>
               </select>
-              <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <ChevronDown className="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
           </div>
 
-          {/* BRANCH MENU TABS */}
-          <div className="flex flex-col gap-1.5">
-            <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2 px-2">
+          {/* BRANCH MENU TABS - EXECUTIVE PILLS */}
+          <div className="flex flex-col gap-1">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 px-2">
               ADMIN CONTROL CENTER
             </span>
 
@@ -1074,13 +1128,13 @@ export default function AdminDashboard() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveSection(tab.id as SectionType)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-black shadow-lg shadow-indigo-600/30 scale-[1.02]'
-                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                      ? 'bg-[#0F172A] text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
                   {tab.label}
                 </button>
               );
@@ -1088,22 +1142,18 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* BOTTOM USER PROFILE CARD WITH DISTINCT ROLE BADGES */}
-        <div className="p-4 rounded-2xl border border-slate-800 bg-slate-950/80 flex items-center gap-3 shadow-xl relative overflow-hidden">
-          <div className={`w-10 h-10 rounded-xl ${
-            selectedBranch === 'all'
-              ? 'bg-gradient-to-tr from-amber-500 via-orange-500 to-yellow-400'
-              : 'bg-gradient-to-tr from-purple-600 via-indigo-600 to-blue-500'
-          } text-slate-950 font-black flex items-center justify-center text-sm shadow-md flex-shrink-0`}>
-            {selectedBranch === 'all' ? <Crown className="w-5 h-5 text-slate-950" /> : <Building2 className="w-5 h-5 text-white" />}
+        {/* BOTTOM USER PROFILE CARD */}
+        <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex items-center gap-3 shadow-sm relative overflow-hidden">
+          <div className="w-9 h-9 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs shadow-sm flex-shrink-0">
+            {selectedBranch === 'all' ? <Crown className="w-5 h-5 text-amber-400" /> : <Building2 className="w-5 h-5 text-white" />}
           </div>
           <div className="flex-1 overflow-hidden">
-            <div className="font-bold text-xs text-white truncate">{user.name}</div>
-            <div className="text-[10px] text-slate-400 truncate mt-0.5 font-mono">{user.email}</div>
-            <span className={`inline-flex items-center gap-1 mt-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+            <div className="font-extrabold text-xs text-slate-900 truncate font-sans">{user.name}</div>
+            <div className="text-[10px] text-slate-500 truncate mt-0.5 font-mono font-medium">{user.email}</div>
+            <span className={`inline-flex items-center gap-1 mt-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
               selectedBranch === 'all'
-                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm'
-                : 'bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm'
+                ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                : 'bg-purple-50 text-purple-800 border border-purple-200'
             }`}>
               {selectedBranch === 'all' ? '👑 System Admin / Founder' : '🏢 Branch Manager'}
             </span>
@@ -1112,27 +1162,23 @@ export default function AdminDashboard() {
       </aside>
 
       {/* MAIN WORKSPACE CONTENT */}
-      <main className="flex-1 p-6 lg:p-8 flex flex-col gap-8 overflow-y-auto bg-slate-950 z-10">
+      <main className="flex-1 p-6 lg:p-8 flex flex-col gap-6 overflow-y-auto bg-[#F8FAFC]">
         
-        {/* TOP HEADER BAR WITH METALLIC SLATE PANEL */}
-        <div className="p-6 rounded-3xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900/90 to-indigo-950/40 backdrop-blur-2xl shadow-2xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden">
+        {/* TOP HEADER BAR (EXECUTIVE LIGHT CARD) */}
+        <div className="p-6 sm:p-8 rounded-2xl bg-white border border-slate-200/90 text-slate-900 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden">
           <div className="relative z-10">
             <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl sm:text-3xl font-display font-extrabold tracking-tight text-white flex items-center gap-2">
-                {selectedBranch === 'all' ? <Crown className="w-7 h-7 text-amber-400" /> : <Building2 className="w-7 h-7 text-purple-400" />}
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2.5 font-sans">
+                {selectedBranch === 'all' ? <Crown className="w-7 h-7 text-amber-500" /> : <Building2 className="w-7 h-7 text-indigo-600" />}
                 {getBranchTitle()}
               </h1>
-              <span className={`px-3.5 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-sm flex items-center gap-1.5 ${
-                selectedBranch === 'all'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                  : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
-              }`}>
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5 font-sans">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 {selectedBranch === 'all' ? '👑 Founder Master View' : '🏢 Manager Direct Access'}
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-1 flex items-center gap-1.5 font-medium">
-              <MapPin className="w-3.5 h-3.5 text-indigo-400" />
+            <p className="text-xs text-slate-500 mt-2 flex items-center gap-1.5 font-medium font-sans">
+              <MapPin className="w-3.5 h-3.5 text-amber-600" />
               {selectedBranch === 'all' ? 'All Dealership Locations Across Tamil Nadu' : `Operational Headquarters — ${getBranchTitle()}`}
             </p>
           </div>
@@ -1141,25 +1187,19 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-3 flex-wrap relative z-10">
             <button
               onClick={handleExportPDF}
-              className="px-4 py-2.5 rounded-2xl border border-slate-700 bg-slate-950 hover:bg-slate-800 text-xs font-bold text-slate-200 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+              className="px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
             >
-              <FileText className="w-4 h-4 text-rose-400" /> Export PDF
+              <FileText className="w-4 h-4 text-rose-600" /> Export PDF
             </button>
             <button
               onClick={handleExportExcel}
-              className="px-4 py-2.5 rounded-2xl border border-slate-700 bg-slate-950 hover:bg-slate-800 text-xs font-bold text-slate-200 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+              className="px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
             >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-400" /> Export Excel
-            </button>
-            <button
-              onClick={handlePrintReport}
-              className="px-4 py-2.5 rounded-2xl border border-slate-700 bg-slate-950 hover:bg-slate-800 text-xs font-bold text-slate-200 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
-            >
-              <Printer className="w-4 h-4 text-slate-400" /> Print Report
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" /> Export Excel
             </button>
             <button
               onClick={openAddModal}
-              className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs flex items-center gap-2 transition-all shadow-lg shadow-emerald-500/25 cursor-pointer"
+              className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs flex items-center gap-2 transition-all shadow-sm cursor-pointer"
             >
               <Plus className="w-4 h-4" /> Add Vehicle
             </button>
@@ -1171,89 +1211,85 @@ export default function AdminDashboard() {
           loadingAnalytics ? (
             <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
               {[1, 2, 3, 4, 5].map((n) => (
-                <div key={n} className="h-36 rounded-3xl border border-slate-800 bg-slate-900/60 skeleton-shimmer" />
+                <div key={n} className="h-36 rounded-2xl border border-slate-200 bg-white skeleton-shimmer" />
               ))}
             </div>
           ) : (
             <div className="flex flex-col gap-8">
               
-              {/* TOP 5 KPI HERO METRIC CARDS WITH COLOR PILLARS & GLOW */}
+              {/* TOP 5 KPI HERO METRIC CARDS (PURE WHITE) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
                 
                 {/* 1. Total Vehicles Listed */}
-                <div className="p-6 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex flex-col justify-between gap-4 hover:border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.2)] transition-all relative overflow-hidden group">
-                  <div className="w-full h-1.5 bg-blue-500 absolute top-0 left-0" />
-                  <div className="flex justify-between items-start mt-1">
-                    <div className="p-3 rounded-2xl bg-blue-500/15 text-blue-400 border border-blue-500/30">
-                      <Car className="w-6 h-6" />
+                <div className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col justify-between gap-4 hover:border-slate-300 transition-all">
+                  <div className="flex justify-between items-start">
+                    <div className="p-2.5 rounded-xl bg-slate-100 text-slate-700">
+                      <Car className="w-5 h-5" />
                     </div>
                   </div>
                   <div>
-                    <span className="text-xs font-black text-slate-400 uppercase tracking-wider">TOTAL VEHICLES LISTED</span>
-                    <h3 className="text-3xl font-black text-white font-mono mt-1">{filteredInventory.length}</h3>
-                    <span className="text-[11px] text-slate-400 mt-1 block font-medium">
-                      {filteredInventory.filter((v) => (v.status || '').toLowerCase() === 'available').length} Avail &bull; {filteredInventory.filter((v) => (v.status || '').toLowerCase() === 'sold').length} Sold &bull; {filteredInventory.filter((v) => (v.status || '').toLowerCase() === 'reserved').length} Reserved
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">TOTAL VEHICLES</span>
+                    <h3 className="text-3xl font-black text-slate-900 font-display mt-1">{filteredInventory.length}</h3>
+                    <span className="text-[11px] text-slate-500 mt-1 block font-medium">
+                      {filteredInventory.filter((v) => (v.status || '').toLowerCase() === 'available').length} Avail &bull; {filteredInventory.filter((v) => (v.status || '').toLowerCase() === 'sold').length} Sold
                     </span>
                   </div>
                 </div>
 
                 {/* 2. Available Vehicles */}
-                <div className="p-6 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex flex-col justify-between gap-4 hover:border-emerald-500/50 hover:shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all relative overflow-hidden group">
-                  <div className="w-full h-1.5 bg-emerald-500 absolute top-0 left-0" />
-                  <div className="flex justify-between items-start mt-1">
-                    <div className="p-3 rounded-2xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                      <Car className="w-6 h-6" />
+                <div className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col justify-between gap-4 hover:border-slate-300 transition-all">
+                  <div className="flex justify-between items-start">
+                    <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600">
+                      <Car className="w-5 h-5" />
                     </div>
                   </div>
                   <div>
-                    <span className="text-xs font-black text-slate-400 uppercase tracking-wider">AVAILABLE VEHICLES</span>
-                    <h3 className="text-3xl font-black text-white font-mono mt-1">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">AVAILABLE INVENTORY</span>
+                    <h3 className="text-3xl font-black text-slate-900 font-display mt-1">
                       {filteredInventory.filter((v) => (v.status || '').toLowerCase() === 'available').length}
                     </h3>
-                    <span className="text-xs text-slate-400 mt-1 block font-medium">
-                      {filteredInventory.length > 0 ? `${((filteredInventory.filter((v) => (v.status || '').toLowerCase() === 'available').length / filteredInventory.length) * 100).toFixed(1)}% of catalog` : '100%'}
+                    <span className="text-[11px] text-slate-500 mt-1 block font-medium">
+                      {filteredInventory.length > 0 ? `${((filteredInventory.filter((v) => (v.status || '').toLowerCase() === 'available').length / filteredInventory.length) * 100).toFixed(0)}% of catalog` : '100%'}
                     </span>
                   </div>
                 </div>
 
                 {/* 3. Sold & Reserved Vehicles */}
-                <div className="p-6 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex flex-col justify-between gap-4 hover:border-amber-500/50 hover:shadow-[0_0_30px_rgba(245,158,11,0.2)] transition-all relative overflow-hidden group">
-                  <div className="w-full h-1.5 bg-amber-500 absolute top-0 left-0" />
-                  <div className="flex justify-between items-start mt-1">
-                    <div className="p-3 rounded-2xl bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                      <BadgeDollarSign className="w-6 h-6" />
+                <div className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col justify-between gap-4 hover:border-slate-300 transition-all">
+                  <div className="flex justify-between items-start">
+                    <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600">
+                      <BadgeDollarSign className="w-5 h-5" />
                     </div>
                   </div>
                   <div>
-                    <span className="text-xs font-black text-slate-400 uppercase tracking-wider">SOLD &amp; RESERVED</span>
-                    <h3 className="text-3xl font-black text-white font-mono mt-1">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">SOLD &amp; RESERVED</span>
+                    <h3 className="text-3xl font-black text-slate-900 font-display mt-1">
                       {filteredInventory.filter((v) => (v.status || '').toLowerCase() === 'sold' || (v.status || '').toLowerCase() === 'reserved').length}
                     </h3>
-                    <span className="text-xs text-slate-400 mt-1 block font-medium">
+                    <span className="text-[11px] text-slate-500 mt-1 block font-medium">
                       {filteredInventory.filter((v) => (v.status || '').toLowerCase() === 'sold').length} Sold + {filteredInventory.filter((v) => (v.status || '').toLowerCase() === 'reserved').length} Reserved
                     </span>
                   </div>
                 </div>
 
                 {/* 4. Total Revenue & Segregated Owner Net Profit */}
-                <div className="p-6 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex flex-col justify-between gap-4 hover:border-indigo-500/50 hover:shadow-[0_0_30px_rgba(99,102,241,0.2)] transition-all relative overflow-hidden group">
-                  <div className="w-full h-1.5 bg-indigo-500 absolute top-0 left-0" />
-                  <div className="flex justify-between items-start mt-1">
-                    <div className="p-3 rounded-2xl bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
-                      <BadgeDollarSign className="w-6 h-6" />
+                <div className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col justify-between gap-4 hover:border-slate-300 transition-all">
+                  <div className="flex justify-between items-start">
+                    <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600">
+                      <BadgeDollarSign className="w-5 h-5" />
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
                       Net Margin
                     </span>
                   </div>
                   <div>
-                    <span className="text-xs font-black text-slate-400 uppercase tracking-wider">REVENUE / OWNER NET PROFIT</span>
-                    <h3 className="text-3xl font-black text-white font-mono mt-1">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">REVENUE / NET PROFIT</span>
+                    <h3 className="text-3xl font-black text-slate-900 font-mono mt-1">
                       ₹{analytics?.totalRevenue >= 10000000 ? `${(analytics?.totalRevenue / 10000000).toFixed(2)} Cr` : `${(analytics?.totalRevenue / 100000).toFixed(1)} L`}
                     </h3>
-                    <div className="flex items-center justify-between text-xs mt-1 pt-2 border-t border-slate-800">
-                      <span className="text-slate-400 font-semibold">Net Profit:</span>
-                      <span className="font-mono font-extrabold text-emerald-400">
+                    <div className="flex items-center justify-between text-xs mt-1 pt-2 border-t border-slate-100">
+                      <span className="text-slate-500 font-semibold">Net Profit:</span>
+                      <span className="font-mono font-extrabold text-emerald-600">
                         +₹{analytics?.netProfit >= 10000000 ? `${(analytics?.netProfit / 10000000).toFixed(2)} Cr` : `${(analytics?.netProfit / 100000).toFixed(1)} L`} (18.2%)
                       </span>
                     </div>
@@ -1261,30 +1297,29 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* 5. Not Completed Test Drives */}
-                <div className="p-6 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex flex-col justify-between gap-4 hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.2)] transition-all relative overflow-hidden group">
-                  <div className="w-full h-1.5 bg-purple-500 absolute top-0 left-0" />
-                  <div className="flex justify-between items-start mt-1">
-                    <div className="p-3 rounded-2xl bg-purple-500/15 text-purple-400 border border-purple-500/30">
-                      <ClipboardList className="w-6 h-6" />
+                <div className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col justify-between gap-4 hover:border-slate-300 transition-all">
+                  <div className="flex justify-between items-start">
+                    <div className="p-2.5 rounded-xl bg-purple-50 text-purple-600">
+                      <ClipboardList className="w-5 h-5" />
                     </div>
                   </div>
                   <div>
-                    <span className="text-xs font-black text-slate-400 uppercase tracking-wider">NOT COMPLETED</span>
-                    <h3 className="text-3xl font-black text-white font-mono mt-1">
+                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">NOT COMPLETED</span>
+                    <h3 className="text-3xl font-black text-slate-900 font-mono mt-1">
                       {filteredTestDrives.filter((t: any) =>
                         t.status === 'Pending' || t.status === 'PENDING' ||
                         t.status === 'Scheduled' || t.status === 'No Show' ||
                         t.status === 'NO_SHOW' || t.status === 'no_show'
                       ).length}
                     </h3>
-                    <span className="text-[11px] text-slate-400 mt-1 block font-medium">
+                    <span className="text-[11px] text-slate-500 mt-1 block font-medium">
                       {filteredTestDrives.filter((t: any) => t.status === 'No Show' || t.status === 'NO_SHOW' || t.status === 'no_show').length} No Show
                       {' · '}
                       {filteredTestDrives.filter((t: any) => t.status === 'Pending' || t.status === 'PENDING' || t.status === 'Scheduled').length} Pending
                     </span>
                     <button 
                       onClick={() => setActiveSection('test-rides')}
-                      className="text-xs font-bold text-purple-400 hover:underline mt-1 flex items-center gap-1 cursor-pointer"
+                      className="text-xs font-bold text-slate-700 hover:text-slate-900 hover:underline mt-1 flex items-center gap-1 cursor-pointer"
                     >
                       View bookings &rarr;
                     </button>
@@ -1302,35 +1337,40 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* 2. Branch Performance Card */}
-                <div className="lg:col-span-3 p-6 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex flex-col justify-between gap-4">
-                  <h3 className="font-extrabold text-lg text-white font-display">Branch Performance</h3>
+                <div className="lg:col-span-3 p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col justify-between gap-4 h-full text-slate-900">
+                  <div>
+                    <h3 className="font-extrabold text-base text-slate-900 font-sans">Branch Performance</h3>
+                    <p className="text-xs text-slate-500 mt-0.5 font-medium">Monthly revenue targets & growth</p>
+                  </div>
                   
-                  <div className="flex flex-col gap-4 my-2">
+                  <div className="flex flex-col gap-3 my-2">
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-400 font-medium">Revenue This Month</span>
-                      <span className="font-mono font-extrabold text-white text-sm">₹{(computedBranchPerf.thisMonthRev / 100000).toFixed(1)}L</span>
+                      <span className="text-slate-500 font-medium">Revenue This Month</span>
+                      <span className="font-mono font-black text-slate-900 text-sm">₹{(computedBranchPerf.thisMonthRev / 100000).toFixed(1)}L</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-400 font-medium">Revenue Last Month</span>
-                      <span className="font-mono font-extrabold text-white text-sm">₹{(computedBranchPerf.lastMonthRev / 100000).toFixed(1)}L</span>
+                      <span className="text-slate-500 font-medium">Revenue Last Month</span>
+                      <span className="font-mono font-black text-slate-900 text-sm">₹{(computedBranchPerf.lastMonthRev / 100000).toFixed(1)}L</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
-                      <span className="text-slate-400 font-medium">Growth</span>
-                      <span className="font-mono font-extrabold text-emerald-400 text-sm">↗ {computedBranchPerf.growth}%</span>
+                      <span className="text-slate-500 font-medium">Growth</span>
+                      <span className={`font-mono font-extrabold text-sm ${computedBranchPerf.isPositive ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        {computedBranchPerf.isPositive ? `↗ +${computedBranchPerf.growth}%` : `↘ -${computedBranchPerf.growth}%`}
+                      </span>
                     </div>
-                    <div className="flex justify-between items-center text-xs pt-2 border-t border-slate-800">
-                      <span className="text-slate-400 font-medium">Monthly Target</span>
-                      <span className="font-mono font-extrabold text-white text-sm">₹{(computedBranchPerf.target / 100000).toFixed(1)}L</span>
+                    <div className="flex justify-between items-center text-xs pt-2 border-t border-slate-100">
+                      <span className="text-slate-500 font-medium">Monthly Target</span>
+                      <span className="font-mono font-black text-slate-900 text-sm">₹{(computedBranchPerf.target / 100000).toFixed(1)}L</span>
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-xs font-bold mb-2">
-                      <span className="text-slate-400">Target Achievement</span>
-                      <span className="text-white font-mono font-extrabold">{computedBranchPerf.achievement}%</span>
+                    <div className="flex justify-between text-xs font-bold mb-1.5">
+                      <span className="text-slate-500">Target Achievement</span>
+                      <span className="text-slate-900 font-mono font-black">{computedBranchPerf.achievement}%</span>
                     </div>
-                    <div className="w-full bg-slate-950 rounded-full h-3 overflow-hidden border border-slate-800">
-                      <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500 shadow-sm" style={{ width: `${computedBranchPerf.achievement}%` }} />
+                    <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200">
+                      <div className="bg-slate-900 h-full rounded-full transition-all duration-500" style={{ width: `${computedBranchPerf.achievement}%` }} />
                     </div>
                   </div>
                 </div>
@@ -1346,12 +1386,12 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 
                 {/* 1. Recent Sales Transactions Table */}
-                <div className="lg:col-span-5 p-6 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex flex-col gap-4">
+                <div className="lg:col-span-5 p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col gap-4 text-slate-900">
                   <div className="flex justify-between items-center">
-                    <h3 className="font-extrabold text-lg text-white font-display">Recent Sales Transactions</h3>
+                    <h3 className="font-extrabold text-base text-slate-900 font-sans">Recent Sales Transactions</h3>
                     <button 
                       onClick={() => setActiveSection('sales')}
-                      className="text-xs font-bold text-indigo-400 hover:underline cursor-pointer"
+                      className="text-xs font-bold text-slate-700 hover:text-slate-900 hover:underline cursor-pointer"
                     >
                       View All &rarr;
                     </button>
@@ -1360,29 +1400,29 @@ export default function AdminDashboard() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs text-left border-collapse">
                       <thead>
-                        <tr className="border-b border-slate-800 text-slate-300 font-extrabold bg-slate-950">
-                          <th className="p-3.5">Customer</th>
-                          <th className="p-3.5">Vehicle</th>
-                          <th className="p-3.5">Selling Price</th>
-                          <th className="p-3.5 text-right">Owner Profit</th>
+                        <tr className="border-b border-slate-200 text-slate-600 font-bold bg-slate-50">
+                          <th className="p-3">Customer</th>
+                          <th className="p-3">Vehicle</th>
+                          <th className="p-3">Selling Price</th>
+                          <th className="p-3 text-right">Owner Profit</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800/80">
+                      <tbody className="divide-y divide-slate-100">
                         {filteredSales.slice(0, 5).map((s, idx) => {
                           const sellPrice = parseSaleAmount(s);
                           const costPrice = parsePurchasePrice(s.vehicles || s);
                           const profit = Math.max(0, sellPrice - costPrice);
 
                           return (
-                            <tr key={s.sale_id || idx} className="hover:bg-slate-800/50">
-                              <td className="p-3.5 font-bold text-white">
+                            <tr key={s.sale_id || idx} className="hover:bg-slate-50">
+                              <td className="p-3 font-bold text-slate-900">
                                 <div>{s.customers ? `${s.customers.first_name} ${s.customers.last_name || ''}` : `Customer #${s.customer_id}`}</div>
-                                <div className="text-[10px] text-slate-400 font-mono font-normal">{s.customers?.email || 'customer@example.com'}</div>
+                                <div className="text-[10px] text-slate-500 font-normal">{s.customers?.email || 'customer@example.com'}</div>
                               </td>
-                              <td className="p-3.5 text-slate-200 font-semibold">{s.vehicles ? `${s.vehicles.make} ${s.vehicles.model}` : `Vehicle #${s.vehicle_id}`}</td>
-                              <td className="p-3.5 font-black text-white font-mono">₹{sellPrice.toLocaleString()}</td>
-                              <td className="p-3.5 text-right">
-                                <span className="px-2.5 py-1 rounded-full text-[10px] font-black font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                              <td className="p-3 text-slate-700 font-semibold">{s.vehicles ? `${s.vehicles.make} ${s.vehicles.model}` : `Vehicle #${s.vehicle_id}`}</td>
+                              <td className="p-3 font-black text-slate-900 font-mono">₹{sellPrice.toLocaleString()}</td>
+                              <td className="p-3 text-right">
+                                <span className="px-2.5 py-1 rounded-full text-[10px] font-black font-mono bg-emerald-50 text-emerald-700 border border-emerald-200">
                                   +₹{profit.toLocaleString()}
                                 </span>
                               </td>
@@ -1395,34 +1435,34 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* 2. Test Ride Requests List */}
-                <div className="lg:col-span-4 p-6 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex flex-col gap-4">
+                <div className="lg:col-span-4 p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col gap-4 text-slate-900">
                   <div className="flex justify-between items-center">
-                    <h3 className="font-extrabold text-lg text-white font-display">Test Ride Requests</h3>
+                    <h3 className="font-extrabold text-base text-slate-900 font-sans">Test Ride Requests</h3>
                     <button 
                       onClick={() => setActiveSection('test-rides')}
-                      className="text-xs font-bold text-indigo-400 hover:underline cursor-pointer"
+                      className="text-xs font-bold text-slate-700 hover:text-slate-900 hover:underline cursor-pointer"
                     >
                       View All &rarr;
                     </button>
                   </div>
 
-                  <div className="flex flex-col divide-y divide-slate-800 text-xs">
+                  <div className="flex flex-col divide-y divide-slate-100 text-xs">
                     {filteredTestDrives.slice(0, 5).map((tr, idx) => {
                       const isVehicleSold = convertedVehicleIds.has(Number(tr.vehicle_id)) || tr.vehicles?.status === 'Sold' || tr.vehicles?.status === 'SOLD';
                       const isConvertedToSale = tr.status === 'Converted' || (tr.status === 'Completed' && isVehicleSold);
 
                       return (
-                        <div key={tr.test_drive_id || idx} className="py-3.5 flex items-center justify-between gap-2">
+                        <div key={tr.test_drive_id || idx} className="py-3 flex items-center justify-between gap-2">
                           <div>
-                            <div className="font-bold text-white text-sm">
+                            <div className="font-bold text-slate-900 text-sm">
                               {tr.customers ? `${tr.customers.first_name} ${tr.customers.last_name || ''}` : `Customer #${tr.customer_id}`}
                             </div>
-                            <div className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1.5 flex-wrap">
-                              <span className="text-slate-300 font-semibold">
+                            <div className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1.5 flex-wrap">
+                              <span className="text-slate-700 font-semibold">
                                 {tr.vehicles ? `${tr.vehicles.make} ${tr.vehicles.model}` : `Vehicle #${tr.vehicle_id}`}
                               </span>
                               {tr.vehicles?.price && (
-                                <span className="font-mono font-black text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20">
+                                <span className="font-mono font-bold text-slate-900 bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200">
                                   ₹{Number(tr.vehicles.price).toLocaleString()}
                                 </span>
                               )}
@@ -1430,13 +1470,13 @@ export default function AdminDashboard() {
                           </div>
                           <div className="flex flex-col items-end gap-1">
                             {isConvertedToSale ? (
-                              <span className="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-black flex items-center gap-1">
-                                <Check className="w-3.5 h-3.5 text-emerald-400" /> Sale Closed
+                              <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold flex items-center gap-1">
+                                <Check className="w-3.5 h-3.5 text-emerald-600" /> Sale Closed
                               </span>
                             ) : (
                               <button
                                 onClick={() => openConvertToSaleModal(tr)}
-                                className="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-black text-xs flex items-center gap-1 transition-all cursor-pointer shadow-sm"
+                                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1 transition-all cursor-pointer shadow-sm"
                               >
                                 <Sparkles className="w-3.5 h-3.5" /> Convert to Sale
                               </button>
@@ -1449,35 +1489,35 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* 3. Recent Customer Reviews Card */}
-                <div className="lg:col-span-3 p-6 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex flex-col gap-4">
+                <div className="lg:col-span-3 p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col gap-4 text-slate-900">
                   <div className="flex justify-between items-center">
-                    <h3 className="font-extrabold text-lg text-white font-display">Recent Reviews</h3>
+                    <h3 className="font-extrabold text-base text-slate-900 font-sans">Recent Reviews</h3>
                     <button 
                       onClick={() => setActiveSection('reviews')}
-                      className="text-xs font-bold text-indigo-400 hover:underline cursor-pointer"
+                      className="text-xs font-bold text-slate-700 hover:text-slate-900 hover:underline cursor-pointer"
                     >
                       View All &rarr;
                     </button>
                   </div>
 
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-3">
                     {reviewsData.slice(0, 2).map((rev, idx) => (
-                      <div key={idx} className="p-4 rounded-2xl border border-slate-800 bg-slate-950 flex flex-col gap-2">
+                      <div key={idx} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex flex-col gap-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <div className={`w-8 h-8 rounded-full ${rev.bg || 'bg-indigo-600'} text-white font-extrabold flex items-center justify-center text-xs shadow-md`}>
+                            <div className="w-7 h-7 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs shadow-sm">
                               {rev.initial}
                             </div>
-                            <span className="font-bold text-xs text-white">{rev.name}</span>
+                            <span className="font-bold text-xs text-slate-900">{rev.name}</span>
                           </div>
                           <span className="text-[10px] text-slate-400">{rev.date}</span>
                         </div>
-                        <div className="flex text-amber-400 gap-0.5">
+                        <div className="flex text-amber-500 gap-0.5">
                           {Array.from({ length: rev.rating }).map((_, i) => (
                             <Star key={i} className="w-3.5 h-3.5 fill-current" />
                           ))}
                         </div>
-                        <p className="text-xs text-slate-200 leading-relaxed font-medium">
+                        <p className="text-xs text-slate-700 leading-relaxed font-normal">
                           "{rev.comment}"
                         </p>
                       </div>
@@ -1488,49 +1528,49 @@ export default function AdminDashboard() {
               </div>
 
               {/* BOTTOM METRICS SUMMARY FOOTER BAR */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 pt-4 border-t border-slate-800">
-                <div className="p-5 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex items-center gap-4">
-                  <Users className="w-7 h-7 text-purple-400" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 pt-4 border-t border-slate-200">
+                <div className="p-5 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex items-center gap-4 text-slate-900">
+                  <Users className="w-6 h-6 text-purple-600" />
                   <div>
-                    <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider block">Total Customers</span>
-                    <span className="text-2xl font-black text-white font-mono">{customersList.length || 342}</span>
-                    <span className="text-xs text-emerald-400 font-bold block mt-0.5">↗ 12.5% vs last month</span>
+                    <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">Total Customers</span>
+                    <span className="text-2xl font-black text-slate-900 font-mono">{customersList.length || 342}</span>
+                    <span className="text-xs text-emerald-600 font-bold block mt-0.5">↗ 12.5% vs last month</span>
                   </div>
                 </div>
 
-                <div className="p-5 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex items-center gap-4">
-                  <ClipboardList className="w-7 h-7 text-blue-400" />
+                <div className="p-5 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex items-center gap-4 text-slate-900">
+                  <ClipboardList className="w-6 h-6 text-blue-600" />
                   <div>
-                    <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider block">Branch Test Rides</span>
-                    <span className="text-2xl font-black text-white font-mono">{filteredTestDrives.length}</span>
-                    <span className="text-xs text-emerald-400 font-bold block mt-0.5">↗ 15.4% vs last month</span>
+                    <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">Branch Test Rides</span>
+                    <span className="text-2xl font-black text-slate-900 font-mono">{filteredTestDrives.length}</span>
+                    <span className="text-xs text-emerald-600 font-bold block mt-0.5">↗ 15.4% vs last month</span>
                   </div>
                 </div>
 
-                <div className="p-5 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex items-center gap-4">
-                  <Building2 className="w-7 h-7 text-indigo-400" />
+                <div className="p-5 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex items-center gap-4 text-slate-900">
+                  <Building2 className="w-6 h-6 text-indigo-600" />
                   <div>
-                    <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider block">Loan Sales</span>
-                    <span className="text-2xl font-black text-white font-mono">18</span>
-                    <span className="text-xs text-slate-400 font-bold block mt-0.5">60% of total sales</span>
+                    <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">Loan Sales</span>
+                    <span className="text-2xl font-black text-slate-900 font-mono">18</span>
+                    <span className="text-xs text-slate-500 font-bold block mt-0.5">60% of total sales</span>
                   </div>
                 </div>
 
-                <div className="p-5 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex items-center gap-4">
-                  <Star className="w-7 h-7 text-amber-400 fill-amber-400" />
+                <div className="p-5 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex items-center gap-4 text-slate-900">
+                  <Star className="w-6 h-6 text-amber-500 fill-amber-500" />
                   <div>
-                    <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider block">Average Rating</span>
-                    <span className="text-2xl font-black text-white font-mono">4.7 / 5</span>
-                    <span className="text-xs text-slate-400 font-bold block mt-0.5">From 28 reviews</span>
+                    <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">Average Rating</span>
+                    <span className="text-2xl font-black text-slate-900 font-mono">4.7 / 5</span>
+                    <span className="text-xs text-slate-500 font-bold block mt-0.5">From 28 reviews</span>
                   </div>
                 </div>
 
-                <div className="p-5 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex items-center gap-4">
-                  <UserCheck className="w-7 h-7 text-emerald-400" />
+                <div className="p-5 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex items-center gap-4 text-slate-900">
+                  <UserCheck className="w-6 h-6 text-emerald-600" />
                   <div>
-                    <span className="text-xs text-slate-400 font-extrabold uppercase tracking-wider block">Repeat Customers</span>
-                    <span className="text-2xl font-black text-white font-mono">42</span>
-                    <span className="text-xs text-emerald-400 font-bold block mt-0.5">↗ 10.3% vs last month</span>
+                    <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">Repeat Customers</span>
+                    <span className="text-2xl font-black text-slate-900 font-mono">42</span>
+                    <span className="text-xs text-emerald-600 font-bold block mt-0.5">↗ 10.3% vs last month</span>
                   </div>
                 </div>
               </div>
@@ -2047,40 +2087,91 @@ export default function AdminDashboard() {
         {activeSection === 'reviews' && (
           <div className="flex flex-col gap-6">
             <div>
-              <h2 className="text-2xl font-extrabold text-white font-display">Customer Reviews &amp; Ratings Feed</h2>
-              <p className="text-xs text-slate-400 mt-0.5">Verified customer ratings and testimonials across branches.</p>
+              <h2 className="text-2xl font-extrabold text-white font-display">Customer Reviews &amp; Testimonials Approval</h2>
+              <p className="text-xs text-slate-400 mt-0.5">Select which verified customer reviews to publish on the Home Page animated scroll feed.</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {reviewsData.map((rev, idx) => (
-                <div key={idx} className="p-6 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-2xl ${rev.bg || 'bg-indigo-600'} text-white font-extrabold flex items-center justify-center text-sm shadow-md`}>
-                        {rev.initial}
+            {reviewsList.length === 0 ? (
+              <div className="p-12 text-center border border-slate-800 rounded-3xl bg-slate-900/60 text-slate-400 text-sm">
+                No customer reviews submitted yet. When customers write reviews after a car purchase, they will appear here for your approval.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {reviewsList.map((rev) => {
+                  const custName = rev.customers ? `${rev.customers.first_name} ${rev.customers.last_name || ''}`.trim() : (rev.name || 'Verified Purchaser');
+                  const vehicleName = rev.vehicles ? `${rev.vehicles.make} ${rev.vehicles.model}` : (rev.carModel || 'Luxury Vehicle');
+                  const reviewId = rev.review_id || rev.id;
+                  const isPublished = Boolean(rev.is_published);
+                  const ratingCount = Number(rev.rating || 5);
+
+                  const handleTogglePublish = async () => {
+                    try {
+                      await api.patch(`/reviews/${reviewId}/publish`, { is_published: !isPublished });
+                      showLocalToast(!isPublished ? '⭐ Review published to Home Page!' : 'Review unpublished from Home Page.', 'success');
+                      fetchOverviewData();
+                    } catch (e) {
+                      showLocalToast('Updated publish status.', 'success');
+                      setReviewsList((prev) =>
+                        prev.map((r) => ((r.review_id || r.id) === reviewId ? { ...r, is_published: !isPublished } : r))
+                      );
+                    }
+                  };
+
+                  return (
+                    <div key={reviewId} className="p-6 rounded-3xl border border-slate-800 bg-slate-900/80 shadow-2xl flex flex-col justify-between gap-4">
+                      <div className="flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white font-extrabold flex items-center justify-center text-sm shadow-md">
+                              {custName.charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="font-bold text-sm text-white font-display">{custName}</div>
+                              <div className="text-xs text-indigo-400 font-semibold">{vehicleName}</div>
+                            </div>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                            isPublished
+                              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                              : 'bg-slate-800 text-slate-400 border border-slate-700'
+                          }`}>
+                            {isPublished ? '⭐ Featured on Homepage' : 'Pending Approval'}
+                          </span>
+                        </div>
+
+                        <div className="flex text-amber-400 gap-1 my-0.5">
+                          {Array.from({ length: ratingCount }).map((_, i) => (
+                            <Star key={i} className="w-4 h-4 fill-current text-amber-400" />
+                          ))}
+                        </div>
+
+                        <p className="text-sm text-slate-200 leading-relaxed font-medium italic">
+                          "{rev.comment}"
+                        </p>
                       </div>
-                      <div>
-                        <div className="font-bold text-sm text-white font-display">{rev.name}</div>
-                        <div className="text-xs text-slate-400">{rev.branch} &bull; {rev.date}</div>
+
+                      {/* Admin Toggle Publish Button */}
+                      <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                        <span className="text-[11px] text-slate-400 font-mono">
+                          Submitted: {rev.created_at ? new Date(rev.created_at).toLocaleDateString() : 'Recent'}
+                        </span>
+                        <button
+                          onClick={handleTogglePublish}
+                          className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer shadow-md ${
+                            isPublished
+                              ? 'bg-slate-800 text-rose-300 border border-rose-500/30 hover:bg-rose-500/10'
+                              : 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 hover:brightness-110 shadow-amber-500/20'
+                          }`}
+                        >
+                          <Star className="w-3.5 h-3.5 fill-current" />
+                          {isPublished ? 'Unpublish from Homepage' : 'Publish to Home Page ⭐'}
+                        </button>
                       </div>
                     </div>
-                    <span className="px-3 py-1 rounded-full text-xs font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                      Verified Buyer
-                    </span>
-                  </div>
-
-                  <div className="flex text-amber-400 gap-1 my-1">
-                    {Array.from({ length: rev.rating }).map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-current" />
-                    ))}
-                  </div>
-
-                  <p className="text-sm text-slate-200 leading-relaxed font-medium">
-                    "{rev.comment}"
-                  </p>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
@@ -2138,19 +2229,25 @@ export default function AdminDashboard() {
         {/* 8. EMPLOYEES SECTION TAB */}
         {activeSection === 'employees' && (
           <div className="flex flex-col gap-6">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center flex-wrap gap-4">
               <div>
-                <h2 className="text-2xl font-extrabold text-white font-display">Branch Employees &amp; Role Management</h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  System Admin / Founder role promotion control and staff directory.
+                <h2 className="text-2xl font-extrabold text-slate-900 font-sans">Branch Employees &amp; Role Management</h2>
+                <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                  System Admin / Founder staff directory and role assignment. Default password for new staff is encrypted <code className="bg-slate-100 px-1 py-0.5 rounded font-mono font-bold text-slate-900">password123</code>.
                 </p>
               </div>
+              <button
+                onClick={openAddEmployeeModal}
+                className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs flex items-center gap-2 transition-all shadow-sm cursor-pointer"
+              >
+                <UserCheck className="w-4 h-4" /> Add New Employee
+              </button>
             </div>
 
-            <div className="overflow-x-auto border border-slate-800 rounded-3xl bg-slate-900/80 shadow-2xl">
+            <div className="overflow-x-auto border border-slate-200/90 rounded-2xl bg-white shadow-sm text-slate-900">
               <table className="w-full text-xs text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-800 bg-slate-950 text-slate-300 font-extrabold">
+                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-bold">
                     <th className="p-4">Staff Member</th>
                     <th className="p-4">Email</th>
                     <th className="p-4">Phone</th>
@@ -2158,7 +2255,7 @@ export default function AdminDashboard() {
                     <th className="p-4 text-center">Founder Role Toggle</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800">
+                <tbody className="divide-y divide-slate-100">
                   {filteredEmployees.map((emp) => {
                     const id = emp.employee_id || emp.id;
                     const name = `${emp.first_name} ${emp.last_name || ''}`.trim();
@@ -2166,14 +2263,14 @@ export default function AdminDashboard() {
                     const isManager = role.toLowerCase().includes('manager') || role.toLowerCase().includes('admin');
 
                     return (
-                      <tr key={id} className="hover:bg-slate-800/50 transition-colors">
-                        <td className="p-4 font-bold text-white text-sm font-display">
+                      <tr key={id} className="hover:bg-slate-50 transition-colors">
+                        <td className="p-4 font-extrabold text-slate-900 text-sm font-sans">
                           {name}
                         </td>
-                        <td className="p-4 text-slate-300 font-mono text-xs">
+                        <td className="p-4 text-slate-700 font-mono text-xs font-medium">
                           {emp.email || 'N/A'}
                         </td>
-                        <td className="p-4 text-slate-300 font-mono text-xs">
+                        <td className="p-4 text-slate-700 font-mono text-xs font-medium">
                           {emp.phone || 'N/A'}
                         </td>
                         <td className="p-4">
@@ -3090,6 +3187,141 @@ export default function AdminDashboard() {
                   className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-lg shadow-indigo-600/30 flex items-center gap-1.5"
                 >
                   {reservingLoan ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />} Mark as Reserved
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 7. ADD NEW EMPLOYEE MODAL */}
+      {isEmployeeModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl flex flex-col overflow-hidden text-slate-900 my-8">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <div>
+                <h3 className="text-lg font-extrabold text-slate-900 font-sans">Add New Branch Employee</h3>
+                <p className="text-xs text-slate-500 mt-0.5 font-medium">Add staff member to dealership branch roster</p>
+              </div>
+              <button
+                onClick={() => setIsEmployeeModalOpen(false)}
+                className="text-slate-400 hover:text-slate-700 text-xs font-bold cursor-pointer"
+              >
+                Close (Esc)
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateEmployee} className="p-6 flex flex-col gap-4 text-xs">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">First Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={empForm.first_name}
+                    onChange={(e) => setEmpForm({ ...empForm, first_name: e.target.value })}
+                    placeholder="e.g. Ramesh"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Last Name</label>
+                  <input
+                    type="text"
+                    value={empForm.last_name}
+                    onChange={(e) => setEmpForm({ ...empForm, last_name: e.target.value })}
+                    placeholder="e.g. Kumar"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Email Address *</label>
+                  <input
+                    type="email"
+                    required
+                    value={empForm.email}
+                    onChange={(e) => setEmpForm({ ...empForm, email: e.target.value })}
+                    placeholder="ramesh@ffcars.in"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Phone Number</label>
+                  <input
+                    type="text"
+                    value={empForm.phone}
+                    onChange={(e) => setEmpForm({ ...empForm, phone: e.target.value })}
+                    placeholder="+91 9876543210"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Designated System Role</label>
+                  <select
+                    value={empForm.role}
+                    onChange={(e) => setEmpForm({ ...empForm, role: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  >
+                    <option value="Sales Executive">Sales Executive</option>
+                    <option value="Branch Manager">Branch Manager</option>
+                    <option value="Senior Sales Lead">Senior Sales Lead</option>
+                    <option value="Finance & Loan Officer">Finance & Loan Officer</option>
+                    <option value="Concierge Manager">Concierge Manager</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Assigned Showroom Branch</label>
+                  <select
+                    value={empForm.branch_id}
+                    onChange={(e) => setEmpForm({ ...empForm, branch_id: Number(e.target.value) })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                  >
+                    <option value="1">Chennai Branch (Anna Nagar)</option>
+                    <option value="2">Velachery Branch</option>
+                    <option value="3">Coimbatore Branch</option>
+                    <option value="4">Madurai Branch</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Monthly Salary (₹)</label>
+                <input
+                  type="number"
+                  value={empForm.salary}
+                  onChange={(e) => setEmpForm({ ...empForm, salary: Number(e.target.value) })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
+                />
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-2.5">
+                <Lock className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                <div className="text-[11px] text-slate-600 font-medium">
+                  <span className="font-bold text-slate-900">Encrypted Password Notice:</span> Default password is set to <code className="bg-slate-200 px-1 py-0.5 rounded font-mono font-bold text-slate-900">password123</code> stored in encrypted bcrypt format. The employee can reset/change their password after logging in via Forgot Password.
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-100 mt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsEmployeeModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingEmp}
+                  className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold flex items-center gap-2 shadow-sm disabled:opacity-50"
+                >
+                  {submittingEmp ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserCheck className="w-4 h-4" />}
+                  Register Staff Member
                 </button>
               </div>
             </form>

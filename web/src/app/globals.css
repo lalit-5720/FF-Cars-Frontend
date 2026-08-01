@@ -1,37 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@300;400;500&display=swap');
 
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────────
-   FF-CARS  ·  MIDNIGHT CONCIERGE DESIGN SYSTEM
-   Champagne Gold on Deep Obsidian
+   FF-CARS  ·  EXECUTIVE DESIGN SYSTEM
    ───────────────────────────────────────────── */
 
 :root {
-  /* Core Palette */
-  --midnight:       #05060A;
-  --obsidian:       #0C0E14;
-  --onyx:           #11131B;
-  --onyx-border:    #1A1C26;
-  --charcoal:       #252832;
+  /* Core Executive Palette (Reference Match) */
+  --midnight:       #F8FAFC;  /* Main Page Off-White Background */
+  --obsidian:       #FFFFFF;  /* Card Pure White Background */
+  --hero-obsidian:  #0F172A;  /* Dark Hero Banner Background */
+  --onyx:           #FFFFFF;
+  --onyx-border:    #E2E8F0;  /* Subtle Soft Border */
+  --charcoal:       #F1F5F9;
 
-  /* Gold System */
-  --gold:           #C9A96E;
-  --gold-light:     #E8C97A;
-  --gold-dim:       #A88B52;
-  --gold-muted:     rgba(201, 169, 110, 0.15);
-  --gold-glow:      rgba(201, 169, 110, 0.08);
-
-  /* Text */
-  --platinum:       #E8E6E1;
-  --silver:         #A8A8B3;
-  --silver-dim:     #6A6A78;
-  --silver-ghost:   #3A3A48;
-
-  /* Status */
-  --emerald:        #4ADE80;
-  --crimson:        #9B2335;
-  --amber:          #F59E0B;
+  /* Executive Text System */
+  --platinum:       #0F172A;  /* Main Primary Text - Dark Navy */
+  --silver:         #475569;  /* Secondary Text - Slate */
+  --silver-dim:     #64748B;  /* Muted Text / Labels */
+  --silver-ghost:   #94A3B8;
 
   /* Radius */
   --radius-sm:      0.5rem;
@@ -48,11 +36,9 @@
   --color-card-foreground: var(--platinum);
   --color-border:       var(--onyx-border);
   --color-muted-foreground: var(--silver);
-  --color-primary:      var(--gold);
-  --color-primary-foreground: var(--midnight);
 
-  --font-sans:     'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display:  'Cormorant Garamond', Georgia, serif;
+  --font-sans:     'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display:  'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono:     'DM Mono', 'Courier New', monospace;
 }
 
@@ -68,7 +54,7 @@ html {
 body {
   background-color: var(--midnight);
   color: var(--platinum);
-  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
   letter-spacing: -0.01em;
   font-size: 15px;
@@ -79,10 +65,27 @@ body {
 
 /* ── Typography ───────────────────────────────── */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  letter-spacing: -0.01em;
-  line-height: 1.1;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   color: var(--platinum);
+}
+
+/* Marquee Scroll Animation */
+@keyframes marqueeScroll {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll 35s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
 }
 
 /* Gold Text Utility */
@@ -134,27 +137,29 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 20px rgba(201, 169, 110, 0.08), inset 0 0 20px rgba(201, 169, 110, 0.03);
 }
 
-/* ── Glass Panels ────────────────────────────── */
+/* ── Glass & Executive Cards ────────────────── */
 .glass-luxury {
-  background: rgba(12, 14, 20, 0.85);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: #FFFFFF;
   border: 1px solid var(--onyx-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
 .glass-gold {
   background: rgba(201, 169, 110, 0.06);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(201, 169, 110, 0.2);
+  border: 1px solid rgba(201, 169, 110, 0.25);
 }
 
-/* Legacy glass-panel (for backwards compat) */
 .glass-panel {
-  background: rgba(12, 14, 20, 0.85);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: #FFFFFF;
   border: 1px solid var(--onyx-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.card-executive {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
 /* ── Button Styles ───────────────────────────── */
@@ -335,25 +340,34 @@ h1, h2, h3, h4, h5, h6 {
 /* ── Input Styles ────────────────────────────── */
 .input-luxury {
   width: 100%;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--onyx-border);
+  background: #FFFFFF;
+  border: 1px solid #CBD5E1;
   border-radius: var(--radius-md);
-  color: var(--platinum);
-  padding: 0.875rem 1.125rem;
-  font-family: 'DM Sans', sans-serif;
+  color: #0F172A;
+  padding-top: 0.875rem;
+  padding-bottom: 0.875rem;
+  padding-right: 1.125rem;
+  padding-left: 1.125rem;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 0.875rem;
   transition: all 0.25s ease;
   outline: none;
 }
 
+.input-luxury.pl-11,
+.input-luxury.pl-10,
+.input-has-icon {
+  padding-left: 2.75rem !important;
+}
+
 .input-luxury::placeholder {
-  color: var(--silver-dim);
+  color: #94A3B8;
 }
 
 .input-luxury:focus {
-  border-color: rgba(201, 169, 110, 0.5);
-  background: rgba(201, 169, 110, 0.04);
-  box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.08);
+  border-color: #0F172A;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
 }
 
 /* ── Shimmer Skeleton ────────────────────────── */

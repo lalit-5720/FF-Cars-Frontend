@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '../../services/api';
@@ -32,20 +32,29 @@ function CarsListingPage() {
   const [page, setPage] = useState(parseInt(searchParams.get('page') || '1', 10));
 
   const { toggleWishlist, isWishlisted } = useWishlistStore();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { user, isAuthenticated } = useAuthStore();
+
+  const [branchesList, setBranchesList] = useState<any[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState(searchParams.get('branchId') || '');
 
   useEffect(() => {
-    const fetchBrands = async () => {
+    const fetchMetadata = async () => {
       try {
-        const response = await api.get('/vehicles');
-        const list = Array.isArray(response.data) ? response.data : (response.data.data || []);
+        const [vehRes, branchRes] = await Promise.all([
+          api.get('/vehicles'),
+          api.get('/branches').catch(() => ({ data: [] })),
+        ]);
+        const list = Array.isArray(vehRes.data) ? vehRes.data : (vehRes.data.data || []);
         const uniqueMakes = Array.from(new Set(list.map((v: any) => v.make || v.brand))).filter(Boolean) as string[];
         setBrands(uniqueMakes);
+
+        const bList = Array.isArray(branchRes.data) ? branchRes.data : (branchRes.data.data || []);
+        setBranchesList(bList);
       } catch (error) {
-        console.error('Failed to fetch brands list', error);
+        console.error('Failed to fetch metadata', error);
       }
     };
-    fetchBrands();
+    fetchMetadata();
   }, []);
 
   const fetchCars = async () => {
@@ -54,6 +63,7 @@ function CarsListingPage() {
       const params: any = {};
       if (search) params.search = search;
       if (selectedBrand) params.make = selectedBrand;
+      if (selectedBranch) params.branchId = selectedBranch;
       if (fuelType) params.fuelType = fuelType;
       if (transmission) params.transmission = transmission;
       if (minPrice) params.minPrice = minPrice;
@@ -76,6 +86,7 @@ function CarsListingPage() {
     const queryParams = new URLSearchParams();
     if (search) queryParams.set('search', search);
     if (selectedBrand) queryParams.set('brand', selectedBrand);
+    if (selectedBranch) queryParams.set('branchId', selectedBranch);
     if (fuelType) queryParams.set('fuelType', fuelType);
     if (transmission) queryParams.set('transmission', transmission);
     if (minPrice) queryParams.set('minPrice', minPrice);
@@ -84,7 +95,7 @@ function CarsListingPage() {
     if (sortOrder) queryParams.set('sortOrder', sortOrder);
     queryParams.set('page', page.toString());
     router.replace(`/cars?${queryParams.toString()}`);
-  }, [search, selectedBrand, fuelType, transmission, minPrice, maxPrice, sortBy, sortOrder, page]);
+  }, [search, selectedBrand, selectedBranch, fuelType, transmission, minPrice, maxPrice, sortBy, sortOrder, page]);
 
   useEffect(() => {
     const handleAvailabilityChange = (e: Event) => {
@@ -106,7 +117,7 @@ function CarsListingPage() {
       router.push('/login');
       return;
     }
-    const added = await toggleWishlist(carId);
+    const added = await toggleWishlist(carId, user?.email);
     showLocalToast(added ? 'Saved to your collection' : 'Removed from collection');
   };
 
@@ -125,88 +136,51 @@ function CarsListingPage() {
   const activeFilterCount = [search, selectedBrand, fuelType, transmission, minPrice, maxPrice]
     .filter(Boolean).length;
 
+  // Prioritize Available vehicles first in the inventory list
+  const sortedCars = useMemo(() => {
+    return [...cars].sort((a, b) => {
+      const isAvailA = (a.status || '').toLowerCase() === 'available' ? 0 : 1;
+      const isAvailB = (b.status || '').toLowerCase() === 'available' ? 0 : 1;
+      if (isAvailA !== isAvailB) return isAvailA - isAvailB; // Available vehicles come first!
+
+      if (sortBy === 'price') {
+        return sortOrder === 'asc' ? Number(a.price) - Number(b.price) : Number(b.price) - Number(a.price);
+      }
+      if (sortBy === 'year') {
+        const yearA = Number(a.manufacture_year || a.year || 0);
+        const yearB = Number(b.manufacture_year || b.year || 0);
+        return sortOrder === 'asc' ? yearA - yearB : yearB - yearA;
+      }
+      return new Date(b.createdAt || b.created_at || 0).getTime() - new Date(a.createdAt || a.created_at || 0).getTime();
+    });
+  }, [cars, sortBy, sortOrder]);
+
   return (
     <div
-      className="flex-1 flex flex-col"
-      style={{ backgroundColor: 'var(--midnight)', minHeight: '100vh' }}
+      className="flex-1 flex flex-col bg-[#F8FAFC] text-slate-900 min-h-screen"
     >
       {/* ── Page Header ── */}
-      <div
-        className="relative py-14 px-4 sm:px-6 lg:px-8 overflow-hidden"
-        style={{
-          background: 'var(--obsidian)',
-          borderBottom: '1px solid var(--onyx-border)',
-        }}
-      >
-        {/* Background dot grid */}
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: 'radial-gradient(rgba(201,169,110,0.12) 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
-          }}
-        />
-        {/* Gold ambient */}
-        <div
-          className="absolute top-0 left-1/3 w-64 h-64 rounded-full pointer-events-none"
-          style={{
-            background: 'radial-gradient(circle, rgba(201,169,110,0.05) 0%, transparent 70%)',
-            filter: 'blur(60px)',
-          }}
-        />
-
-        <div className="relative max-w-7xl mx-auto">
-          <div className="section-label mb-4">Vehicle Inventory</div>
-          <h1
-            style={{
-              fontFamily: "'Cormorant Garamond', Georgia, serif",
-              fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-              fontWeight: 500,
-              color: 'var(--platinum)',
-              lineHeight: 1.0,
-              letterSpacing: '-0.02em',
-            }}
-          >
-            Certified{' '}
-            <em style={{ fontStyle: 'italic', fontWeight: 300, color: 'var(--gold)' }}>
-              Collection
-            </em>
+      <div className="bg-white border-b border-slate-200 py-7 px-4 sm:px-6 lg:px-8 shadow-sm">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Vehicle Inventory</div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-display">
+            Certified <em className="italic text-amber-600 font-normal">Collection</em>
           </h1>
-          <p
-            className="mt-3"
-            style={{
-              color: 'var(--silver)',
-              fontFamily: "'DM Sans', sans-serif",
-              fontWeight: 300,
-              maxWidth: '36rem',
-            }}
-          >
-            Explore our curated selection of inspected and certified premium vehicles
-            across both Chennai showrooms.
+          <p className="mt-2 text-sm text-slate-500 max-w-lg font-sans">
+            Explore our curated selection of inspected and certified premium vehicles across all showroom locations.
           </p>
         </div>
       </div>
 
       {/* ── Main Content ── */}
-      <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex flex-col lg:flex-row gap-10">
+      <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
 
-          {/* ─────────────────────────────
-              SIDEBAR FILTERS
-          ───────────────────────────── */}
+          {/* SIDEBAR FILTERS */}
           <aside className="w-full lg:w-72 flex-shrink-0">
-            <div
-              className="sticky top-24 rounded-3xl p-6 flex flex-col gap-7"
-              style={{
-                background: 'var(--obsidian)',
-                border: '1px solid var(--onyx-border)',
-              }}
-            >
+            <div className="sticky top-24 rounded-2xl p-6 flex flex-col gap-6 bg-white border border-slate-200/90 shadow-sm">
               {/* Filter Header */}
-              <div
-                className="flex items-center justify-between pb-5"
-                style={{ borderBottom: '1px solid var(--onyx-border)' }}
-              >
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div className="flex items-center gap-2.5">
                   <SlidersHorizontal className="w-4 h-4" style={{ color: 'var(--gold)' }} />
                   <span
@@ -276,6 +250,29 @@ function CarsListingPage() {
                   <option value="" style={{ background: '#0C0E14' }}>All Marques</option>
                   {brands.map((b) => (
                     <option key={b} value={b} style={{ background: '#0C0E14' }}>{b}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Showroom Branch */}
+              <div>
+                <label
+                  className="block text-[10px] uppercase tracking-widest font-semibold mb-2"
+                  style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
+                >
+                  Showroom Location
+                </label>
+                <select
+                  value={selectedBranch}
+                  onChange={(e) => { setSelectedBranch(e.target.value); setPage(1); }}
+                  className="input-luxury text-sm cursor-pointer"
+                  style={{ WebkitAppearance: 'none', appearance: 'none' }}
+                >
+                  <option value="" style={{ background: '#0C0E14' }}>All Showrooms (Chennai)</option>
+                  {branchesList.map((br) => (
+                    <option key={br.branch_id} value={br.branch_id} style={{ background: '#0C0E14' }}>
+                      📍 {br.branch_name} ({br.city || 'Chennai'})
+                    </option>
                   ))}
                 </select>
               </div>
@@ -456,7 +453,7 @@ function CarsListingPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {cars.map((car) => {
+                {sortedCars.map((car) => {
                   const id = car.vehicle_id || car.id;
                   const make = car.make || car.brand;
                   const image = car.image_url || car.thumbnail || FALLBACK_IMG;
@@ -472,66 +469,30 @@ function CarsListingPage() {
                     <Link
                       key={id}
                       href={`/cars/${id}`}
-                      className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-400 relative"
+                      className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-300 relative bg-white border border-slate-200/90 shadow-sm hover:border-slate-300 hover:shadow-md"
                       style={{
-                        background: 'var(--obsidian)',
-                        border: '1px solid var(--onyx-border)',
                         opacity: isAvailable ? 1 : 0.75,
-                      }}
-                      onMouseEnter={e => {
-                        (e.currentTarget as HTMLElement).style.borderColor = 'rgba(201,169,110,0.3)';
-                        (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)';
-                        (e.currentTarget as HTMLElement).style.boxShadow = '0 20px 60px rgba(0,0,0,0.5)';
-                      }}
-                      onMouseLeave={e => {
-                        (e.currentTarget as HTMLElement).style.borderColor = 'var(--onyx-border)';
-                        (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                        (e.currentTarget as HTMLElement).style.boxShadow = 'none';
                       }}
                     >
                       {/* Status */}
                       {!isAvailable && (
-                        <div
-                          className="absolute top-3 left-3 z-10 badge-sold"
-                        >
+                        <div className="absolute top-3 left-3 z-10 px-3 py-0.5 rounded-full text-[9px] font-bold uppercase bg-rose-600 text-white shadow-sm">
                           {status}
                         </div>
                       )}
 
                       {/* Image */}
-                      <div
-                        className="relative overflow-hidden"
-                        style={{ aspectRatio: '16/9', background: 'var(--onyx)' }}
-                      >
+                      <div className="relative overflow-hidden aspect-video bg-slate-100">
                         <img
                           src={image}
                           alt={`${make} ${car.model}`}
-                          className="w-full h-full object-cover"
-                          style={{ transition: 'transform 0.6s cubic-bezier(0.4,0,0.2,1)' }}
-                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1.07)'; }}
-                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)'; }}
-                        />
-
-                        {/* Gold edge overlay on hover */}
-                        <div
-                          className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                          style={{
-                            background: 'linear-gradient(135deg, rgba(201,169,110,0.07) 0%, transparent 50%)',
-                          }}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
 
                         {/* Wishlist */}
                         <button
                           onClick={(e) => handleWishlistToggle(e, String(id))}
-                          className="absolute top-3 right-3 p-2.5 rounded-full transition-all duration-200 z-10"
-                          style={{
-                            background: isWishlisted(String(id))
-                              ? 'var(--gold)'
-                              : 'rgba(5,6,10,0.75)',
-                            border: '1px solid rgba(201,169,110,0.25)',
-                            backdropFilter: 'blur(8px)',
-                            color: isWishlisted(String(id)) ? 'var(--midnight)' : 'var(--silver)',
-                          }}
+                          className="absolute top-3 right-3 p-2.5 rounded-full backdrop-blur-md shadow-sm transition-all border z-10 bg-white/90 border-slate-200 text-rose-500 hover:scale-110"
                         >
                           <Heart
                             className="w-3.5 h-3.5"
@@ -540,16 +501,7 @@ function CarsListingPage() {
                         </button>
 
                         {/* Year */}
-                        <div
-                          className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg text-[9px] font-bold tracking-widest uppercase"
-                          style={{
-                            background: 'rgba(5,6,10,0.8)',
-                            border: '1px solid rgba(201,169,110,0.2)',
-                            backdropFilter: 'blur(8px)',
-                            color: 'var(--gold)',
-                            fontFamily: "'DM Mono', monospace",
-                          }}
-                        >
+                        <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-slate-900/90 text-white">
                           {year}
                         </div>
                       </div>
@@ -558,61 +510,30 @@ function CarsListingPage() {
                       <div className="p-5 flex-1 flex flex-col">
                         <div className="flex justify-between items-start gap-2 mb-3">
                           <div>
-                            <h3
-                              style={{
-                                fontFamily: "'Cormorant Garamond', Georgia, serif",
-                                fontSize: '1.2rem',
-                                fontWeight: 600,
-                                color: 'var(--platinum)',
-                                lineHeight: 1.2,
-                              }}
-                            >
+                            <h3 className="font-extrabold text-base leading-tight text-slate-900 group-hover:text-slate-700 transition-colors font-display">
                               {make} {car.model}
                             </h3>
-                            <p
-                              className="text-xs mt-0.5"
-                              style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-                            >
+                            <p className="text-xs text-slate-500 mt-0.5 font-sans">
                               {car.color || 'Standard Edition'}
                             </p>
                           </div>
-                          <span
-                            className="flex-shrink-0 px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-wider"
-                            style={{
-                              background: 'rgba(201,169,110,0.08)',
-                              border: '1px solid rgba(201,169,110,0.18)',
-                              color: 'var(--gold)',
-                              fontFamily: "'DM Sans', sans-serif",
-                            }}
-                          >
+                          <span className="flex-shrink-0 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-slate-100 border border-slate-200 text-slate-700">
                             {car.transmission || 'Auto'}
                           </span>
                         </div>
 
                         {/* Specs */}
-                        <div
-                          className="grid grid-cols-3 gap-2 py-3 text-xs my-2"
-                          style={{
-                            borderTop: '1px solid var(--onyx-border)',
-                            borderBottom: '1px solid var(--onyx-border)',
-                          }}
-                        >
+                        <div className="grid grid-cols-3 gap-2 py-3 text-xs my-2 border-y border-slate-100 text-slate-500">
                           {[
                             { label: 'Driven', val: `${km.toLocaleString()} km` },
                             { label: 'Fuel', val: fuel },
                             { label: 'Owner', val: owner },
                           ].map(({ label, val }) => (
                             <div key={label}>
-                              <span
-                                className="block text-[8px] uppercase tracking-wider"
-                                style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif", fontWeight: 600 }}
-                              >
+                              <span className="block text-[9px] uppercase font-bold text-slate-400">
                                 {label}
                               </span>
-                              <span
-                                className="font-medium mt-0.5 block"
-                                style={{ color: 'var(--platinum)', fontFamily: "'DM Sans', sans-serif" }}
-                              >
+                              <span className="font-bold text-slate-900 mt-0.5 block font-sans">
                                 {val}
                               </span>
                             </div>
@@ -622,32 +543,21 @@ function CarsListingPage() {
                         {/* Price + CTA */}
                         <div className="flex items-end justify-between mt-auto pt-3">
                           <div>
-                            <span
-                              className="text-[9px] uppercase tracking-widest block"
-                              style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-                            >
+                            <span className="text-[9px] uppercase font-bold text-slate-400 block">
                               Price
                             </span>
-                            <span
-                              className="text-xl font-bold block"
-                              style={{
-                                color: 'var(--gold)',
-                                fontFamily: "'DM Mono', monospace",
-                                letterSpacing: '-0.02em',
-                              }}
-                            >
+                            <span className="text-lg font-black text-slate-900 block font-mono">
                               ₹{price.toLocaleString()}
                             </span>
                           </div>
                           {isAvailable ? (
-                            <span
-                              className="text-[10px] font-bold uppercase tracking-widest transition-transform duration-200 group-hover:translate-x-1"
-                              style={{ color: 'var(--gold)', fontFamily: "'DM Sans', sans-serif" }}
-                            >
-                              Enquire →
+                            <span className="text-xs font-bold text-slate-700 group-hover:text-slate-900 flex items-center gap-1">
+                              View Details &rarr;
                             </span>
                           ) : (
-                            <span className="badge-sold">Sold</span>
+                            <span className="text-xs font-bold text-rose-500">
+                              Reserved / Sold
+                            </span>
                           )}
                         </div>
                       </div>
@@ -679,13 +589,11 @@ function CarsListingPage() {
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className="w-9 h-9 flex items-center justify-center text-xs font-semibold rounded-xl transition-all cursor-pointer"
-                    style={{
-                      background: page === p ? 'var(--gold)' : 'transparent',
-                      border: page === p ? '1px solid var(--gold)' : '1px solid var(--onyx-border)',
-                      color: page === p ? 'var(--midnight)' : 'var(--silver)',
-                      fontFamily: "'DM Mono', monospace",
-                    }}
+                    className={`w-9 h-9 flex items-center justify-center text-xs font-bold rounded-xl transition-all cursor-pointer ${
+                      page === p
+                        ? 'bg-[#0F172A] text-white shadow-sm'
+                        : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
+                    }`}
                   >
                     {p}
                   </button>
@@ -693,12 +601,7 @@ function CarsListingPage() {
                 <button
                   onClick={() => setPage(Math.min(meta.totalPages, page + 1))}
                   disabled={page === meta.totalPages}
-                  className="px-4 py-2 text-xs font-medium rounded-xl transition-all cursor-pointer disabled:opacity-30"
-                  style={{
-                    border: '1px solid var(--onyx-border)',
-                    color: 'var(--silver)',
-                    fontFamily: "'DM Sans', sans-serif",
-                  }}
+                  className="px-4 py-2 text-xs font-bold rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition-all cursor-pointer disabled:opacity-30"
                 >
                   Next
                 </button>

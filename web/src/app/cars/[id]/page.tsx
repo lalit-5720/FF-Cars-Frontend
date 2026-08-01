@@ -44,7 +44,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
   const [tenureMonths, setTenureMonths] = useState(60);     // 5 years default
   const annualInterestRate = 8.5; // 8.5% fixed
 
-  const { isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const { toggleWishlist, isWishlisted } = useWishlistStore();
 
   useEffect(() => {
@@ -164,54 +164,55 @@ export default function CarDetailPage({ params }: CarDetailProps) {
       router.push('/login');
       return;
     }
-    const added = await toggleWishlist(String(car.vehicle_id || car.id));
+    const added = await toggleWishlist(String(car.vehicle_id || car.id), user?.email);
     showLocalToast(added ? 'Added to wishlist!' : 'Removed from wishlist.');
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 flex flex-col gap-10">
-      
-      {/* Back button and title info */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <button 
-            onClick={() => router.push('/cars')}
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-2 group transition-colors"
-          >
-            <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-            Back to Inventory
-          </button>
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <h1 className="text-3xl font-display font-extrabold tracking-tight">
-              {make} {car.model}
-            </h1>
-            <span className="text-muted-foreground text-sm font-semibold">{car.color || car.variant || 'Standard'}</span>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            Registration: {car.registration_number || 'TN Registration'} &bull; Fully Inspected &amp; Certified
-          </p>
-        </div>
-
-        {/* Wishlist Button and Pricing */}
-        <div className="flex items-center gap-6 self-stretch sm:self-auto justify-between sm:justify-end border-t sm:border-t-0 pt-4 sm:pt-0 border-border">
+    <div className="bg-[#F8FAFC] text-slate-900 min-h-screen pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col gap-8">
+        
+        {/* Back button and title info */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <span className="text-xs text-muted-foreground uppercase font-semibold">Total Price (GST Incl.)</span>
-            <div className="text-3xl font-extrabold text-foreground mt-0.5">
-              ₹{price.toLocaleString()}
+            <button 
+              onClick={() => router.push('/cars')}
+              className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 mb-2 group transition-colors cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+              Back to Inventory
+            </button>
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <h1 className="text-3xl font-display font-extrabold tracking-tight text-slate-900">
+                {make} {car.model}
+              </h1>
+              <span className="text-slate-500 text-sm font-semibold">{car.color || car.variant || 'Standard'}</span>
             </div>
+            <p className="text-xs text-slate-500 mt-1 font-sans">
+              Registration: {car.registration_number || 'TN Registration'} &bull; Fully Inspected &amp; Certified
+            </p>
           </div>
-          <button
-            onClick={handleWishlist}
-            className={`p-3 rounded-full border transition-all cursor-pointer ${
-              isWishlisted(String(car.vehicle_id || car.id))
-                ? 'bg-primary border-primary text-primary-foreground shadow-md'
-                : 'border-border bg-secondary/15 text-foreground hover:bg-secondary/30'
-            }`}
-          >
-            <Heart className="w-5 h-5" fill={isWishlisted(String(car.vehicle_id || car.id)) ? 'currentColor' : 'none'} />
-          </button>
+
+          {/* Wishlist Button and Pricing */}
+          <div className="flex items-center gap-6 self-stretch sm:self-auto justify-between sm:justify-end border-t sm:border-t-0 pt-4 sm:pt-0 border-slate-200">
+            <div>
+              <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Total Price (GST Incl.)</span>
+              <div className="text-3xl font-black text-slate-900 font-mono mt-0.5">
+                ₹{price.toLocaleString()}
+              </div>
+            </div>
+            <button
+              onClick={handleWishlist}
+              className={`p-3 rounded-full border transition-all cursor-pointer ${
+                isWishlisted(String(car.vehicle_id || car.id))
+                  ? 'bg-rose-500 border-rose-500 text-white shadow-sm'
+                  : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
+              }`}
+            >
+              <Heart className="w-5 h-5" fill={isWishlisted(String(car.vehicle_id || car.id)) ? 'currentColor' : 'none'} />
+            </button>
+          </div>
         </div>
-      </div>
 
       {/* Main Grid: Images & Booking Form */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -279,82 +280,82 @@ export default function CarDetailPage({ params }: CarDetailProps) {
 
           {/* Highlights & Features Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="p-4 rounded-xl border border-border bg-card flex flex-col gap-1.5">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-primary" />
+            <div className="p-4 rounded-2xl border border-slate-200/90 bg-white flex flex-col gap-1.5 shadow-sm">
+              <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 text-amber-600" />
                 Year
               </span>
-              <span className="font-extrabold text-foreground">{year}</span>
+              <span className="font-extrabold text-slate-900">{year}</span>
             </div>
-            <div className="p-4 rounded-xl border border-border bg-card flex flex-col gap-1.5">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                <Gauge className="w-3.5 h-3.5 text-primary" />
+            <div className="p-4 rounded-2xl border border-slate-200/90 bg-white flex flex-col gap-1.5 shadow-sm">
+              <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                <Gauge className="w-3.5 h-3.5 text-amber-600" />
                 Driven
               </span>
-              <span className="font-extrabold text-foreground">{km.toLocaleString()} km</span>
+              <span className="font-extrabold text-slate-900">{km.toLocaleString()} km</span>
             </div>
-            <div className="p-4 rounded-xl border border-border bg-card flex flex-col gap-1.5">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                <Fuel className="w-3.5 h-3.5 text-primary" />
+            <div className="p-4 rounded-2xl border border-slate-200/90 bg-white flex flex-col gap-1.5 shadow-sm">
+              <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                <Fuel className="w-3.5 h-3.5 text-amber-600" />
                 Fuel Type
               </span>
-              <span className="font-extrabold text-foreground">{fuel}</span>
+              <span className="font-extrabold text-slate-900">{fuel}</span>
             </div>
-            <div className="p-4 rounded-xl border border-border bg-card flex flex-col gap-1.5">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                <Wrench className="w-3.5 h-3.5 text-primary" />
+            <div className="p-4 rounded-2xl border border-slate-200/90 bg-white flex flex-col gap-1.5 shadow-sm">
+              <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+                <Wrench className="w-3.5 h-3.5 text-amber-600" />
                 Gearbox
               </span>
-              <span className="font-extrabold text-foreground">{car.transmission || 'Manual'}</span>
+              <span className="font-extrabold text-slate-900">{car.transmission || 'Manual'}</span>
             </div>
           </div>
 
           {/* Description Card */}
-          <div className="p-6 rounded-2xl border border-border bg-card shadow-sm flex flex-col gap-3">
-            <h2 className="text-base font-bold flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
+          <div className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col gap-3">
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 font-display">
+              <Sparkles className="w-5 h-5 text-amber-600" />
               Dealer Description
             </h2>
-            <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line">
+            <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line font-sans">
               {car.description || "No description provided for this vehicle."}
             </p>
           </div>
 
           {/* Specs Details Sheet */}
-          <div className="p-6 rounded-2xl border border-border bg-card shadow-sm">
-            <h2 className="text-base font-bold mb-4">Complete Specifications Sheet</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-8 text-xs">
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Make</span>
-                <span className="font-semibold text-foreground">{make}</span>
+          <div className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm">
+            <h2 className="text-base font-bold text-slate-900 mb-4 font-display">Complete Specifications Sheet</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-8 text-xs font-sans">
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Make</span>
+                <span className="font-bold text-slate-900">{make}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Model</span>
-                <span className="font-semibold text-foreground">{car.model}</span>
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Model</span>
+                <span className="font-bold text-slate-900">{car.model}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Color</span>
-                <span className="font-semibold text-foreground">{car.color || 'Standard'}</span>
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Color</span>
+                <span className="font-bold text-slate-900">{car.color || 'Standard'}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Ownership History</span>
-                <span className="font-semibold text-foreground">{owner}</span>
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Ownership History</span>
+                <span className="font-bold text-slate-900">{owner}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Transmission Type</span>
-                <span className="font-semibold text-foreground">{car.transmission || 'Manual'}</span>
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Transmission Type</span>
+                <span className="font-bold text-slate-900">{car.transmission || 'Manual'}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Fuel Type</span>
-                <span className="font-semibold text-foreground">{fuel}</span>
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Fuel Type</span>
+                <span className="font-bold text-slate-900">{fuel}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Manufacture Year</span>
-                <span className="font-semibold text-foreground">{year}</span>
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Manufacture Year</span>
+                <span className="font-bold text-slate-900">{year}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Odometer reading</span>
-                <span className="font-semibold text-foreground">{km.toLocaleString()} km</span>
+              <div className="flex justify-between py-2 border-b border-slate-100">
+                <span className="text-slate-500">Odometer reading</span>
+                <span className="font-bold text-slate-900">{km.toLocaleString()} km</span>
               </div>
             </div>
           </div>
@@ -363,27 +364,27 @@ export default function CarDetailPage({ params }: CarDetailProps) {
         {/* Right Side: Booking Panel & EMI Calculator (4 Cols) */}
         <div className="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-24">
           
-          {/* Instant Booking Action Card */}
-          <div className="p-6 rounded-2xl border border-border bg-card shadow-lg flex flex-col gap-4">
-            <h2 className="text-lg font-bold">Request a Test Ride</h2>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Request a test ride for this vehicle. Once requested, you can coordinate with the admin to verify payment and secure your booking.
+          {/* REFERENCE MATCH HERO BOOKING CARD (DARK OBSIDIAN) */}
+          <div className="p-7 rounded-3xl bg-[#0F172A] text-white shadow-xl flex flex-col gap-4">
+            <h2 className="text-lg font-extrabold font-display">Request a Test Ride</h2>
+            <p className="text-xs text-slate-300 leading-relaxed font-sans">
+              Experience this luxury vehicle firsthand. Schedule your personalized test ride concierge appointment.
             </p>
 
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/20 text-primary">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/90 border border-slate-700 text-emerald-400">
               <ShieldCheck className="w-5 h-5 flex-shrink-0" />
-              <div className="text-[11px] font-semibold leading-normal">
-                Inspected &bull; 5-Day Money-Back &bull; Free Delivery
+              <div className="text-[11px] font-bold leading-normal font-sans">
+                Inspected &bull; Doorstep Delivery &bull; Certified
               </div>
             </div>
 
             <button
               onClick={handleBooking}
               disabled={!isAvailable || isBooking}
-              className={`w-full py-4 px-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+              className={`w-full py-3.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 isAvailable
-                  ? 'bg-primary text-primary-foreground hover:bg-primary/95 shadow-md shadow-primary/25 active:scale-[0.98]'
-                  : 'bg-zinc-800 border border-zinc-700 text-zinc-500 cursor-not-allowed'
+                  ? 'bg-white text-slate-950 hover:bg-slate-100 shadow-md'
+                  : 'bg-slate-800 text-slate-400 cursor-not-allowed'
               }`}
             >
               {isBooking ? (
@@ -399,29 +400,29 @@ export default function CarDetailPage({ params }: CarDetailProps) {
             </button>
 
             {isAvailable && (
-              <span className="text-[10px] text-center text-emerald-500 font-semibold uppercase tracking-wider flex items-center justify-center gap-1 animate-pulse">
+              <span className="text-[10px] text-center text-emerald-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
                 &bull; Live availability verified
               </span>
             )}
           </div>
 
           {/* Live Finance EMI Estimator Card */}
-          <div className="p-6 rounded-2xl border border-border bg-card shadow-sm flex flex-col gap-5">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <h3 className="font-bold text-sm flex items-center gap-2">
-                <CircleDollarSign className="w-4.5 h-4.5 text-primary" />
+          <div className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col gap-5 text-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-sm flex items-center gap-2 text-slate-900 font-display">
+                <CircleDollarSign className="w-4.5 h-4.5 text-amber-600" />
                 EMI Loan Estimator
               </h3>
-              <span className="text-[10px] font-bold text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded">
+              <span className="text-[10px] font-bold text-slate-800 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full">
                 8.5% fixed PA
               </span>
             </div>
 
             {/* Slider 1: Down Payment Percentage */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 font-sans">
               <div className="flex justify-between text-xs font-semibold">
-                <span className="text-muted-foreground">Down Payment ({downPaymentPct}%)</span>
-                <span className="text-foreground">₹{downPayment.toLocaleString()}</span>
+                <span className="text-slate-500">Down Payment ({downPaymentPct}%)</span>
+                <span className="text-slate-900 font-mono font-bold">₹{downPayment.toLocaleString()}</span>
               </div>
               <input
                 type="range"
@@ -430,19 +431,19 @@ export default function CarDetailPage({ params }: CarDetailProps) {
                 step="5"
                 value={downPaymentPct}
                 onChange={(e) => setDownPaymentPct(parseInt(e.target.value, 10))}
-                className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary focus:outline-none"
+                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900 focus:outline-none"
               />
-              <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
+              <div className="flex justify-between text-[9px] text-slate-400 font-medium">
                 <span>10% (₹{(car.price * 0.1).toLocaleString()})</span>
                 <span>90% (₹{(car.price * 0.9).toLocaleString()})</span>
               </div>
             </div>
 
             {/* Slider 2: Tenure Months */}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 font-sans">
               <div className="flex justify-between text-xs font-semibold">
-                <span className="text-muted-foreground">Loan Tenure</span>
-                <span className="text-foreground">{tenureMonths} Months ({tenureMonths / 12} Yrs)</span>
+                <span className="text-slate-500">Loan Tenure</span>
+                <span className="text-slate-900 font-bold">{tenureMonths} Months ({tenureMonths / 12} Yrs)</span>
               </div>
               <input
                 type="range"
@@ -451,21 +452,21 @@ export default function CarDetailPage({ params }: CarDetailProps) {
                 step="12"
                 value={tenureMonths}
                 onChange={(e) => setTenureMonths(parseInt(e.target.value, 10))}
-                className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary focus:outline-none"
+                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900 focus:outline-none"
               />
-              <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
+              <div className="flex justify-between text-[9px] text-slate-400 font-medium">
                 <span>12 Months</span>
                 <span>84 Months</span>
               </div>
             </div>
 
             {/* Calculation output */}
-            <div className="p-4 rounded-xl bg-secondary/15 border border-border flex flex-col items-center justify-center text-center gap-1.5">
-              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Estimated Monthly Payment</span>
-              <div className="text-2xl font-extrabold text-foreground">
-                ₹{emi.toLocaleString()} <span className="text-xs text-muted-foreground font-medium">/mo</span>
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-center text-center gap-1">
+              <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Estimated Monthly Payment</span>
+              <div className="text-2xl font-black text-slate-900 font-mono">
+                ₹{emi.toLocaleString()} <span className="text-xs text-slate-500 font-normal">/mo</span>
               </div>
-              <p className="text-[10px] text-muted-foreground mt-1 max-w-[200px] leading-tight">
+              <p className="text-[10px] text-slate-400 mt-1 max-w-[200px] leading-tight">
                 Calculated on loan principal of ₹{loanPrincipal.toLocaleString()} for {tenureMonths} months.
               </p>
             </div>
@@ -474,7 +475,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
         </div>
 
       </div>
-
+      </div>
     </div>
   );
 }

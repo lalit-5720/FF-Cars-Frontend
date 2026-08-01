@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '../store/useAuthStore';
 import { useWishlistStore } from '../store/useWishlistStore';
 import { useNotificationStore } from '../store/useNotificationStore';
-import { Heart, Bell, User as UserIcon, LogOut, ChevronDown, Check, Menu, X } from 'lucide-react';
+import { Heart, Bell, User as UserIcon, LogOut, ChevronDown, Check, Menu, X, Crown } from 'lucide-react';
 import { Logo } from './Logo';
 
 export const Navbar: React.FC = () => {
@@ -25,11 +25,13 @@ export const Navbar: React.FC = () => {
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchWishlist();
+    if (isAuthenticated && user?.email) {
+      fetchWishlist(user.email);
       fetchNotifications();
+    } else {
+      fetchWishlist();
     }
-  }, [isAuthenticated, fetchWishlist, fetchNotifications]);
+  }, [isAuthenticated, user?.email, fetchWishlist, fetchNotifications]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -59,20 +61,13 @@ export const Navbar: React.FC = () => {
   return (
     <>
       <nav
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-500"
-        style={{
-          backgroundColor: scrolled ? 'rgba(5, 6, 10, 0.95)' : 'rgba(5, 6, 10, 0.7)',
-          backdropFilter: 'blur(24px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
-          borderBottom: scrolled ? '1px solid rgba(26, 28, 38, 0.9)' : '1px solid rgba(26, 28, 38, 0.4)',
-          boxShadow: scrolled ? '0 8px 40px rgba(0,0,0,0.4)' : 'none',
-        }}
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm"
       >
         {/* Ultra-thin gold top line */}
         <div
           style={{
-            height: '1px',
-            background: 'linear-gradient(90deg, transparent 0%, rgba(201, 169, 110, 0.6) 30%, rgba(232, 201, 122, 0.8) 50%, rgba(201, 169, 110, 0.6) 70%, transparent 100%)',
+            height: '2px',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(201, 169, 110, 0.8) 30%, rgba(232, 201, 122, 1) 50%, rgba(201, 169, 110, 0.8) 70%, transparent 100%)',
           }}
         />
 
@@ -84,10 +79,9 @@ export const Navbar: React.FC = () => {
               <Logo size={38} circular={true} className="transition-transform duration-300 group-hover:scale-105" />
               <div className="flex flex-col leading-none">
                 <span
-                  className="font-black tracking-widest uppercase text-sm"
+                  className="font-black tracking-widest uppercase text-sm text-slate-900"
                   style={{
-                    fontFamily: "'DM Sans', sans-serif",
-                    color: 'var(--platinum)',
+                    fontFamily: "'Plus Jakarta Sans', sans-serif",
                     letterSpacing: '0.15em',
                   }}
                 >
@@ -95,52 +89,43 @@ export const Navbar: React.FC = () => {
                 </span>
                 <span
                   className="text-[8px] uppercase tracking-widest mt-0.5"
-                  style={{ color: 'var(--gold)', letterSpacing: '0.2em', fontFamily: "'DM Sans', sans-serif" }}
+                  style={{ color: 'var(--gold)', letterSpacing: '0.2em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 >
                   Automotive Concierge
                 </span>
               </div>
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-8">
+            {/* Desktop Navigation - Reference Match Dark Pills */}
+            <div className="hidden md:flex items-center justify-center gap-2 flex-1 max-w-md mx-auto">
               {[
+                { href: '/', label: 'Home' },
                 { href: '/cars', label: 'Inventory' },
                 ...(isAuthenticated ? [{ href: '/dashboard', label: 'My Bookings' }] : []),
-                ...(isAuthenticated && user?.role === 'ADMIN' ? [{ href: '/admin', label: 'Admin' }] : []),
-              ].map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="relative text-sm font-medium transition-colors duration-200 group"
-                  style={{
-                    color: isActive(href) ? 'var(--gold)' : 'var(--silver)',
-                    fontFamily: "'DM Sans', sans-serif",
-                    letterSpacing: '0.02em',
-                  }}
-                >
-                  {label}
-                  {/* Gold underline */}
-                  <span
-                    className="absolute -bottom-1 left-0 h-px transition-all duration-300"
+                ...(isAuthenticated && (user?.role === 'ADMIN' || user?.role !== 'CUSTOMER' || user?.email?.toLowerCase().includes('admin')) ? [{ href: '/admin', label: 'Admin Dashboard' }] : []),
+              ].map(({ href, label }) => {
+                const active = isActive(href);
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={`text-xs font-bold transition-all duration-200 px-4 py-2 rounded-full cursor-pointer ${
+                      active
+                        ? 'bg-[#0F172A] text-white shadow-md'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
                     style={{
-                      width: isActive(href) ? '100%' : '0%',
-                      background: 'linear-gradient(90deg, var(--gold-dim), var(--gold-light))',
+                      fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif",
                     }}
-                  />
-                  <span
-                    className="absolute -bottom-1 left-0 h-px transition-all duration-300 opacity-0 group-hover:opacity-100 group-hover:w-full"
-                    style={{
-                      width: '0%',
-                      background: 'linear-gradient(90deg, var(--gold-dim), var(--gold-light))',
-                    }}
-                  />
-                </Link>
-              ))}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
             </div>
 
             {/* Right Actions */}
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-3 flex-shrink-0">
               {isAuthenticated ? (
                 <>
                   {/* Wishlist */}
@@ -250,82 +235,74 @@ export const Navbar: React.FC = () => {
                   <div className="relative" ref={profileRef}>
                     <button
                       onClick={() => { setIsProfileOpen(!isProfileOpen); setIsNotifOpen(false); }}
-                      className="flex items-center gap-2 p-1.5 pl-2.5 pr-3 rounded-full transition-all duration-200"
-                      style={{
-                        border: '1px solid var(--onyx-border)',
-                        background: isProfileOpen ? 'rgba(201,169,110,0.06)' : 'transparent',
-                      }}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-300 hover:bg-slate-100 transition-all cursor-pointer bg-white"
                     >
-                      <div
-                        className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
-                        style={{ background: 'var(--gold-muted)', color: 'var(--gold)' }}
-                      >
+                      <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
                         {user?.name.charAt(0).toUpperCase()}
                       </div>
-                      <ChevronDown className="w-3.5 h-3.5" style={{ color: 'var(--silver)' }} />
+                      <span className="text-xs font-bold text-slate-800">{user?.name}</span>
+                      <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
                     </button>
 
                     {isProfileOpen && (
-                      <div
-                        className="absolute right-0 mt-3 w-56 rounded-2xl shadow-2xl overflow-hidden"
-                        style={{
-                          background: 'var(--obsidian)',
-                          border: '1px solid var(--onyx-border)',
-                          boxShadow: '0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,169,110,0.08)',
-                        }}
-                      >
-                        <div className="p-4" style={{ borderBottom: '1px solid var(--onyx-border)' }}>
-                          <p className="font-semibold text-sm" style={{ color: 'var(--platinum)' }}>{user?.name}</p>
-                          <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--silver-dim)' }}>{user?.email}</p>
-                          <span
-                            className="inline-block mt-2 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider"
-                            style={{ background: 'rgba(201,169,110,0.12)', color: 'var(--gold)' }}
-                          >
+                      <div className="absolute right-0 mt-3 w-56 rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden z-50">
+                        <div className="p-4 border-b border-slate-100">
+                          <p className="font-bold text-sm text-slate-900">{user?.name}</p>
+                          <p className="text-xs text-slate-500 mt-0.5 truncate">{user?.email}</p>
+                          <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700">
                             {user?.role}
                           </span>
                         </div>
-                        <div className="p-2">
+                        <div className="p-2 flex flex-col gap-1">
+                          {(user?.role === 'ADMIN' || user?.role !== 'CUSTOMER' || user?.email?.toLowerCase().includes('admin')) && (
+                            <Link
+                              href="/admin"
+                              onClick={() => setIsProfileOpen(false)}
+                              className="flex items-center gap-2.5 w-full p-2.5 text-xs font-bold text-amber-700 bg-amber-50 rounded-xl hover:bg-amber-100 transition-colors border border-amber-200"
+                            >
+                              <Crown className="w-4 h-4 text-amber-600" />
+                              Admin Dashboard
+                            </Link>
+                          )}
                           <Link
                             href="/dashboard"
                             onClick={() => setIsProfileOpen(false)}
-                            className="flex items-center gap-2.5 w-full p-2.5 text-sm rounded-xl transition-colors"
-                            style={{ color: 'var(--silver)' }}
-                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; (e.currentTarget as HTMLElement).style.color = 'var(--platinum)'; }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--silver)'; }}
+                            className="flex items-center gap-2.5 w-full p-2.5 text-xs font-bold text-slate-700 rounded-xl hover:bg-slate-100 transition-colors"
                           >
-                            <UserIcon className="w-4 h-4" />
+                            <UserIcon className="w-4 h-4 text-slate-500" />
                             My Dashboard
                           </Link>
                           <button
                             onClick={handleLogout}
-                            className="flex items-center gap-2.5 w-full p-2.5 text-sm rounded-xl transition-colors mt-0.5"
-                            style={{ color: '#E87070' }}
-                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(155,35,53,0.1)'; }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                            className="flex items-center gap-2.5 w-full p-2.5 text-xs font-bold text-rose-600 rounded-xl hover:bg-rose-50 transition-colors cursor-pointer"
                           >
-                            <LogOut className="w-4 h-4" />
-                            Sign Out
+                            <LogOut className="w-4 h-4 text-rose-500" />
+                            Logout
                           </button>
                         </div>
                       </div>
                     )}
                   </div>
+
+                  {/* Direct Logout Button matching Reference Image */}
+                  <button
+                    onClick={handleLogout}
+                    className="hidden sm:inline-flex px-4 py-1.5 text-xs font-bold text-slate-700 border border-slate-300 rounded-full hover:bg-slate-100 transition-all cursor-pointer"
+                  >
+                    Logout
+                  </button>
                 </>
               ) : (
                 <div className="flex items-center gap-3">
                   <Link
                     href="/login"
-                    className="text-sm font-medium transition-colors duration-200 px-4 py-2"
-                    style={{ color: 'var(--silver)', fontFamily: "'DM Sans', sans-serif" }}
-                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--platinum)')}
-                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--silver)')}
+                    className="text-xs font-bold text-slate-700 px-4 py-2 hover:text-slate-900 transition-colors"
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/register"
-                    className="btn-gold text-xs"
-                    style={{ padding: '0.6rem 1.25rem' }}
+                    className="px-5 py-2 rounded-full text-xs font-bold bg-[#0F172A] text-white hover:bg-slate-800 transition-all shadow-sm"
                   >
                     Get Started
                   </Link>
@@ -421,7 +398,7 @@ export const Navbar: React.FC = () => {
       )}
 
       {/* Spacer for fixed nav */}
-      <div className="h-[69px]" />
+      <div className="h-[70px]" />
     </>
   );
 };
