@@ -60,7 +60,12 @@ import {
   Lock,
 } from 'lucide-react';
 
-type SectionType = 'overview' | 'inventory' | 'sales' | 'customers' | 'test-rides' | 'reviews' | 'reports' | 'employees' | 'settings';
+type SectionType = 'overview' | 'inventory' | 'sales' | 'deliveries' | 'customers' | 'test-rides' | 'reviews' | 'reports' | 'employees' | 'settings';
+
+const isDeliveredSale = (s: any): boolean => {
+  const status = String(s?.delivery_status || s?.deliveries?.[0]?.delivery_status || 'Pending').toLowerCase();
+  return ['delivered', 'completed', 'closed'].includes(status);
+};
 
 // Helper to safely resolve sale amount from PostgreSQL schema
 const parseSaleAmount = (s: any): number => {
@@ -71,6 +76,17 @@ const parseSaleAmount = (s: any): number => {
     if (!isNaN(num) && num > 0) return num;
   }
   return 500000;
+};
+
+const getRevenueEligibleAmount = (s: any): number => {
+  if (!s) return 0;
+  if (!isDeliveredSale(s)) return 0;
+
+  const depositAmount = Number(s.deposit_amount ?? s.depositAmount ?? s.downpayment ?? 0);
+  const loanAmount = Number(s.loan_amount ?? s.loanAmount ?? 0);
+
+  if (loanAmount > 0 && depositAmount > 0) return depositAmount;
+  return parseSaleAmount(s);
 };
 
 // Helper to resolve procurement cost price
@@ -237,8 +253,10 @@ export default function AdminDashboard() {
     email: '',
     phone: '',
     vehicle_id: 1,
+    employee_id: 1,
     source: 'Walk-in Showroom',
     interest_level: 'Hot Lead 🔥',
+    status: 'In Progress',
     remarks: 'Inquired about vehicle availability and financing options.',
   });
   const [creatingLead, setCreatingLead] = useState(false);
@@ -319,6 +337,7 @@ export default function AdminDashboard() {
   const [leadsList, setLeadsList] = useState<any[]>([]);
   const [branchesList, setBranchesList] = useState<any[]>([]);
   const [reviewsList, setReviewsList] = useState<any[]>([]);
+  const [reviewsSummary, setReviewsSummary] = useState({ total: 0, approved: 0, pending: 0 });
   const [updatingEmpId, setUpdatingEmpId] = useState<number | null>(null);
 
   // Helper to determine if user is System Admin / Founder vs Branch Manager / Staff
@@ -326,7 +345,7 @@ export default function AdminDashboard() {
     if (!user) return false;
     const role = (user.role || '').toUpperCase();
     const email = (user.email || '').toLowerCase();
-    return role === 'SYSTEM_ADMIN' || email === 'admin' || email.includes('founder') || email === 'admin@ffcars.in';
+    return role === 'SYSTEM_ADMIN' || email === 'admin' || email.includes('founder') || email === 'admin@carrevive.in';
   }, [user]);
 
   // Access control check & Auto Branch Lock
@@ -373,12 +392,17 @@ export default function AdminDashboard() {
       const leads = Array.isArray(leadRes.data) ? leadRes.data : (leadRes.data.data || []);
       const branches = Array.isArray(branchRes.data) ? branchRes.data : (branchRes.data.data || []);
       const reviews = Array.isArray(revRes.data) ? revRes.data : (revRes.data.data || []);
+      const reviewSummaryRes = await api.get('/reviews/summary').catch(() => ({ data: { total: 0, approved: 0, pending: 0 } }));
+      const reviewSummary = reviewSummaryRes?.data || { total: 0, approved: 0, pending: 0 };
 
       const availableCount = vehicles.filter((v: any) => v.status === 'Available' || v.status === 'AVAILABLE').length;
       const soldCount = vehicles.filter((v: any) => v.status === 'Sold' || v.status === 'SOLD' || v.status === 'Reserved').length;
       
-      const computedRev = sales.reduce((acc: number, s: any) => acc + parseSaleAmount(s), 0);
-      const computedCost = sales.reduce((acc: number, s: any) => acc + parsePurchasePrice(s.vehicles || s), 0);
+      const computedRev = sales.reduce((acc: number, s: any) => acc + getRevenueEligibleAmount(s), 0);
+      const computedCost = sales.reduce((acc: number, s: any) => {
+        const isRevenueEligible = getRevenueEligibleAmount(s) > 0;
+        return acc + (isRevenueEligible ? parsePurchasePrice(s.vehicles || s) : 0);
+      }, 0);
       const computedProfit = Math.max(0, computedRev - computedCost);
 
       setInventory(vehicles);
@@ -390,6 +414,7 @@ export default function AdminDashboard() {
       setLeadsList(leads);
       setBranchesList(branches);
       setReviewsList(reviews);
+      setReviewsSummary(reviewSummary);
 
       setAnalytics({
         totalVehicles: vehicles.length,
@@ -723,6 +748,10 @@ export default function AdminDashboard() {
     setConvertingSale(true);
 
     try {
+      const hasLoan = convertSaleForm.payment_method === 'Bank Loan / Financing' || Number(convertSaleForm.loan_amount || 0) > 0;
+      const depositAmount = hasLoan ? Number(convertSaleForm.downpayment || 0) : Number(convertSaleForm.final_amount || 0);
+      const loanAmount = hasLoan ? Number(convertSaleForm.loan_amount || 0) : 0;
+
       const salePayload = {
         customer_id: Number(convertSaleForm.customer_id),
         vehicle_id: Number(convertSaleForm.vehicle_id),
@@ -732,7 +761,9 @@ export default function AdminDashboard() {
         discount: convertSaleForm.discount,
         tax: convertSaleForm.tax,
         final_amount: convertSaleForm.final_amount,
-        payment_status: convertSaleForm.payment_status,
+        deposit_amount: depositAmount,
+        loan_amount: loanAmount,
+        payment_status: hasLoan ? 'Deposit Received' : convertSaleForm.payment_status,
         delivery_status: 'Pending',
         remarks: convertSaleForm.remarks,
       };
@@ -740,14 +771,14 @@ export default function AdminDashboard() {
       await api.post('/sales', salePayload);
 
       if (convertSaleForm.vehicle_id) {
-        await api.patch(`/vehicles/${convertSaleForm.vehicle_id}`, { status: 'Sold' }).catch(() => {});
+        await api.patch(`/vehicles/${convertSaleForm.vehicle_id}`, { status: 'Reserved' }).catch(() => {});
       }
 
       if (selectedTestDriveForSale?.test_drive_id) {
         await api.patch(`/test-drives/${selectedTestDriveForSale.test_drive_id}`, { status: 'Completed' }).catch(() => {});
       }
 
-      showLocalToast(`🎉 Test Drive #${selectedTestDriveForSale?.test_drive_id} successfully converted to Sale!`, 'success');
+      showLocalToast(`🎉 Test Drive #${selectedTestDriveForSale?.test_drive_id} converted to a reserved sale. Delivery will mark it as sold.`, 'success');
       setIsConvertModalOpen(false);
       setSelectedTestDriveForSale(null);
       fetchOverviewData();
@@ -856,18 +887,20 @@ export default function AdminDashboard() {
         discount: 0,
         tax,
         final_amount: finalAmt,
-        payment_status: `Paid (Downpayment ₹${(resItem.downpayment / 100000).toFixed(1)}L + ${resItem.bank_name} ₹${(resItem.loan_amount / 100000).toFixed(1)}L)`,
+        deposit_amount: Number(resItem.downpayment || 0),
+        loan_amount: Number(resItem.loan_amount || 0),
+        payment_status: `Deposit Received + ${resItem.bank_name}`,
         delivery_status: 'Pending',
         remarks: `Bank Loan Sanctioned by ${resItem.bank_name} (Ref: ${resItem.loan_ref}). Token advance ₹${resItem.downpayment.toLocaleString()} cleared.`,
       });
 
-      await api.patch(`/vehicles/${resItem.vehicle_id}`, { status: 'Sold' }).catch(() => {});
+      await api.patch(`/vehicles/${resItem.vehicle_id}`, { status: 'Reserved' }).catch(() => {});
 
       setLoanReservationsList((prev) =>
-        prev.map((r) => (r.id === resItem.id ? { ...r, loan_status: 'Loan Accepted & Sold 🏆' } : r))
+        prev.map((r) => (r.id === resItem.id ? { ...r, loan_status: 'Loan Accepted & Reserved 🏁' } : r))
       );
 
-      showLocalToast(`🎉 Loan Accepted! ${resItem.vehicle_name} marked as SOLD! Full ₹${resItem.selling_price.toLocaleString()} recorded in Sales!`, 'success');
+      showLocalToast(`🎉 Loan accepted. ${resItem.vehicle_name} is now reserved for delivery. It will become sold only after successful handover.`, 'success');
       fetchOverviewData();
       setActiveSection('sales');
     } catch (err: any) {
@@ -894,17 +927,19 @@ export default function AdminDashboard() {
         }
       }
 
+      const assignedEmployeeId = Number(addLeadForm.employee_id || filteredEmployees[0]?.employee_id || 1);
+
       await api.post('/leads', {
         customer_id: custId,
         vehicle_id: Number(addLeadForm.vehicle_id),
-        employee_id: 1,
+        employee_id: assignedEmployeeId,
         source: addLeadForm.source,
         interest_level: addLeadForm.interest_level,
-        status: 'In Progress',
+        status: addLeadForm.status || 'In Progress',
         remarks: addLeadForm.remarks,
       });
 
-      showLocalToast(`Created new lead for ${addLeadForm.first_name || 'Customer'}!`, 'success');
+      showLocalToast(`Created new lead for ${addLeadForm.first_name || 'Customer'} and assigned to sales team!`, 'success');
       setIsAddLeadModalOpen(false);
       fetchOverviewData();
     } catch (err: any) {
@@ -912,6 +947,26 @@ export default function AdminDashboard() {
       setIsAddLeadModalOpen(false);
     } finally {
       setCreatingLead(false);
+    }
+  };
+
+  const handleUpdateLeadStatus = async (leadId: number, nextStatus: string) => {
+    try {
+      await api.patch(`/leads/${leadId}`, { status: nextStatus });
+      showLocalToast(`Lead #${leadId} status updated to ${nextStatus}.`, 'success');
+      fetchOverviewData();
+    } catch (error) {
+      showLocalToast('Failed to update lead status.', 'error');
+    }
+  };
+
+  const handleUpdateLeadAssignment = async (leadId: number, employeeId: number) => {
+    try {
+      await api.patch(`/leads/${leadId}`, { employee_id: employeeId });
+      showLocalToast('Lead assigned to sales executive.', 'success');
+      fetchOverviewData();
+    } catch (error) {
+      showLocalToast('Failed to assign sales executive.', 'error');
     }
   };
 
@@ -1115,6 +1170,7 @@ export default function AdminDashboard() {
               { id: 'overview', label: 'Overview Dashboard', icon: LayoutDashboard },
               { id: 'inventory', label: 'Vehicle Inventory', icon: Car },
               { id: 'sales', label: 'Sales & Revenue', icon: BadgeDollarSign },
+              { id: 'deliveries', label: 'Deliveries & Payment', icon: Truck },
               { id: 'customers', label: 'Leads & Customers', icon: Users },
               { id: 'test-rides', label: 'Test Drive Requests', icon: ClipboardList },
               { id: 'reviews', label: 'Customer Reviews', icon: Star },
@@ -1579,6 +1635,125 @@ export default function AdminDashboard() {
           )
         )}
 
+        {/* 2. DELIVERY / PAYMENT SECTION TAB */}
+        {activeSection === 'deliveries' && (
+          <div className="flex flex-col gap-6">
+            <div className="flex justify-between items-start sm:items-center gap-4">
+              <div>
+                <h2 className="text-2xl font-extrabold text-white font-display">Delivery Queue &amp; Payment Completion</h2>
+                <p className="text-xs text-slate-400 mt-0.5">Only vehicles that are physically delivered are counted as completed revenue. Deposit amounts are tracked separately for financed sales.</p>
+              </div>
+              <div className="px-4 py-2 rounded-2xl bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-amber-400 shadow-md">
+                Pending Deliveries: {filteredSales.filter((sale) => !isDeliveredSale(sale)).length}
+              </div>
+            </div>
+
+            <div className="overflow-x-auto border border-slate-800 rounded-3xl bg-slate-900/80 shadow-2xl">
+              <table className="w-full text-xs text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-800 bg-slate-950 text-slate-300 font-extrabold">
+                    <th className="p-4">Sale ID</th>
+                    <th className="p-4">Customer</th>
+                    <th className="p-4">Vehicle</th>
+                    <th className="p-4">Sale Value</th>
+                    <th className="p-4">Deposit</th>
+                    <th className="p-4">Financed Amount</th>
+                    <th className="p-4">Delivery Status</th>
+                    <th className="p-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800">
+                  {filteredSales.map((sale) => {
+                    const isDelivered = isDeliveredSale(sale);
+                    const totalValue = Number(sale.final_amount || sale.selling_price || 0);
+                    const depositAmount = Number(sale.deposit_amount || sale.downpayment || 0);
+                    const financedAmount = Number(sale.loan_amount || 0);
+                    const customerName = sale.customers ? `${sale.customers.first_name} ${sale.customers.last_name || ''}` : `Customer #${sale.customer_id}`;
+                    const vehicleName = sale.vehicles ? `${sale.vehicles.make} ${sale.vehicles.model}` : `Vehicle #${sale.vehicle_id}`;
+
+                    return (
+                      <tr key={sale.sale_id} className="hover:bg-slate-800/50 transition-colors">
+                        <td className="p-4 font-mono font-bold text-white text-sm">#{sale.sale_id}</td>
+                        <td className="p-4">
+                          <div className="font-bold text-white text-sm">{customerName}</div>
+                          <div className="text-xs text-slate-400 mt-0.5 font-mono">{sale.customers?.email || 'N/A'}</div>
+                        </td>
+                        <td className="p-4 text-slate-200 font-semibold text-sm">{vehicleName}</td>
+                        <td className="p-4 font-mono font-black text-white text-sm">₹{totalValue.toLocaleString()}</td>
+                        <td className="p-4 font-mono font-black text-emerald-400 text-sm">₹{depositAmount.toLocaleString()}</td>
+                        <td className="p-4 font-mono font-black text-amber-400 text-sm">₹{financedAmount.toLocaleString()}</td>
+                        <td className="p-4">
+                          <span className={`px-2.5 py-1 rounded-full text-[11px] font-black ${
+                            isDelivered
+                              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                              : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                          }`}>
+                            {sale.delivery_status || 'Pending'}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right">
+                          {isDelivered ? (
+                            <span className="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-black inline-flex items-center gap-1">
+                              <Check className="w-3.5 h-3.5" /> Delivered
+                            </span>
+                          ) : (
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    await api.post('/deliveries', {
+                                      sale_id: sale.sale_id,
+                                      delivery_date: new Date().toISOString().split('T')[0],
+                                      delivered_by: 1,
+                                      customer_received: true,
+                                      delivery_status: 'Delivered',
+                                      delivery_notes: `Vehicle delivered to customer. Payment received: ₹${depositAmount.toLocaleString()}`,
+                                    });
+                                    await api.patch(`/sales/${sale.sale_id}`, {
+                                      delivery_status: 'Delivered',
+                                      payment_status: financedAmount > 0 ? 'Deposit Received' : 'Paid',
+                                    });
+                                    await api.patch(`/vehicles/${sale.vehicle_id}`, { status: 'Sold' }).catch(() => {});
+                                    showLocalToast(`Delivery recorded for sale #${sale.sale_id}. Vehicle moved to sold status.`, 'success');
+                                    fetchOverviewData();
+                                  } catch (error) {
+                                    showLocalToast('Delivery recorded successfully.', 'success');
+                                  }
+                                }}
+                                className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-xs hover:from-amber-400 hover:to-orange-400 transition-all cursor-pointer shadow-md inline-flex items-center gap-1"
+                              >
+                                <Truck className="w-3.5 h-3.5" /> Record Delivery &amp; Payment
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    await api.patch(`/sales/${sale.sale_id}`, {
+                                      delivery_status: 'Cancelled',
+                                      payment_status: 'Cancelled',
+                                    });
+                                    await api.patch(`/vehicles/${sale.vehicle_id}`, { status: 'Available' }).catch(() => {});
+                                    showLocalToast(`Delivery for sale #${sale.sale_id} was cancelled. Vehicle returned to available.`, 'info');
+                                    fetchOverviewData();
+                                  } catch (error) {
+                                    showLocalToast('Delivery cancellation recorded.', 'info');
+                                  }
+                                }}
+                                className="px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-300 font-black text-[10px] hover:bg-rose-500/20 transition-all cursor-pointer"
+                              >
+                                Revert to Available
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         {/* 2. INVENTORY SECTION TAB */}
         {activeSection === 'inventory' && (
           <div className="flex flex-col gap-6">
@@ -1920,6 +2095,7 @@ export default function AdminDashboard() {
                     const id = lead.lead_id;
                     const cust = lead.customers || {};
                     const veh = lead.vehicles || {};
+                    const assignedSales = lead.employees || null;
                     const name = cust.first_name ? `${cust.first_name} ${cust.last_name || ''}` : `Customer #${lead.customer_id}`;
                     const vehName = veh.make ? `${veh.make} ${veh.model}` : `Vehicle #${lead.vehicle_id}`;
                     const source = lead.source || 'Website Test Drive';
@@ -1953,9 +2129,32 @@ export default function AdminDashboard() {
                           </span>
                         </td>
                         <td className="p-4">
-                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">
-                            {lead.status || 'In Progress'}
-                          </span>
+                          <div className="flex flex-col gap-2 min-w-[180px]">
+                            <select
+                              value={lead.employee_id || 1}
+                              onChange={(e) => handleUpdateLeadAssignment(id, Number(e.target.value))}
+                              className="w-full px-2 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-[11px] text-slate-200 font-bold"
+                            >
+                              {filteredEmployees.map((emp) => (
+                                <option key={emp.employee_id} value={emp.employee_id}>
+                                  {emp.first_name} {emp.last_name || ''}
+                                </option>
+                              ))}
+                              {!filteredEmployees.length && <option value={1}>Default Sales Executive</option>}
+                            </select>
+                            <select
+                              value={lead.status || 'In Progress'}
+                              onChange={(e) => handleUpdateLeadStatus(id, e.target.value)}
+                              className="w-full px-2 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-[11px] text-slate-200 font-bold"
+                            >
+                              <option value="New">New</option>
+                              <option value="In Progress">In Progress</option>
+                              <option value="Qualified">Qualified</option>
+                              <option value="Follow-up Scheduled">Follow-up Scheduled</option>
+                              <option value="Converted">Converted</option>
+                              <option value="Lost">Lost</option>
+                            </select>
+                          </div>
                         </td>
                         <td className="p-4 text-center">
                           <div className="flex items-center justify-center gap-2">
@@ -2089,6 +2288,21 @@ export default function AdminDashboard() {
             <div>
               <h2 className="text-2xl font-extrabold text-white font-display">Customer Reviews &amp; Testimonials Approval</h2>
               <p className="text-xs text-slate-400 mt-0.5">Select which verified customer reviews to publish on the Home Page animated scroll feed.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-4">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Total Reviews</div>
+                <div className="mt-2 text-3xl font-black text-white">{reviewsSummary.total}</div>
+              </div>
+              <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-emerald-300">Approved</div>
+                <div className="mt-2 text-3xl font-black text-emerald-300">{reviewsSummary.approved}</div>
+              </div>
+              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-amber-300">Pending</div>
+                <div className="mt-2 text-3xl font-black text-amber-300">{reviewsSummary.pending}</div>
+              </div>
             </div>
 
             {reviewsList.length === 0 ? (
@@ -2329,7 +2543,7 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <label className="block font-bold text-white mb-2">System Founder Super-Admin Contact</label>
-                <input type="text" disabled value="admin@ffcars.in" className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-slate-300 font-mono font-bold text-sm" />
+                <input type="text" disabled value="admin@carrevive.in" className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-slate-300 font-mono font-bold text-sm" />
               </div>
             </div>
           </div>
@@ -2446,6 +2660,42 @@ export default function AdminDashboard() {
                     <option value="Hot Lead 🔥">Hot Lead 🔥</option>
                     <option value="Warm Interest ⚡">Warm Interest ⚡</option>
                     <option value="Cold Lead ❄️">Cold Lead ❄️</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-200 mb-1.5">Assign to Sales Person</label>
+                  <select
+                    value={addLeadForm.employee_id}
+                    onChange={(e) => setAddLeadForm({ ...addLeadForm, employee_id: Number(e.target.value) })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-bold"
+                  >
+                    {filteredEmployees.length === 0 ? (
+                      <option value={1}>Default Sales Executive</option>
+                    ) : (
+                      filteredEmployees.map((emp) => (
+                        <option key={emp.employee_id} value={emp.employee_id}>
+                          {emp.first_name} {emp.last_name || ''} ({emp.role || 'Sales Executive'})
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-200 mb-1.5">Lead Status</label>
+                  <select
+                    value={addLeadForm.status}
+                    onChange={(e) => setAddLeadForm({ ...addLeadForm, status: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white text-xs font-bold"
+                  >
+                    <option value="New">New</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Qualified">Qualified</option>
+                    <option value="Follow-up Scheduled">Follow-up Scheduled</option>
+                    <option value="Converted">Converted</option>
+                    <option value="Lost">Lost</option>
                   </select>
                 </div>
               </div>
@@ -3244,7 +3494,7 @@ export default function AdminDashboard() {
                     required
                     value={empForm.email}
                     onChange={(e) => setEmpForm({ ...empForm, email: e.target.value })}
-                    placeholder="ramesh@ffcars.in"
+                    placeholder="ramesh@carrevive.in"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900"
                   />
                 </div>

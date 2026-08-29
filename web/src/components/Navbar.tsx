@@ -85,7 +85,7 @@ export const Navbar: React.FC = () => {
                     letterSpacing: '0.15em',
                   }}
                 >
-                  FF-CARS
+                  CarRevive
                 </span>
                 <span
                   className="text-[8px] uppercase tracking-widest mt-0.5"

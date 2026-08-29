@@ -4,9 +4,9 @@ import ClientWrapper from "../components/ClientWrapper";
 import Preloader from "../components/Preloader";
 
 export const metadata: Metadata = {
-  title: "FF-Cars | Luxury Automotive Concierge — Chennai's Premier Dealership",
+  title: "CarRevive | Luxury Automotive Concierge — Chennai's Premier Dealership",
   description:
-    "Experience the finest pre-owned luxury vehicles at FF-Cars. Certified inventory, transparent pricing, and white-glove service across our Chennai showrooms.",
+    "Experience the finest pre-owned luxury vehicles at CarRevive. Certified inventory, transparent pricing, and white-glove service across our Chennai showrooms.",
 };
 
 export default function RootLayout({

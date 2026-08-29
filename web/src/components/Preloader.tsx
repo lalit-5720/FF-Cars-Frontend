@@ -9,7 +9,7 @@ export const Preloader: React.FC = () => {
 
   useEffect(() => {
     // Check session storage to see if we've already shown the preloader in this session
-    const hasPreloaded = sessionStorage.getItem('ff_cars_preloaded');
+    const hasPreloaded = sessionStorage.getItem('carrevive_preloaded');
     if (hasPreloaded) {
       return;
     }
@@ -32,7 +32,7 @@ export const Preloader: React.FC = () => {
           setIsAnimatingOut(true);
           setTimeout(() => {
             setIsVisible(false);
-            sessionStorage.setItem('ff_cars_preloaded', 'true');
+            sessionStorage.setItem('carrevive_preloaded', 'true');
           }, 700); // Match exit transition duration
         }, 500); // Stay at 100% for 500ms
       }
@@ -139,7 +139,7 @@ export const Preloader: React.FC = () => {
         {/* Loading progress elements */}
         <div className="flex flex-col items-center gap-2 mt-4">
           <span className="font-mono text-[10px] tracking-[0.3em] text-zinc-500 uppercase">
-            FF Cars Company
+            CarRevive Company
           </span>
           <div className="text-3xl font-extrabold tracking-tight text-white font-mono">
             {progress}%

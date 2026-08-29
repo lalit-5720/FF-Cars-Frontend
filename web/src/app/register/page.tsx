@@ -54,7 +54,7 @@ export default function RegisterPage() {
       <div className="max-w-md w-full p-8 sm:p-10 rounded-3xl border border-slate-200/90 bg-white text-slate-900 shadow-xl">
         <div className="text-center mb-8">
           <span className="font-sans text-2xl font-extrabold tracking-widest text-slate-900">
-            FF-CARS
+            CarRevive
           </span>
           <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-slate-900 font-sans">
             Create Customer Account

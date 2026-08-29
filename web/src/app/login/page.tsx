@@ -53,7 +53,7 @@ export default function LoginPage() {
             {/* Brand mark */}
             <div className="mb-4 flex items-center justify-center">
               <span className="font-extrabold tracking-widest text-2xl text-slate-900 font-sans">
-                FF-CARS
+                CarRevive
               </span>
             </div>
 
@@ -137,11 +137,11 @@ export default function LoginPage() {
             <p className="text-[11px] text-center mt-2 text-slate-500 font-medium">
               Admin:{' '}
               <code className="px-1.5 py-0.5 rounded font-mono text-[10px] bg-slate-100 text-slate-800 border border-slate-200">
-                admin@ffcars.in
+                admin@carrevive.in
               </code>
               {' '}· Customer:{' '}
               <code className="px-1.5 py-0.5 rounded font-mono text-[10px] bg-slate-100 text-slate-800 border border-slate-200">
-                customer@ffcars.com
+                customer@carrevive.com
               </code>
             </p>
           </div>
@@ -149,7 +149,7 @@ export default function LoginPage() {
 
         {/* Bottom register link */}
         <p className="text-center mt-6 text-xs text-slate-500 font-medium">
-          New to FF-Cars?{' '}
+          New to CarRevive?{' '}
           <Link
             href="/register"
             className="font-bold text-slate-900 hover:underline"

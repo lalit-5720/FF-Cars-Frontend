@@ -51,64 +51,9 @@ export default function HomePage() {
       try {
         const response = await api.get('/reviews/published');
         const list = Array.isArray(response.data) ? response.data : (response.data.data || []);
-        if (list.length > 0) {
-          setPublishedReviews(list);
-        } else {
-          setPublishedReviews([
-            {
-              review_id: 1,
-              rating: 5,
-              comment: 'Exceptional service! Purchased my BMW 5 Series from the Anna Nagar showroom. Pristine condition and complete transparency throughout.',
-              customers: { first_name: 'Vikram', last_name: 'Aditya' },
-              vehicles: { make: 'BMW', model: '5 Series' },
-            },
-            {
-              review_id: 2,
-              rating: 5,
-              comment: 'The concierge delivery to my doorstep in Velachery was white-glove quality. Highly recommended for luxury car buyers in Chennai!',
-              customers: { first_name: 'Ananya', last_name: 'Reddy' },
-              vehicles: { make: 'Mercedes-Benz', model: 'C-Class' },
-            },
-            {
-              review_id: 3,
-              rating: 5,
-              comment: 'Imperium certified inspection gave me total peace of mind. Driving my Audi A6 with complete confidence!',
-              customers: { first_name: 'Siddharth', last_name: 'Roy' },
-              vehicles: { make: 'Audi', model: 'A6' },
-            },
-            {
-              review_id: 4,
-              rating: 5,
-              comment: 'Flawless experience from booking the test drive to final keys handover. FF-Cars is Chennai’s premier luxury dealer.',
-              customers: { first_name: 'Kavitha', last_name: 'Raman' },
-              vehicles: { make: 'Porsche', model: 'Macan' },
-            },
-          ]);
-        }
+        setPublishedReviews(list || []);
       } catch (e) {
-        setPublishedReviews([
-          {
-            review_id: 1,
-            rating: 5,
-            comment: 'Exceptional service! Purchased my BMW 5 Series from the Anna Nagar showroom. Pristine condition and complete transparency throughout.',
-            customers: { first_name: 'Vikram', last_name: 'Aditya' },
-            vehicles: { make: 'BMW', model: '5 Series' },
-          },
-          {
-            review_id: 2,
-            rating: 5,
-            comment: 'The concierge delivery to my doorstep in Velachery was white-glove quality. Highly recommended for luxury car buyers in Chennai!',
-            customers: { first_name: 'Ananya', last_name: 'Reddy' },
-            vehicles: { make: 'Mercedes-Benz', model: 'C-Class' },
-          },
-          {
-            review_id: 3,
-            rating: 5,
-            comment: 'Imperium certified inspection gave me total peace of mind. Driving my Audi A6 with complete confidence!',
-            customers: { first_name: 'Siddharth', last_name: 'Roy' },
-            vehicles: { make: 'Audi', model: 'A6' },
-          },
-        ]);
+        setPublishedReviews([]);
       }
     };
     fetchPublishedReviews();
@@ -230,7 +175,7 @@ export default function HomePage() {
             >
               A curated collection of certified luxury and premium vehicles. 
               Transparent pricing, white-glove service, and our signature 
-              200-point assurance — at every FF-Cars showroom.
+              200-point assurance — at every CarRevive showroom.
             </p>
 
             {/* Location pills */}
@@ -694,7 +639,7 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════
-          THE FF-CARS DIFFERENCE
+          THE CARREVIVE DIFFERENCE
       ══════════════════════════════════════ */}
       <section
         className="py-28"
@@ -720,7 +665,7 @@ export default function HomePage() {
                 letterSpacing: '-0.02em',
               }}
             >
-              The FF-Cars{' '}
+              The CarRevive{' '}
               <em style={{ fontStyle: 'italic', fontWeight: 300, color: 'var(--gold)' }}>
                 Difference
               </em>
@@ -729,7 +674,7 @@ export default function HomePage() {
               className="mt-4 mx-auto max-w-lg"
               style={{ color: 'var(--silver)', fontFamily: "'DM Sans', sans-serif", fontWeight: 300 }}
             >
-              Every aspect of the FF-Cars experience is engineered around trust,
+              Every aspect of the CarRevive experience is engineered around trust,
               transparency, and excellence.
             </p>
           </div>
@@ -825,59 +770,65 @@ export default function HomePage() {
             Client <span className="text-amber-600 font-black">Experiences</span>
           </h2>
           <p className="mt-2 text-xs text-slate-500 max-w-md mx-auto font-sans font-medium">
-            Hear from discerning owners who purchased their certified luxury automobiles through FF-Cars.
+            Hear from discerning owners who purchased their certified luxury automobiles through CarRevive.
           </p>
         </div>
 
         {/* Infinite Marquee Container */}
-        <div className="relative w-full overflow-hidden py-4">
-          {/* Side Fades - Light smooth gradient matching #F8FAFC */}
-          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#F8FAFC] via-[#F8FAFC]/80 to-transparent z-10 pointer-events-none" />
-          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#F8FAFC] via-[#F8FAFC]/80 to-transparent z-10 pointer-events-none" />
+        {publishedReviews.length > 0 ? (
+          <div className="relative w-full overflow-hidden py-4">
+            {/* Side Fades - Light smooth gradient matching #F8FAFC */}
+            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#F8FAFC] via-[#F8FAFC]/80 to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#F8FAFC] via-[#F8FAFC]/80 to-transparent z-10 pointer-events-none" />
 
-          {/* Marquee Track */}
-          <div className="animate-marquee flex gap-6 px-4">
-            {[...publishedReviews, ...publishedReviews, ...publishedReviews].map((rev, idx) => {
-              const custName = rev.customers ? `${rev.customers.first_name} ${rev.customers.last_name || ''}`.trim() : (rev.name || 'Verified Owner');
-              const carModel = rev.vehicles ? `${rev.vehicles.make} ${rev.vehicles.model}` : (rev.carModel || 'Luxury Automobile');
-              const rating = Number(rev.rating || 5);
+            {/* Marquee Track */}
+            <div className="animate-marquee flex gap-6 px-4">
+              {[...publishedReviews, ...publishedReviews, ...publishedReviews].map((rev, idx) => {
+                const custName = rev.customers ? `${rev.customers.first_name} ${rev.customers.last_name || ''}`.trim() : (rev.name || 'Verified Owner');
+                const carModel = rev.vehicles ? `${rev.vehicles.make} ${rev.vehicles.model}` : (rev.carModel || 'Luxury Automobile');
+                const rating = Number(rev.rating || 5);
 
-              return (
-                <div
-                  key={idx}
-                  className="w-[380px] p-7 rounded-2xl flex-shrink-0 flex flex-col justify-between gap-5 bg-white border border-slate-200/90 shadow-sm text-slate-900"
-                >
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex text-amber-500 gap-1">
-                        {Array.from({ length: rating }).map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-current text-amber-500" />
-                        ))}
+                return (
+                  <div
+                    key={idx}
+                    className="w-[380px] p-7 rounded-2xl flex-shrink-0 flex flex-col justify-between gap-5 bg-white border border-slate-200/90 shadow-sm text-slate-900"
+                  >
+                    <div className="flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex text-amber-500 gap-1">
+                          {Array.from({ length: rating }).map((_, i) => (
+                            <Star key={i} className="w-4 h-4 fill-current text-amber-500" />
+                          ))}
+                        </div>
+                        <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-sans">
+                          Verified Purchaser ✓
+                        </span>
                       </div>
-                      <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-sans">
-                        Verified Purchaser ✓
-                      </span>
+
+                      <p className="text-xs text-slate-700 leading-relaxed font-sans font-normal">
+                        "{rev.comment}"
+                      </p>
                     </div>
 
-                    <p className="text-xs text-slate-700 leading-relaxed font-sans font-normal">
-                      "{rev.comment}"
-                    </p>
-                  </div>
-
-                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <div>
-                      <div className="font-bold text-xs text-slate-900 font-sans">{custName}</div>
-                      <div className="text-[11px] text-slate-500 font-semibold font-sans mt-0.5">{carModel}</div>
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm font-sans">
-                      {custName.charAt(0)}
+                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                      <div>
+                        <div className="font-bold text-xs text-slate-900 font-sans">{custName}</div>
+                        <div className="text-[11px] text-slate-500 font-semibold font-sans mt-0.5">{carModel}</div>
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm font-sans">
+                        {custName.charAt(0)}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="max-w-3xl mx-auto px-4 text-center text-sm text-slate-500">
+            No approved customer reviews yet. Once a customer review is approved, it will appear here.
+          </div>
+        )}
       </section>
     </div>
   );

@@ -46,7 +46,7 @@ export const Footer: React.FC = () => {
                   letterSpacing: '0.18em',
                 }}
               >
-                FF-CARS
+                CarRevive
               </span>
               <span
                 className="block text-[9px] uppercase tracking-widest mt-0.5"
@@ -171,7 +171,7 @@ export const Footer: React.FC = () => {
             className="text-xs"
             style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
           >
-            &copy; {year} FF-Cars Pvt. Ltd. All rights reserved. Chennai, Tamil Nadu.
+            &copy; {year} CarRevive Pvt. Ltd. All rights reserved. Chennai, Tamil Nadu.
           </p>
           <div className="flex gap-6">
             {['Privacy Policy', 'Terms of Service', 'Contact Us'].map((item) => (

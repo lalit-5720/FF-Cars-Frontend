@@ -36,7 +36,7 @@ export const useAuthStore = create<AuthState>()(
         set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false }),
     }),
     {
-      name: 'ff-cars-auth', // localStorage key
+      name: 'carrevive-auth', // localStorage key
     }
   )
 );
