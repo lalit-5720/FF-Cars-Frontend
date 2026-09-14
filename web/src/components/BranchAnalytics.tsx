@@ -24,15 +24,7 @@ interface RevenueChartProps {
 export function SalesRevenueChart({ dataPoints: propDataPoints, timeframe: initialTimeframe = 'This Year', onTimeframeChange }: RevenueChartProps) {
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>(initialTimeframe);
 
-  const yearPoints: MonthlyPoint[] = [
-    { month: 'Jan', val: 900000, formatted: '₹9.0L' },
-    { month: 'Feb', val: 1150000, formatted: '₹11.5L' },
-    { month: 'Mar', val: 1650000, formatted: '₹16.5L' },
-    { month: 'Apr', val: 1400000, formatted: '₹14.0L' },
-    { month: 'May', val: 1800000, formatted: '₹18.0L' },
-    { month: 'Jun', val: 1950000, formatted: '₹19.5L' },
-    { month: 'Jul', val: 2450000, formatted: '₹24.5L' },
-  ];
+  const yearPoints: MonthlyPoint[] = [];
 
   const formatL = (v: number) => {
     if (v >= 10000000) return `₹${(v / 10000000).toFixed(2)}Cr`;
@@ -53,12 +45,7 @@ export function SalesRevenueChart({ dataPoints: propDataPoints, timeframe: initi
         { month: 'Q4 (Oct-Dec)', val: q4Val, formatted: formatL(q4Val) },
       ];
     }
-    return [
-      { month: 'Q1 (Jan-Mar)', val: 3700000, formatted: '₹37.0L' },
-      { month: 'Q2 (Apr-Jun)', val: 5150000, formatted: '₹51.5L' },
-      { month: 'Q3 (Jul-Sep)', val: 2450000, formatted: '₹24.5L' },
-      { month: 'Q4 (Oct-Dec)', val: 0, formatted: '₹0.0L' },
-    ];
+    return [];
   };
 
   const getMonthPoints = (): MonthlyPoint[] => {
@@ -75,12 +62,7 @@ export function SalesRevenueChart({ dataPoints: propDataPoints, timeframe: initi
         { month: 'Week 4', val: w4, formatted: formatL(w4) },
       ];
     }
-    return [
-      { month: 'Week 1', val: 450000, formatted: '₹4.5L' },
-      { month: 'Week 2', val: 680000, formatted: '₹6.8L' },
-      { month: 'Week 3', val: 720000, formatted: '₹7.2L' },
-      { month: 'Week 4', val: 950000, formatted: '₹9.5L' },
-    ];
+    return [];
   };
 
   const getActivePoints = () => {
@@ -132,11 +114,11 @@ export function SalesRevenueChart({ dataPoints: propDataPoints, timeframe: initi
   const areaPath = `${svgPath} L ${coords[coords.length - 1]?.x || 416} 190 L ${coords[0]?.x || 20} 190 Z`;
 
   return (
-    <div className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col justify-between gap-4 h-full text-slate-900">
+    <div className="p-6 rounded-2xl border border-border/90 bg-card shadow-sm flex flex-col justify-between gap-4 h-full text-foreground">
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="font-extrabold text-base text-slate-900 font-sans">Sales Overview (Revenue)</h3>
-          <p className="text-xs text-slate-500 mt-0.5 font-medium">
+          <h3 className="font-extrabold text-base text-foreground font-sans">Sales Overview (Revenue)</h3>
+          <p className="text-xs text-muted-foreground mt-0.5 font-medium">
             {selectedTimeframe === 'This Month' ? 'Weekly revenue breakdown for current month' : selectedTimeframe === 'This Quarter' ? 'Quarterly revenue performance breakdown' : 'Real-time monthly revenue computed from branch sales'}
           </p>
         </div>
@@ -144,7 +126,7 @@ export function SalesRevenueChart({ dataPoints: propDataPoints, timeframe: initi
           value={selectedTimeframe}
           onChange={(e) => handleTimeframeSelect(e.target.value)}
           aria-label="Select revenue timeframe"
-          className="px-3 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer shadow-sm"
+          className="px-3 py-1.5 rounded-xl border border-border bg-card text-xs font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer shadow-sm"
         >
           <option value="This Month">This Month</option>
           <option value="This Quarter">This Quarter</option>
@@ -170,7 +152,7 @@ export function SalesRevenueChart({ dataPoints: propDataPoints, timeframe: initi
               x2="420"
               y2={yVal}
               stroke="currentColor"
-              className="text-slate-200"
+              className="text-border"
               strokeDasharray="4 4"
             />
           ))}
@@ -188,7 +170,7 @@ export function SalesRevenueChart({ dataPoints: propDataPoints, timeframe: initi
                 cx={pt.x}
                 cy={pt.y}
                 r="5"
-                className="fill-slate-900 stroke-white stroke-2 hover:r-7 transition-all"
+                className="fill-primary stroke-primary-foreground stroke-2 hover:r-7 transition-all"
                 onMouseEnter={() =>
                   setHoveredPoint({
                     month: `${pt.month} 2026`,
@@ -205,16 +187,16 @@ export function SalesRevenueChart({ dataPoints: propDataPoints, timeframe: initi
         {/* Hover Tooltip Overlay */}
         {hoveredPoint && (
           <div
-            className="absolute z-20 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs shadow-xl border border-slate-700 pointer-events-none transform -translate-x-1/2 -translate-y-12 transition-all"
+            className="absolute z-20 px-3 py-1.5 rounded-xl bg-secondary text-foreground text-xs shadow-xl border border-border pointer-events-none transform -translate-x-1/2 -translate-y-12 transition-all"
             style={{ left: `${(hoveredPoint.x / 440) * 100}%`, top: `${(hoveredPoint.y / 200) * 100}%` }}
           >
-            <div className="font-semibold text-slate-300">{hoveredPoint.month}</div>
-            <div className="font-extrabold text-sm text-white font-mono mt-0.5">{hoveredPoint.value}</div>
+            <div className="font-semibold text-muted-foreground">{hoveredPoint.month}</div>
+            <div className="font-extrabold text-sm text-foreground font-mono mt-0.5">{hoveredPoint.value}</div>
           </div>
         )}
 
         {/* X Axis Labels */}
-        <div className="flex justify-between px-3 text-xs text-slate-500 font-bold mt-2">
+        <div className="flex justify-between px-3 text-xs text-muted-foreground font-bold mt-2">
           {coords.map((pt) => (
             <span key={pt.month}>{pt.month}</span>
           ))}
@@ -250,11 +232,11 @@ export function TopBrandsDonutChart({ brandData: propBrandData, totalSold: propT
   });
 
   return (
-    <div className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col h-full text-slate-900 justify-between gap-4">
+    <div className="p-6 rounded-2xl border border-border/90 bg-card shadow-sm flex flex-col h-full text-foreground justify-between gap-4">
       <div className="flex justify-between items-center">
         <div>
-          <h3 className="font-extrabold text-base text-slate-900 font-sans">Top Selling Brands (Branch Split)</h3>
-          <p className="text-xs text-slate-500 mt-0.5 font-medium">Share of total completed vehicle sales</p>
+          <h3 className="font-extrabold text-base text-foreground font-sans">Top Selling Brands (Branch Split)</h3>
+          <p className="text-xs text-muted-foreground mt-0.5 font-medium">Share of total completed vehicle sales</p>
         </div>
       </div>
 
@@ -279,8 +261,8 @@ export function TopBrandsDonutChart({ brandData: propBrandData, totalSold: propT
 
           {/* Center Badge */}
           <div className="absolute flex flex-col items-center justify-center text-center">
-            <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Total Sold</span>
-            <span className="text-2xl font-black text-slate-900 font-mono leading-tight">{totalCount}</span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Total Sold</span>
+            <span className="text-2xl font-black text-foreground font-mono leading-tight">{totalCount}</span>
           </div>
         </div>
 
@@ -290,9 +272,9 @@ export function TopBrandsDonutChart({ brandData: propBrandData, totalSold: propT
             <div key={b.name} className="flex items-center justify-between gap-4 text-xs">
               <div className="flex items-center gap-2">
                 <span className="w-3 h-3 rounded-full shadow-sm" style={{ backgroundColor: b.color }} />
-                <span className="font-bold text-slate-800 truncate max-w-[90px]">{b.name}</span>
+                <span className="font-bold text-foreground truncate max-w-[90px]">{b.name}</span>
               </div>
-              <span className="font-mono text-slate-900 font-extrabold text-xs">{b.pct}%</span>
+              <span className="font-mono text-foreground font-extrabold text-xs">{b.pct}%</span>
             </div>
           ))}
         </div>

@@ -1,13 +1,23 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type UserRole =
+  | 'CUSTOMER'
+  | 'ADMIN'
+  | 'SYSTEM_ADMIN'
+  | 'BRANCH_MANAGER'
+  | 'SALES_EXECUTIVE';
+
 export interface User {
-  id: string;
+  id: string | number;
   email: string;
   name: string;
-  role: 'CUSTOMER' | 'ADMIN';
-  createdAt: string;
+  role: UserRole;
+  branch_id?: number | null;
+  job_title?: string;
+  createdAt?: string;
 }
+
 
 interface AuthState {
   user: User | null;

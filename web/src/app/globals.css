@@ -8,18 +8,28 @@
 
 :root {
   /* Core Executive Palette (Reference Match) */
-  --midnight:       #F8FAFC;  /* Main Page Off-White Background */
-  --obsidian:       #FFFFFF;  /* Card Pure White Background */
-  --hero-obsidian:  #0F172A;  /* Dark Hero Banner Background */
-  --onyx:           #FFFFFF;
-  --onyx-border:    #E2E8F0;  /* Subtle Soft Border */
-  --charcoal:       #F1F5F9;
+  --midnight:       #0B0F1A;
+  --obsidian:       #141A2A;
+  --hero-obsidian:  #101827;
+  --onyx:           #20283A;
+  --onyx-border:    #2D374A;
+  --charcoal:       #1B2434;
 
   /* Executive Text System */
-  --platinum:       #0F172A;  /* Main Primary Text - Dark Navy */
-  --silver:         #475569;  /* Secondary Text - Slate */
-  --silver-dim:     #64748B;  /* Muted Text / Labels */
-  --silver-ghost:   #94A3B8;
+  --platinum:       #F4F7FB;
+  --silver:         #A5B0C2;
+  --silver-dim:     #8490A5;
+  --silver-ghost:   #68758B;
+
+  --success:        #2BBE84;
+  --warning:        #F0B429;
+  --sidebar:        #0A101C;
+  --sidebar-active: #5468F0;
+  --chart-1:        #5468F0;
+  --chart-2:        #2BBE84;
+  --chart-3:        #F0B429;
+  --chart-4:        #9162D8;
+  --chart-5:        #E47A67;
 
   /* Radius */
   --radius-sm:      0.5rem;
@@ -36,6 +46,13 @@
   --color-card-foreground: var(--platinum);
   --color-border:       var(--onyx-border);
   --color-muted-foreground: var(--silver);
+  --color-primary: var(--sidebar-active);
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: var(--charcoal);
+  --color-secondary-foreground: var(--platinum);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-sidebar: var(--sidebar);
 
   --font-sans:     'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
   --font-display:  'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;

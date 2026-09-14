@@ -221,8 +221,8 @@ function CustomerDashboard() {
 
   if (authLoading || !user) {
     return (
-      <div className="flex-1 flex items-center justify-center min-h-screen bg-[#F8FAFC]">
-        <Loader2 className="w-8 h-8 text-slate-900 animate-spin" />
+      <div className="flex-1 flex items-center justify-center min-h-screen bg-background">
+        <Loader2 className="w-8 h-8 text-foreground animate-spin" />
       </div>
     );
   }
@@ -230,38 +230,38 @@ function CustomerDashboard() {
   const completedPurchasesCount = bookings.filter((b) => b.is_purchased || b.sale_status === 'Completed').length;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans flex flex-col pb-12">
+    <div className="min-h-screen bg-background text-foreground font-sans flex flex-col pb-12">
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col gap-6 w-full">
         
         {/* 1. REFERENCE MATCH HERO WELCOME BANNER (DARK OBSIDIAN) */}
-        <div className="p-8 sm:p-10 rounded-3xl bg-[#0F172A] text-white shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative overflow-hidden">
+        <div className="p-8 sm:p-10 rounded-3xl bg-[#0F172A] text-primary-foreground shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative overflow-hidden">
           <div className="flex flex-col items-start max-w-2xl">
             
             {/* Status Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-[11px] font-bold text-emerald-400 uppercase tracking-widest mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-secondary/80 border border-border text-[11px] font-bold text-emerald-400 uppercase tracking-widest mb-4">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               SYSTEM ONLINE
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-display">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-primary-foreground tracking-tight font-display">
               Welcome back, {user.name}
             </h1>
 
-            <p className="text-sm text-slate-300 mt-3 font-medium leading-relaxed font-sans">
+            <p className="text-sm text-muted-foreground mt-3 font-medium leading-relaxed font-sans">
               Monitor test drive schedules, track vehicle delivery progress, and curate your personalized luxury automobile collection.
             </p>
 
             <div className="flex items-center gap-4 mt-7 flex-wrap">
               <Link
                 href="/cars"
-                className="px-6 py-3 rounded-xl bg-white text-slate-950 font-bold text-xs hover:bg-slate-100 transition-all shadow-md cursor-pointer"
+                className="px-6 py-3 rounded-xl bg-card text-foreground font-bold text-xs hover:bg-secondary transition-all shadow-md cursor-pointer"
               >
                 Browse Inventory
               </Link>
               <button
                 onClick={() => setActiveTab('wishlist')}
-                className="px-6 py-3 rounded-xl bg-slate-800/90 border border-slate-700 text-slate-200 font-bold text-xs hover:bg-slate-800 transition-all cursor-pointer"
+                className="px-6 py-3 rounded-xl bg-secondary/90 border border-border text-foreground font-bold text-xs hover:bg-secondary transition-all cursor-pointer"
               >
                 View Wishlist
               </button>
@@ -271,7 +271,7 @@ function CustomerDashboard() {
           {user.role === 'ADMIN' && (
             <Link
               href="/admin"
-              className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition-all flex items-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer"
+              className="px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-foreground font-black text-xs transition-all flex items-center gap-2 shadow-lg shadow-amber-500/20 cursor-pointer"
             >
               Admin Dashboard <ExternalLink className="w-4 h-4" />
             </Link>
@@ -280,34 +280,34 @@ function CustomerDashboard() {
 
         {/* 2. REFERENCE MATCH STAT SUMMARY CARDS (PURE WHITE) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-card border border-border/90 shadow-sm flex flex-col justify-between">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">HEALTHY BOOKINGS</span>
-              <span className="text-4xl font-black text-slate-900 mt-2 block font-display">{bookings.length}</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">HEALTHY BOOKINGS</span>
+              <span className="text-4xl font-black text-foreground mt-2 block font-display">{bookings.length}</span>
             </div>
-            <div className="flex items-center gap-2 mt-6 text-xs text-slate-600 font-medium pt-3 border-t border-slate-100">
+            <div className="flex items-center gap-2 mt-6 text-xs text-muted-foreground font-medium pt-3 border-t border-border">
               <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs">✓</span>
               Active and ready for test drive.
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-card border border-border/90 shadow-sm flex flex-col justify-between">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">SAVED VEHICLES</span>
-              <span className="text-4xl font-black text-slate-900 mt-2 block font-display">{wishlistCars.length}</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">SAVED VEHICLES</span>
+              <span className="text-4xl font-black text-foreground mt-2 block font-display">{wishlistCars.length}</span>
             </div>
-            <div className="flex items-center gap-2 mt-6 text-xs text-slate-600 font-medium pt-3 border-t border-slate-100">
+            <div className="flex items-center gap-2 mt-6 text-xs text-muted-foreground font-medium pt-3 border-t border-border">
               <Heart className="w-4 h-4 text-rose-500" />
               Curated luxury garage items.
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white border border-slate-200/90 shadow-sm flex flex-col justify-between">
+          <div className="p-6 rounded-2xl bg-card border border-border/90 shadow-sm flex flex-col justify-between">
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">COMPLETED PURCHASES</span>
-              <span className="text-4xl font-black text-slate-900 mt-2 block font-display">{completedPurchasesCount}</span>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">COMPLETED PURCHASES</span>
+              <span className="text-4xl font-black text-foreground mt-2 block font-display">{completedPurchasesCount}</span>
             </div>
-            <div className="flex items-center gap-2 mt-6 text-xs text-slate-600 font-medium pt-3 border-t border-slate-100">
+            <div className="flex items-center gap-2 mt-6 text-xs text-muted-foreground font-medium pt-3 border-t border-border">
               <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
               Verified owner privileges.
             </div>
@@ -315,13 +315,13 @@ function CustomerDashboard() {
         </div>
 
         {/* 3. NAVIGATION PILL TABS */}
-        <div className="flex gap-2 border-b border-slate-200 pb-3">
+        <div className="flex gap-2 border-b border-border pb-3">
           <button
             onClick={() => setActiveTab('bookings')}
             className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'bookings'
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                ? 'bg-secondary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
             }`}
           >
             <ShoppingBag className="w-4 h-4" />
@@ -331,8 +331,8 @@ function CustomerDashboard() {
             onClick={() => setActiveTab('wishlist')}
             className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
               activeTab === 'wishlist'
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+                ? 'bg-secondary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
             }`}
           >
             <Heart className="w-4 h-4" />
@@ -346,23 +346,23 @@ function CustomerDashboard() {
             loadingBookings ? (
               <div className="grid grid-cols-1 gap-4">
                 {[1, 2].map((n) => (
-                  <div key={n} className="h-40 rounded-2xl border border-slate-200 bg-white skeleton-shimmer" />
+                  <div key={n} className="h-40 rounded-2xl border border-border bg-card skeleton-shimmer" />
                 ))}
               </div>
             ) : bookings.length === 0 ? (
-              <div className="text-center py-16 border border-slate-200 rounded-2xl bg-white flex flex-col items-center gap-4 shadow-sm">
-                <div className="p-4 rounded-2xl bg-slate-100 text-slate-700">
+              <div className="text-center py-16 border border-border rounded-2xl bg-card flex flex-col items-center gap-4 shadow-sm">
+                <div className="p-4 rounded-2xl bg-secondary text-foreground">
                   <Clock className="w-8 h-8" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-slate-900 font-display">No Test Rides Scheduled</h3>
-                  <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
+                  <h3 className="font-bold text-lg text-foreground font-display">No Test Rides Scheduled</h3>
+                  <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
                     You haven't requested any luxury vehicle test drives yet. Explore our inventory catalog to book one.
                   </p>
                 </div>
                 <Link
                   href="/cars"
-                  className="px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-sm"
+                  className="px-6 py-3 rounded-xl bg-secondary hover:bg-secondary text-primary-foreground font-bold text-xs transition-all shadow-sm"
                 >
                   Browse Luxury Catalog
                 </Link>
@@ -391,25 +391,25 @@ function CustomerDashboard() {
                   return (
                     <div
                       key={bookingKey}
-                      className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col md:flex-row gap-6 items-stretch md:items-center justify-between hover:border-slate-300 transition-all"
+                      className="p-6 rounded-2xl border border-border/90 bg-card shadow-sm flex flex-col md:flex-row gap-6 items-stretch md:items-center justify-between hover:border-border transition-all"
                     >
                       {/* Car Thumbnail and Info */}
                       <div className="flex gap-5 items-center">
-                        <div className="w-28 h-20 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200 shadow-sm">
+                        <div className="w-28 h-20 rounded-xl overflow-hidden bg-secondary flex-shrink-0 border border-border shadow-sm">
                           <img src={thumbnail} alt={model} className="w-full h-full object-cover" />
                         </div>
                         <div>
                           <Link href={`/cars/${carId}`} className="hover:underline">
-                            <h3 className="font-extrabold text-base leading-tight text-slate-900 hover:text-slate-700 transition-colors font-display">
+                            <h3 className="font-extrabold text-base leading-tight text-foreground hover:text-foreground transition-colors font-display">
                               {brand} {model}
                             </h3>
                           </Link>
-                          <p className="text-xs text-slate-500 mt-1 font-medium">{variant} &bull; {year}</p>
+                          <p className="text-xs text-muted-foreground mt-1 font-medium">{variant} &bull; {year}</p>
                           <div className="flex gap-2 mt-2">
-                            <span className="text-[10px] px-2.5 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 font-bold">
+                            <span className="text-[10px] px-2.5 py-0.5 rounded-md bg-secondary border border-border text-foreground font-bold">
                               {transmission}
                             </span>
-                            <span className="text-[10px] px-2.5 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 font-bold">
+                            <span className="text-[10px] px-2.5 py-0.5 rounded-md bg-secondary border border-border text-foreground font-bold">
                               {fuelType}
                             </span>
                           </div>
@@ -417,17 +417,17 @@ function CustomerDashboard() {
                       </div>
 
                       {/* Booking Details: Test Drive & Sale Status */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs border-t md:border-t-0 pt-4 md:pt-0 border-slate-100">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs border-t md:border-t-0 pt-4 md:pt-0 border-border">
                         <div>
-                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Scheduled Date</span>
-                          <span className="font-bold text-slate-900 mt-1 block font-mono">{new Date(bookingDate).toLocaleDateString()}</span>
+                          <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">Scheduled Date</span>
+                          <span className="font-bold text-foreground mt-1 block font-mono">{new Date(bookingDate).toLocaleDateString()}</span>
                         </div>
                         <div>
-                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Vehicle Price</span>
-                          <span className="font-extrabold text-slate-900 mt-1 block font-mono text-sm">₹{price.toLocaleString()}</span>
+                          <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">Vehicle Price</span>
+                          <span className="font-extrabold text-foreground mt-1 block font-mono text-sm">₹{price.toLocaleString()}</span>
                         </div>
                         <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Test Drive Status</span>
+                          <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">Test Drive Status</span>
                           <span className={`px-2.5 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wider inline-block w-fit ${
                             testDriveStatus === 'COMPLETED' || testDriveStatus === 'APPROVED'
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
@@ -439,11 +439,11 @@ function CustomerDashboard() {
                           </span>
                         </div>
                         <div className="flex flex-col gap-1">
-                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block">Purchase Status</span>
+                          <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider block">Purchase Status</span>
                           <span className={`px-2.5 py-0.5 rounded-full border text-[9px] font-bold uppercase tracking-wider inline-block w-fit ${
                             isPurchased
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              : 'bg-slate-100 text-slate-600 border-slate-200'
+                              : 'bg-secondary text-muted-foreground border-border'
                           }`}>
                             {isPurchased ? 'Completed (Sold)' : 'Not Purchased'}
                           </span>
@@ -451,7 +451,7 @@ function CustomerDashboard() {
                       </div>
 
                       {/* Action Buttons: Cancel Request & Write Review */}
-                      <div className="flex items-center gap-3 justify-end border-t md:border-t-0 pt-4 md:pt-0 border-slate-100 flex-wrap">
+                      <div className="flex items-center gap-3 justify-end border-t md:border-t-0 pt-4 md:pt-0 border-border flex-wrap">
                         
                         {/* WRITE REVIEW BUTTON - GATED TO PURCHASED CUSTOMERS ONLY */}
                         {isPurchased ? (
@@ -459,15 +459,15 @@ function CustomerDashboard() {
                             onClick={() => openWriteReviewModal(booking)}
                             className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                               isReviewed
-                                ? 'bg-slate-100 text-slate-500 border border-slate-200'
-                                : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-sm'
+                                ? 'bg-secondary text-muted-foreground border border-border'
+                                : 'bg-amber-500 hover:bg-amber-400 text-foreground shadow-sm'
                             }`}
                           >
                             <Star className="w-4 h-4 fill-slate-950" />
                             {isReviewed ? 'Review Submitted ✓' : 'Write Review ⭐'}
                           </button>
                         ) : (
-                          <span className="text-[11px] font-medium text-slate-500 bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl flex items-center gap-1.5">
+                          <span className="text-[11px] font-medium text-muted-foreground bg-secondary border border-border px-3 py-2 rounded-xl flex items-center gap-1.5">
                             <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
                             Purchase required to review
                           </span>
@@ -499,23 +499,23 @@ function CustomerDashboard() {
             loadingWishlist ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3].map((n) => (
-                  <div key={n} className="h-90 rounded-2xl border border-slate-200 bg-white skeleton-shimmer" />
+                  <div key={n} className="h-90 rounded-2xl border border-border bg-card skeleton-shimmer" />
                 ))}
               </div>
             ) : wishlistCars.length === 0 ? (
-              <div className="text-center py-16 border border-slate-200 rounded-2xl bg-white flex flex-col items-center gap-4 shadow-sm">
+              <div className="text-center py-16 border border-border rounded-2xl bg-card flex flex-col items-center gap-4 shadow-sm">
                 <div className="p-4 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100">
                   <Heart className="w-8 h-8" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg text-slate-900 font-display">Your Wishlist is Empty</h3>
-                  <p className="text-xs text-slate-500 mt-1 max-w-xs mx-auto">
+                  <h3 className="font-bold text-lg text-foreground font-display">Your Wishlist is Empty</h3>
+                  <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
                     Browse luxury vehicles and click the heart icon to save your favorite cars.
                   </p>
                 </div>
                 <Link
                   href="/cars"
-                  className="px-6 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-sm"
+                  className="px-6 py-3 rounded-xl bg-secondary hover:bg-secondary text-primary-foreground font-bold text-xs transition-all shadow-sm"
                 >
                   Explore Inventory
                 </Link>
@@ -540,19 +540,19 @@ function CustomerDashboard() {
                     <Link
                       key={carId}
                       href={`/cars/${carId}`}
-                      className={`group rounded-2xl border border-slate-200/90 bg-white overflow-hidden hover:border-slate-300 transition-all flex flex-col h-full relative shadow-sm ${
+                      className={`group rounded-2xl border border-border/90 bg-card overflow-hidden hover:border-border transition-all flex flex-col h-full relative shadow-sm ${
                         !isAvailable ? 'opacity-85' : ''
                       }`}
                     >
                       {/* Status Badge */}
                       {!isAvailable && (
-                        <div className="absolute top-3 left-3 z-10 px-3 py-0.5 rounded-full text-[9px] font-bold uppercase bg-rose-600 text-white shadow-md">
+                        <div className="absolute top-3 left-3 z-10 px-3 py-0.5 rounded-full text-[9px] font-bold uppercase bg-rose-600 text-primary-foreground shadow-md">
                           {status}
                         </div>
                       )}
 
                       {/* Photo Container */}
-                      <div className="relative aspect-video w-full overflow-hidden bg-slate-100">
+                      <div className="relative aspect-video w-full overflow-hidden bg-secondary">
                         <img
                           src={thumbnail}
                           alt={`${brand} ${model}`}
@@ -560,11 +560,11 @@ function CustomerDashboard() {
                         />
                         <button
                           onClick={(e) => handleRemoveWishlist(e, carId)}
-                          className="absolute top-3 right-3 p-2.5 rounded-full backdrop-blur-md shadow-sm transition-all border z-10 bg-white/90 border-slate-200 text-rose-500 hover:scale-110"
+                          className="absolute top-3 right-3 p-2.5 rounded-full backdrop-blur-md shadow-sm transition-all border z-10 bg-card/90 border-border text-rose-500 hover:scale-110"
                         >
                           <Heart className="w-4 h-4" fill="currentColor" />
                         </button>
-                        <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase backdrop-blur-md bg-slate-900/90 text-white">
+                        <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase backdrop-blur-md bg-secondary/90 text-primary-foreground">
                           {year}
                         </div>
                       </div>
@@ -573,35 +573,35 @@ function CustomerDashboard() {
                       <div className="p-5 flex-1 flex flex-col">
                         <div className="flex justify-between items-start gap-2 mb-2">
                           <div>
-                            <h3 className="font-extrabold text-base leading-tight text-slate-900 group-hover:text-slate-700 transition-colors font-display">
+                            <h3 className="font-extrabold text-base leading-tight text-foreground group-hover:text-foreground transition-colors font-display">
                               {brand} {model}
                             </h3>
-                            <p className="text-xs text-slate-500 mt-0.5">{variant}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{variant}</p>
                           </div>
-                          <span className="flex-shrink-0 inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase">
+                          <span className="flex-shrink-0 inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-secondary text-foreground border border-border uppercase">
                             {car.transmission || 'Automatic'}
                           </span>
                         </div>
-                        <div className="grid grid-cols-3 gap-2 py-3 border-y border-slate-100 my-3 text-xs text-slate-500">
+                        <div className="grid grid-cols-3 gap-2 py-3 border-y border-border my-3 text-xs text-muted-foreground">
                           <div>
-                            <span className="block text-[9px] uppercase font-bold text-slate-400">Driven</span>
-                            <span className="font-bold text-slate-900 font-mono">{kmDriven.toLocaleString()} km</span>
+                            <span className="block text-[9px] uppercase font-bold text-muted-foreground">Driven</span>
+                            <span className="font-bold text-foreground font-mono">{kmDriven.toLocaleString()} km</span>
                           </div>
                           <div>
-                            <span className="block text-[9px] uppercase font-bold text-slate-400">Fuel</span>
-                            <span className="font-bold text-slate-900">{fuelType}</span>
+                            <span className="block text-[9px] uppercase font-bold text-muted-foreground">Fuel</span>
+                            <span className="font-bold text-foreground">{fuelType}</span>
                           </div>
                           <div>
-                            <span className="block text-[9px] uppercase font-bold text-slate-400">Owner</span>
-                            <span className="font-bold text-slate-900">{ownership}</span>
+                            <span className="block text-[9px] uppercase font-bold text-muted-foreground">Owner</span>
+                            <span className="font-bold text-foreground">{ownership}</span>
                           </div>
                         </div>
 
                         <div className="mt-auto flex justify-between items-center pt-2">
-                          <span className="text-lg font-black text-slate-900 font-mono">
+                          <span className="text-lg font-black text-foreground font-mono">
                             ₹{price.toLocaleString()}
                           </span>
-                          <span className="text-xs font-bold text-slate-700 hover:text-slate-900 flex items-center gap-1">
+                          <span className="text-xs font-bold text-foreground hover:text-foreground flex items-center gap-1">
                             View Details &rarr;
                           </span>
                         </div>
@@ -617,34 +617,34 @@ function CustomerDashboard() {
 
       {/* INTERACTIVE WRITE CUSTOMER REVIEW MODAL */}
       {isReviewModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl flex flex-col">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+        <div className="fixed inset-0 z-50 bg-secondary/60 flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-card border border-border rounded-3xl w-full max-w-lg shadow-2xl flex flex-col">
+            <div className="p-6 border-b border-border flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                <h3 className="text-lg font-bold text-slate-900 font-display">
+                <h3 className="text-lg font-bold text-foreground font-display">
                   Write Vehicle Review &amp; Rating
                 </h3>
               </div>
               <button
                 onClick={() => setIsReviewModalOpen(false)}
-                className="text-slate-400 hover:text-slate-700 text-xs font-bold cursor-pointer"
+                className="text-muted-foreground hover:text-foreground text-xs font-bold cursor-pointer"
               >
                 Close (Esc)
               </button>
             </div>
 
             <form onSubmit={handleSubmitReview} className="p-6 flex flex-col gap-5 text-xs">
-              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Reviewing Purchased Vehicle</div>
-                <div className="font-extrabold text-slate-900 text-sm mt-0.5 font-display">
+              <div className="p-4 rounded-xl bg-secondary border border-border">
+                <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Reviewing Purchased Vehicle</div>
+                <div className="font-extrabold text-foreground text-sm mt-0.5 font-display">
                   {selectedBookingForReview?.vehicles?.make || selectedBookingForReview?.car?.make || 'Luxury'} {selectedBookingForReview?.vehicles?.model || selectedBookingForReview?.car?.model || 'Vehicle'}
                 </div>
               </div>
 
               {/* STAR RATING SELECTOR */}
               <div className="flex flex-col gap-2 items-center text-center">
-                <label className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+                <label className="text-xs font-extrabold text-foreground uppercase tracking-wider">
                   Tap Stars to Select Your Rating
                 </label>
                 <div className="flex gap-2.5 my-1">
@@ -661,7 +661,7 @@ function CustomerDashboard() {
                         className={`w-8 h-8 ${
                           (hoverRating || reviewRating) >= star
                             ? 'text-amber-500 fill-amber-500 drop-shadow-sm'
-                            : 'text-slate-300'
+                            : 'text-muted-foreground'
                         }`}
                       />
                     </button>
@@ -674,7 +674,7 @@ function CustomerDashboard() {
 
               {/* REVIEW COMMENT */}
               <div>
-                <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
+                <label className="block text-[10px] font-bold uppercase text-muted-foreground mb-1">
                   Your Review &amp; Dealership Feedback
                 </label>
                 <textarea
@@ -683,22 +683,22 @@ function CustomerDashboard() {
                   value={reviewComment}
                   onChange={(e) => setReviewComment(e.target.value)}
                   placeholder="Share your driving feedback, vehicle performance, sales executive courtesy, and overall dealership satisfaction..."
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 font-medium"
+                  className="w-full px-4 py-3 rounded-xl bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-slate-900 font-medium"
                 />
               </div>
 
-              <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
+              <div className="pt-4 flex justify-end gap-3 border-t border-border">
                 <button
                   type="button"
                   onClick={() => setIsReviewModalOpen(false)}
-                  className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:text-slate-900 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer"
+                  className="px-5 py-2.5 text-xs font-bold text-muted-foreground hover:text-foreground border border-border rounded-xl hover:bg-secondary cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submittingReview}
-                  className="px-6 py-2.5 text-xs font-bold bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all cursor-pointer shadow-md disabled:opacity-50 flex items-center gap-2"
+                  className="px-6 py-2.5 text-xs font-bold bg-secondary text-primary-foreground rounded-xl hover:bg-secondary transition-all cursor-pointer shadow-md disabled:opacity-50 flex items-center gap-2"
                 >
                   {submittingReview ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Publish Review ⭐'}
                 </button>
@@ -715,7 +715,7 @@ function CustomerDashboard() {
 export default function DashboardPage() {
   return (
     <Suspense fallback={
-      <div className="flex-1 flex items-center justify-center min-h-screen bg-slate-950">
+      <div className="flex-1 flex items-center justify-center min-h-screen bg-background">
         <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
       </div>
     }>

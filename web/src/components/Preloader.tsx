@@ -46,7 +46,7 @@ export const Preloader: React.FC = () => {
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black transition-all duration-700 ease-in-out ${
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-background transition-all duration-700 ease-in-out ${
         isAnimatingOut ? 'opacity-0 -translate-y-full' : 'opacity-100 translate-y-0'
       }`}
     >
@@ -80,37 +80,22 @@ export const Preloader: React.FC = () => {
               }}
             />
             
-            {/* FF Large Text */}
+            {/* CarRevive Text */}
             <text
-              x="55"
+              x="100"
               y="112"
+              textAnchor="middle"
               fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
               fontWeight="800"
-              fontSize="78"
-              letterSpacing="-6"
+              fontSize="52"
+              letterSpacing="-1"
               fill="#1a1a1a"
               className="opacity-0"
               style={{
                 animation: 'fillLogo 0.4s cubic-bezier(0.25, 1, 0.5, 1) 1.2s forwards',
               }}
             >
-              FF
-            </text>
-
-            {/* Cars Text */}
-            <text
-              x="114"
-              y="112"
-              fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-              fontWeight="300"
-              fontSize="28"
-              fill="#1a1a1a"
-              className="opacity-0"
-              style={{
-                animation: 'fillLogo 0.4s cubic-bezier(0.25, 1, 0.5, 1) 1.3s forwards',
-              }}
-            >
-              Cars
+              CarRevive
             </text>
 
             {/* Slogan */}
@@ -128,26 +113,26 @@ export const Preloader: React.FC = () => {
                 animation: 'fillLogo 0.4s cubic-bezier(0.25, 1, 0.5, 1) 1.4s forwards',
               }}
             >
-              Buy & Sell Car Directly
+              Drive Better
             </text>
           </svg>
           
           {/* Subtle Ambient Pulse behind the logo */}
-          <div className="absolute inset-0 bg-white/5 rounded-full blur-2xl -z-10 animate-[pulseGlow_3s_infinite]" />
+          <div className="absolute inset-0 bg-card/5 rounded-full blur-2xl -z-10 animate-[pulseGlow_3s_infinite]" />
         </div>
 
         {/* Loading progress elements */}
         <div className="flex flex-col items-center gap-2 mt-4">
-          <span className="font-mono text-[10px] tracking-[0.3em] text-zinc-500 uppercase">
+          <span className="font-mono text-[10px] tracking-[0.3em] text-muted-foreground uppercase">
             CarRevive Company
           </span>
-          <div className="text-3xl font-extrabold tracking-tight text-white font-mono">
+          <div className="text-3xl font-extrabold tracking-tight text-foreground font-mono">
             {progress}%
           </div>
           {/* Small modern thin loading bar */}
-          <div className="w-48 h-[1px] bg-zinc-800 relative overflow-hidden rounded-full mt-2">
+          <div className="w-48 h-[1px] bg-secondary relative overflow-hidden rounded-full mt-2">
             <div
-              className="h-full bg-white transition-all duration-100 ease-out"
+              className="h-full bg-card transition-all duration-100 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>

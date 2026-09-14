@@ -4,9 +4,11 @@ import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '../../services/api';
-import { Heart, Search, SlidersHorizontal, RefreshCw } from 'lucide-react';
+import { Heart, Search, SlidersHorizontal, RefreshCw, Scale } from 'lucide-react';
 import { useWishlistStore } from '../../store/useWishlistStore';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useCompareStore } from '../../store/useCompareStore';
+import { CarComparisonDrawer } from '../../components/CarComparisonDrawer';
 import { showLocalToast } from '../../components/Toast';
 
 const FALLBACK_IMG = 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&q=80&w=1200';
@@ -32,6 +34,7 @@ function CarsListingPage() {
   const [page, setPage] = useState(parseInt(searchParams.get('page') || '1', 10));
 
   const { toggleWishlist, isWishlisted } = useWishlistStore();
+  const { addToCompare, removeFromCompare, isInCompare } = useCompareStore();
   const { user, isAuthenticated } = useAuthStore();
 
   const [branchesList, setBranchesList] = useState<any[]>([]);
@@ -157,16 +160,16 @@ function CarsListingPage() {
 
   return (
     <div
-      className="flex-1 flex flex-col bg-[#F8FAFC] text-slate-900 min-h-screen"
+      className="flex-1 flex flex-col bg-background text-foreground min-h-screen"
     >
       {/* ── Page Header ── */}
-      <div className="bg-white border-b border-slate-200 py-7 px-4 sm:px-6 lg:px-8 shadow-sm">
+      <div className="bg-card border-b border-border py-7 px-4 sm:px-6 lg:px-8 shadow-sm">
         <div className="max-w-7xl mx-auto">
-          <div className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Vehicle Inventory</div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-display">
+          <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Vehicle Inventory</div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight font-display">
             Certified <em className="italic text-amber-600 font-normal">Collection</em>
           </h1>
-          <p className="mt-2 text-sm text-slate-500 max-w-lg font-sans">
+          <p className="mt-2 text-sm text-muted-foreground max-w-lg font-sans">
             Explore our curated selection of inspected and certified premium vehicles across all showroom locations.
           </p>
         </div>
@@ -178,9 +181,9 @@ function CarsListingPage() {
 
           {/* SIDEBAR FILTERS */}
           <aside className="w-full lg:w-72 flex-shrink-0">
-            <div className="sticky top-24 rounded-2xl p-6 flex flex-col gap-6 bg-white border border-slate-200/90 shadow-sm">
+            <div className="sticky top-24 rounded-2xl p-6 flex flex-col gap-6 bg-card border border-border/90 shadow-sm">
               {/* Filter Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center justify-between pb-4 border-b border-border">
                 <div className="flex items-center gap-2.5">
                   <SlidersHorizontal className="w-4 h-4" style={{ color: 'var(--gold)' }} />
                   <span
@@ -469,39 +472,66 @@ function CarsListingPage() {
                     <Link
                       key={id}
                       href={`/cars/${id}`}
-                      className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-300 relative bg-white border border-slate-200/90 shadow-sm hover:border-slate-300 hover:shadow-md"
+                      className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-300 relative bg-card border border-border/90 shadow-sm hover:border-border hover:shadow-md"
                       style={{
                         opacity: isAvailable ? 1 : 0.75,
                       }}
                     >
                       {/* Status */}
                       {!isAvailable && (
-                        <div className="absolute top-3 left-3 z-10 px-3 py-0.5 rounded-full text-[9px] font-bold uppercase bg-rose-600 text-white shadow-sm">
+                        <div className="absolute top-3 left-3 z-10 px-3 py-0.5 rounded-full text-[9px] font-bold uppercase bg-rose-600 text-primary-foreground shadow-sm">
                           {status}
                         </div>
                       )}
 
                       {/* Image */}
-                      <div className="relative overflow-hidden aspect-video bg-slate-100">
+                      <div className="relative overflow-hidden aspect-video bg-secondary">
                         <img
                           src={image}
                           alt={`${make} ${car.model}`}
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
 
-                        {/* Wishlist */}
-                        <button
-                          onClick={(e) => handleWishlistToggle(e, String(id))}
-                          className="absolute top-3 right-3 p-2.5 rounded-full backdrop-blur-md shadow-sm transition-all border z-10 bg-white/90 border-slate-200 text-rose-500 hover:scale-110"
-                        >
-                          <Heart
-                            className="w-3.5 h-3.5"
-                            fill={isWishlisted(String(id)) ? 'currentColor' : 'none'}
-                          />
-                        </button>
+                        {/* Wishlist & Compare Overlay */}
+                        <div className="absolute top-3 right-3 flex items-center gap-1.5 z-20">
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (isInCompare(String(id))) {
+                                removeFromCompare(String(id));
+                                showLocalToast('Removed from comparison');
+                              } else {
+                                addToCompare({ id: String(id), ...car });
+                                showLocalToast('Added to comparison');
+                              }
+                            }}
+                            className="p-2 rounded-full backdrop-blur-md shadow-sm transition-all border text-white hover:scale-110"
+                            style={{
+                              background: isInCompare(String(id)) ? '#5468F0' : 'rgba(15,23,42,0.8)',
+                              borderColor: isInCompare(String(id)) ? '#5468F0' : 'rgba(255,255,255,0.15)',
+                            }}
+                            title={isInCompare(String(id)) ? 'Remove from Compare' : 'Add to Compare'}
+                          >
+                            <Scale className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={(e) => handleWishlistToggle(e, String(id))}
+                            className="p-2 rounded-full backdrop-blur-md shadow-sm transition-all border text-rose-500 hover:scale-110"
+                            style={{
+                              background: 'rgba(15,23,42,0.8)',
+                              borderColor: 'rgba(255,255,255,0.15)',
+                            }}
+                          >
+                            <Heart
+                              className="w-3.5 h-3.5"
+                              fill={isWishlisted(String(id)) ? 'currentColor' : 'none'}
+                            />
+                          </button>
+                        </div>
 
                         {/* Year */}
-                        <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-slate-900/90 text-white">
+                        <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-secondary/90 text-primary-foreground">
                           {year}
                         </div>
                       </div>
@@ -510,30 +540,30 @@ function CarsListingPage() {
                       <div className="p-5 flex-1 flex flex-col">
                         <div className="flex justify-between items-start gap-2 mb-3">
                           <div>
-                            <h3 className="font-extrabold text-base leading-tight text-slate-900 group-hover:text-slate-700 transition-colors font-display">
+                            <h3 className="font-extrabold text-base leading-tight text-foreground group-hover:text-foreground transition-colors font-display">
                               {make} {car.model}
                             </h3>
-                            <p className="text-xs text-slate-500 mt-0.5 font-sans">
+                            <p className="text-xs text-muted-foreground mt-0.5 font-sans">
                               {car.color || 'Standard Edition'}
                             </p>
                           </div>
-                          <span className="flex-shrink-0 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-slate-100 border border-slate-200 text-slate-700">
+                          <span className="flex-shrink-0 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-secondary border border-border text-foreground">
                             {car.transmission || 'Auto'}
                           </span>
                         </div>
 
                         {/* Specs */}
-                        <div className="grid grid-cols-3 gap-2 py-3 text-xs my-2 border-y border-slate-100 text-slate-500">
+                        <div className="grid grid-cols-3 gap-2 py-3 text-xs my-2 border-y border-border text-muted-foreground">
                           {[
                             { label: 'Driven', val: `${km.toLocaleString()} km` },
                             { label: 'Fuel', val: fuel },
                             { label: 'Owner', val: owner },
                           ].map(({ label, val }) => (
                             <div key={label}>
-                              <span className="block text-[9px] uppercase font-bold text-slate-400">
+                              <span className="block text-[9px] uppercase font-bold text-muted-foreground">
                                 {label}
                               </span>
-                              <span className="font-bold text-slate-900 mt-0.5 block font-sans">
+                              <span className="font-bold text-foreground mt-0.5 block font-sans">
                                 {val}
                               </span>
                             </div>
@@ -543,15 +573,15 @@ function CarsListingPage() {
                         {/* Price + CTA */}
                         <div className="flex items-end justify-between mt-auto pt-3">
                           <div>
-                            <span className="text-[9px] uppercase font-bold text-slate-400 block">
+                            <span className="text-[9px] uppercase font-bold text-muted-foreground block">
                               Price
                             </span>
-                            <span className="text-lg font-black text-slate-900 block font-mono">
+                            <span className="text-lg font-black text-foreground block font-mono">
                               ₹{price.toLocaleString()}
                             </span>
                           </div>
                           {isAvailable ? (
-                            <span className="text-xs font-bold text-slate-700 group-hover:text-slate-900 flex items-center gap-1">
+                            <span className="text-xs font-bold text-foreground group-hover:text-foreground flex items-center gap-1">
                               View Details &rarr;
                             </span>
                           ) : (
@@ -591,8 +621,8 @@ function CarsListingPage() {
                     onClick={() => setPage(p)}
                     className={`w-9 h-9 flex items-center justify-center text-xs font-bold rounded-xl transition-all cursor-pointer ${
                       page === p
-                        ? 'bg-[#0F172A] text-white shadow-sm'
-                        : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-100'
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'bg-card border border-border text-foreground hover:bg-secondary'
                     }`}
                   >
                     {p}
@@ -601,7 +631,7 @@ function CarsListingPage() {
                 <button
                   onClick={() => setPage(Math.min(meta.totalPages, page + 1))}
                   disabled={page === meta.totalPages}
-                  className="px-4 py-2 text-xs font-bold rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 transition-all cursor-pointer disabled:opacity-30"
+                  className="px-4 py-2 text-xs font-bold rounded-xl bg-card border border-border text-foreground hover:bg-secondary transition-all cursor-pointer disabled:opacity-30"
                 >
                   Next
                 </button>
@@ -610,6 +640,7 @@ function CarsListingPage() {
           </div>
         </div>
       </div>
+      <CarComparisonDrawer />
     </div>
   );
 }

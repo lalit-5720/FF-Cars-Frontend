@@ -147,7 +147,10 @@ export default function CarDetailPage({ params }: CarDetailProps) {
 
     setIsBooking(true);
     try {
-      await api.post('/test-drives', { vehicleId: Number(carId) });
+      await api.post('/test-drives', {
+        customer_id: user?.id ? Number(user.id) : undefined,
+        vehicle_id: Number(carId),
+      });
       showLocalToast('Test Ride Request submitted successfully!', 'success');
       router.push('/dashboard');
     } catch (error: any) {
@@ -169,7 +172,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
   };
 
   return (
-    <div className="bg-[#F8FAFC] text-slate-900 min-h-screen pb-12">
+    <div className="bg-background text-foreground min-h-screen pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col gap-8">
         
         {/* Back button and title info */}
@@ -177,27 +180,27 @@ export default function CarDetailPage({ params }: CarDetailProps) {
           <div>
             <button 
               onClick={() => router.push('/cars')}
-              className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 mb-2 group transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground mb-2 group transition-colors cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
               Back to Inventory
             </button>
             <div className="flex items-baseline gap-3 flex-wrap">
-              <h1 className="text-3xl font-display font-extrabold tracking-tight text-slate-900">
+              <h1 className="text-3xl font-display font-extrabold tracking-tight text-foreground">
                 {make} {car.model}
               </h1>
-              <span className="text-slate-500 text-sm font-semibold">{car.color || car.variant || 'Standard'}</span>
+              <span className="text-muted-foreground text-sm font-semibold">{car.color || car.variant || 'Standard'}</span>
             </div>
-            <p className="text-xs text-slate-500 mt-1 font-sans">
+            <p className="text-xs text-muted-foreground mt-1 font-sans">
               Registration: {car.registration_number || 'TN Registration'} &bull; Fully Inspected &amp; Certified
             </p>
           </div>
 
           {/* Wishlist Button and Pricing */}
-          <div className="flex items-center gap-6 self-stretch sm:self-auto justify-between sm:justify-end border-t sm:border-t-0 pt-4 sm:pt-0 border-slate-200">
+          <div className="flex items-center gap-6 self-stretch sm:self-auto justify-between sm:justify-end border-t sm:border-t-0 pt-4 sm:pt-0 border-border">
             <div>
-              <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Total Price (GST Incl.)</span>
-              <div className="text-3xl font-black text-slate-900 font-mono mt-0.5">
+              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Total Price (GST Incl.)</span>
+              <div className="text-3xl font-black text-foreground font-mono mt-0.5">
                 ₹{price.toLocaleString()}
               </div>
             </div>
@@ -205,8 +208,8 @@ export default function CarDetailPage({ params }: CarDetailProps) {
               onClick={handleWishlist}
               className={`p-3 rounded-full border transition-all cursor-pointer ${
                 isWishlisted(String(car.vehicle_id || car.id))
-                  ? 'bg-rose-500 border-rose-500 text-white shadow-sm'
-                  : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
+                  ? 'bg-rose-500 border-rose-500 text-foreground shadow-sm'
+                  : 'border-border bg-card text-foreground hover:bg-secondary'
               }`}
             >
               <Heart className="w-5 h-5" fill={isWishlisted(String(car.vehicle_id || car.id)) ? 'currentColor' : 'none'} />
@@ -221,7 +224,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
         <div className="lg:col-span-8 flex flex-col gap-8">
           
           {/* Slideshow Display */}
-          <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-border bg-black/40 group">
+          <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-border bg-background/40 group">
             <img
               src={imagesList[activeImageIndex]}
               alt={`${make} ${car.model} image`}
@@ -230,7 +233,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
 
             {/* Availability overlay */}
             {!isAvailable && (
-              <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-xs select-none">
+              <div className="absolute inset-0 bg-background/60 flex items-center justify-center backdrop-blur-xs select-none">
                 <span className="px-6 py-3 border border-red-500 rounded-xl bg-red-950/70 text-red-400 font-display font-extrabold tracking-widest text-lg uppercase shadow-xl">
                   {car.status}
                 </span>
@@ -242,13 +245,13 @@ export default function CarDetailPage({ params }: CarDetailProps) {
               <>
                 <button
                   onClick={() => setActiveImageIndex((prev) => (prev === 0 ? imagesList.length - 1 : prev - 1))}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full backdrop-blur-md bg-black/40 text-white hover:bg-black/60 border border-white/10 transition-all opacity-0 group-hover:opacity-100"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full backdrop-blur-md bg-background/40 text-foreground hover:bg-background/60 border border-white/10 transition-all opacity-0 group-hover:opacity-100"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setActiveImageIndex((prev) => (prev === imagesList.length - 1 ? 0 : prev + 1))}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full backdrop-blur-md bg-black/40 text-white hover:bg-black/60 border border-white/10 transition-all opacity-0 group-hover:opacity-100"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full backdrop-blur-md bg-background/40 text-foreground hover:bg-background/60 border border-white/10 transition-all opacity-0 group-hover:opacity-100"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
@@ -256,7 +259,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
             )}
 
             {/* Position indicator */}
-            <div className="absolute bottom-4 right-4 px-3 py-1 rounded bg-black/50 text-[10px] font-bold text-white border border-white/10 select-none">
+            <div className="absolute bottom-4 right-4 px-3 py-1 rounded bg-background/50 text-[10px] font-bold text-foreground border border-white/10 select-none">
               {activeImageIndex + 1} / {imagesList.length}
             </div>
           </div>
@@ -269,7 +272,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
                   key={index}
                   onClick={() => setActiveImageIndex(index)}
                   className={`relative flex-shrink-0 w-24 aspect-video rounded-lg overflow-hidden border-2 transition-all bg-secondary ${
-                    activeImageIndex === index ? 'border-primary' : 'border-border hover:border-zinc-400'
+                    activeImageIndex === index ? 'border-primary' : 'border-border hover:border-muted-foreground'
                   }`}
                 >
                   <img src={url} alt="thumbnail" className="w-full h-full object-cover" />
@@ -280,82 +283,82 @@ export default function CarDetailPage({ params }: CarDetailProps) {
 
           {/* Highlights & Features Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="p-4 rounded-2xl border border-slate-200/90 bg-white flex flex-col gap-1.5 shadow-sm">
-              <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+            <div className="p-4 rounded-2xl border border-border/90 bg-card flex flex-col gap-1.5 shadow-sm">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5 text-amber-600" />
                 Year
               </span>
-              <span className="font-extrabold text-slate-900">{year}</span>
+              <span className="font-extrabold text-foreground">{year}</span>
             </div>
-            <div className="p-4 rounded-2xl border border-slate-200/90 bg-white flex flex-col gap-1.5 shadow-sm">
-              <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+            <div className="p-4 rounded-2xl border border-border/90 bg-card flex flex-col gap-1.5 shadow-sm">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
                 <Gauge className="w-3.5 h-3.5 text-amber-600" />
                 Driven
               </span>
-              <span className="font-extrabold text-slate-900">{km.toLocaleString()} km</span>
+              <span className="font-extrabold text-foreground">{km.toLocaleString()} km</span>
             </div>
-            <div className="p-4 rounded-2xl border border-slate-200/90 bg-white flex flex-col gap-1.5 shadow-sm">
-              <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+            <div className="p-4 rounded-2xl border border-border/90 bg-card flex flex-col gap-1.5 shadow-sm">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
                 <Fuel className="w-3.5 h-3.5 text-amber-600" />
                 Fuel Type
               </span>
-              <span className="font-extrabold text-slate-900">{fuel}</span>
+              <span className="font-extrabold text-foreground">{fuel}</span>
             </div>
-            <div className="p-4 rounded-2xl border border-slate-200/90 bg-white flex flex-col gap-1.5 shadow-sm">
-              <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
+            <div className="p-4 rounded-2xl border border-border/90 bg-card flex flex-col gap-1.5 shadow-sm">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
                 <Wrench className="w-3.5 h-3.5 text-amber-600" />
                 Gearbox
               </span>
-              <span className="font-extrabold text-slate-900">{car.transmission || 'Manual'}</span>
+              <span className="font-extrabold text-foreground">{car.transmission || 'Manual'}</span>
             </div>
           </div>
 
           {/* Description Card */}
-          <div className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col gap-3">
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2 font-display">
+          <div className="p-6 rounded-2xl border border-border/90 bg-card shadow-sm flex flex-col gap-3">
+            <h2 className="text-base font-bold text-foreground flex items-center gap-2 font-display">
               <Sparkles className="w-5 h-5 text-amber-600" />
               Dealer Description
             </h2>
-            <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line font-sans">
+            <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line font-sans">
               {car.description || "No description provided for this vehicle."}
             </p>
           </div>
 
           {/* Specs Details Sheet */}
-          <div className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm">
-            <h2 className="text-base font-bold text-slate-900 mb-4 font-display">Complete Specifications Sheet</h2>
+          <div className="p-6 rounded-2xl border border-border/90 bg-card shadow-sm">
+            <h2 className="text-base font-bold text-foreground mb-4 font-display">Complete Specifications Sheet</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-8 text-xs font-sans">
-              <div className="flex justify-between py-2 border-b border-slate-100">
-                <span className="text-slate-500">Make</span>
-                <span className="font-bold text-slate-900">{make}</span>
+              <div className="flex justify-between py-2 border-b border-border">
+                <span className="text-muted-foreground">Make</span>
+                <span className="font-bold text-foreground">{make}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-slate-100">
-                <span className="text-slate-500">Model</span>
-                <span className="font-bold text-slate-900">{car.model}</span>
+              <div className="flex justify-between py-2 border-b border-border">
+                <span className="text-muted-foreground">Model</span>
+                <span className="font-bold text-foreground">{car.model}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-slate-100">
-                <span className="text-slate-500">Color</span>
-                <span className="font-bold text-slate-900">{car.color || 'Standard'}</span>
+              <div className="flex justify-between py-2 border-b border-border">
+                <span className="text-muted-foreground">Color</span>
+                <span className="font-bold text-foreground">{car.color || 'Standard'}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-slate-100">
-                <span className="text-slate-500">Ownership History</span>
-                <span className="font-bold text-slate-900">{owner}</span>
+              <div className="flex justify-between py-2 border-b border-border">
+                <span className="text-muted-foreground">Ownership History</span>
+                <span className="font-bold text-foreground">{owner}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-slate-100">
-                <span className="text-slate-500">Transmission Type</span>
-                <span className="font-bold text-slate-900">{car.transmission || 'Manual'}</span>
+              <div className="flex justify-between py-2 border-b border-border">
+                <span className="text-muted-foreground">Transmission Type</span>
+                <span className="font-bold text-foreground">{car.transmission || 'Manual'}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-slate-100">
-                <span className="text-slate-500">Fuel Type</span>
-                <span className="font-bold text-slate-900">{fuel}</span>
+              <div className="flex justify-between py-2 border-b border-border">
+                <span className="text-muted-foreground">Fuel Type</span>
+                <span className="font-bold text-foreground">{fuel}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-slate-100">
-                <span className="text-slate-500">Manufacture Year</span>
-                <span className="font-bold text-slate-900">{year}</span>
+              <div className="flex justify-between py-2 border-b border-border">
+                <span className="text-muted-foreground">Manufacture Year</span>
+                <span className="font-bold text-foreground">{year}</span>
               </div>
-              <div className="flex justify-between py-2 border-b border-slate-100">
-                <span className="text-slate-500">Odometer reading</span>
-                <span className="font-bold text-slate-900">{km.toLocaleString()} km</span>
+              <div className="flex justify-between py-2 border-b border-border">
+                <span className="text-muted-foreground">Odometer reading</span>
+                <span className="font-bold text-foreground">{km.toLocaleString()} km</span>
               </div>
             </div>
           </div>
@@ -365,13 +368,13 @@ export default function CarDetailPage({ params }: CarDetailProps) {
         <div className="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-24">
           
           {/* REFERENCE MATCH HERO BOOKING CARD (DARK OBSIDIAN) */}
-          <div className="p-7 rounded-3xl bg-[#0F172A] text-white shadow-xl flex flex-col gap-4">
+          <div className="p-7 rounded-3xl bg-[#0F172A] text-foreground shadow-xl flex flex-col gap-4">
             <h2 className="text-lg font-extrabold font-display">Request a Test Ride</h2>
-            <p className="text-xs text-slate-300 leading-relaxed font-sans">
+            <p className="text-xs text-muted-foreground leading-relaxed font-sans">
               Experience this luxury vehicle firsthand. Schedule your personalized test ride concierge appointment.
             </p>
 
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/90 border border-slate-700 text-emerald-400">
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/90 border border-border text-emerald-400">
               <ShieldCheck className="w-5 h-5 flex-shrink-0" />
               <div className="text-[11px] font-bold leading-normal font-sans">
                 Inspected &bull; Doorstep Delivery &bull; Certified
@@ -383,8 +386,8 @@ export default function CarDetailPage({ params }: CarDetailProps) {
               disabled={!isAvailable || isBooking}
               className={`w-full py-3.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer ${
                 isAvailable
-                  ? 'bg-white text-slate-950 hover:bg-slate-100 shadow-md'
-                  : 'bg-slate-800 text-slate-400 cursor-not-allowed'
+                  ? 'bg-card text-foreground hover:bg-secondary shadow-md'
+                  : 'bg-secondary text-muted-foreground cursor-not-allowed'
               }`}
             >
               {isBooking ? (
@@ -407,13 +410,13 @@ export default function CarDetailPage({ params }: CarDetailProps) {
           </div>
 
           {/* Live Finance EMI Estimator Card */}
-          <div className="p-6 rounded-2xl border border-slate-200/90 bg-white shadow-sm flex flex-col gap-5 text-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-sm flex items-center gap-2 text-slate-900 font-display">
+          <div className="p-6 rounded-2xl border border-border/90 bg-card shadow-sm flex flex-col gap-5 text-foreground">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="font-bold text-sm flex items-center gap-2 text-foreground font-display">
                 <CircleDollarSign className="w-4.5 h-4.5 text-amber-600" />
                 EMI Loan Estimator
               </h3>
-              <span className="text-[10px] font-bold text-slate-800 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full">
+              <span className="text-[10px] font-bold text-foreground bg-secondary border border-border px-2.5 py-0.5 rounded-full">
                 8.5% fixed PA
               </span>
             </div>
@@ -421,8 +424,8 @@ export default function CarDetailPage({ params }: CarDetailProps) {
             {/* Slider 1: Down Payment Percentage */}
             <div className="flex flex-col gap-2 font-sans">
               <div className="flex justify-between text-xs font-semibold">
-                <span className="text-slate-500">Down Payment ({downPaymentPct}%)</span>
-                <span className="text-slate-900 font-mono font-bold">₹{downPayment.toLocaleString()}</span>
+                <span className="text-muted-foreground">Down Payment ({downPaymentPct}%)</span>
+                <span className="text-foreground font-mono font-bold">₹{downPayment.toLocaleString()}</span>
               </div>
               <input
                 type="range"
@@ -431,9 +434,9 @@ export default function CarDetailPage({ params }: CarDetailProps) {
                 step="5"
                 value={downPaymentPct}
                 onChange={(e) => setDownPaymentPct(parseInt(e.target.value, 10))}
-                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900 focus:outline-none"
+                className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-slate-900 focus:outline-none"
               />
-              <div className="flex justify-between text-[9px] text-slate-400 font-medium">
+              <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
                 <span>10% (₹{(car.price * 0.1).toLocaleString()})</span>
                 <span>90% (₹{(car.price * 0.9).toLocaleString()})</span>
               </div>
@@ -442,8 +445,8 @@ export default function CarDetailPage({ params }: CarDetailProps) {
             {/* Slider 2: Tenure Months */}
             <div className="flex flex-col gap-2 font-sans">
               <div className="flex justify-between text-xs font-semibold">
-                <span className="text-slate-500">Loan Tenure</span>
-                <span className="text-slate-900 font-bold">{tenureMonths} Months ({tenureMonths / 12} Yrs)</span>
+                <span className="text-muted-foreground">Loan Tenure</span>
+                <span className="text-foreground font-bold">{tenureMonths} Months ({tenureMonths / 12} Yrs)</span>
               </div>
               <input
                 type="range"
@@ -452,21 +455,21 @@ export default function CarDetailPage({ params }: CarDetailProps) {
                 step="12"
                 value={tenureMonths}
                 onChange={(e) => setTenureMonths(parseInt(e.target.value, 10))}
-                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900 focus:outline-none"
+                className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-slate-900 focus:outline-none"
               />
-              <div className="flex justify-between text-[9px] text-slate-400 font-medium">
+              <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
                 <span>12 Months</span>
                 <span>84 Months</span>
               </div>
             </div>
 
             {/* Calculation output */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-center text-center gap-1">
-              <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Estimated Monthly Payment</span>
-              <div className="text-2xl font-black text-slate-900 font-mono">
-                ₹{emi.toLocaleString()} <span className="text-xs text-slate-500 font-normal">/mo</span>
+            <div className="p-4 rounded-xl bg-secondary border border-border flex flex-col items-center justify-center text-center gap-1">
+              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Estimated Monthly Payment</span>
+              <div className="text-2xl font-black text-foreground font-mono">
+                ₹{emi.toLocaleString()} <span className="text-xs text-muted-foreground font-normal">/mo</span>
               </div>
-              <p className="text-[10px] text-slate-400 mt-1 max-w-[200px] leading-tight">
+              <p className="text-[10px] text-muted-foreground mt-1 max-w-[200px] leading-tight">
                 Calculated on loan principal of ₹{loanPrincipal.toLocaleString()} for {tenureMonths} months.
               </p>
             </div>

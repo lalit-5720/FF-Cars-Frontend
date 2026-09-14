@@ -61,7 +61,7 @@ export const Navbar: React.FC = () => {
   return (
     <>
       <nav
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm"
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-[#0f1523]/95 backdrop-blur-md border-b border-border/[0.08] shadow-lg shadow-black/20"
       >
         {/* Ultra-thin gold top line */}
         <div
@@ -79,7 +79,7 @@ export const Navbar: React.FC = () => {
               <Logo size={38} circular={true} className="transition-transform duration-300 group-hover:scale-105" />
               <div className="flex flex-col leading-none">
                 <span
-                  className="font-black tracking-widest uppercase text-sm text-slate-900"
+                  className="font-black tracking-widest uppercase text-sm text-foreground"
                   style={{
                     fontFamily: "'Plus Jakarta Sans', sans-serif",
                     letterSpacing: '0.15em',
@@ -91,7 +91,7 @@ export const Navbar: React.FC = () => {
                   className="text-[8px] uppercase tracking-widest mt-0.5"
                   style={{ color: 'var(--gold)', letterSpacing: '0.2em', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 >
-                  Automotive Concierge
+                  Drive Better
                 </span>
               </div>
             </Link>
@@ -111,8 +111,8 @@ export const Navbar: React.FC = () => {
                     href={href}
                     className={`text-xs font-bold transition-all duration-200 px-4 py-2 rounded-full cursor-pointer ${
                       active
-                        ? 'bg-[#0F172A] text-white shadow-md'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                        ? 'bg-[#5468F0] text-foreground shadow-md'
+                        : 'text-[#a5b0c2] hover:text-foreground hover:bg-secondary/[0.06]'
                     }`}
                     style={{
                       fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif",
@@ -235,21 +235,21 @@ export const Navbar: React.FC = () => {
                   <div className="relative" ref={profileRef}>
                     <button
                       onClick={() => { setIsProfileOpen(!isProfileOpen); setIsNotifOpen(false); }}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-300 hover:bg-slate-100 transition-all cursor-pointer bg-white"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border hover:bg-secondary transition-all cursor-pointer bg-card"
                     >
-                      <div className="w-6 h-6 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold">
+                      <div className="w-6 h-6 rounded-full bg-secondary text-foreground flex items-center justify-center text-xs font-bold">
                         {user?.name.charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-xs font-bold text-slate-800">{user?.name}</span>
-                      <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
+                      <span className="text-xs font-bold text-foreground">{user?.name}</span>
+                      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
                     </button>
 
                     {isProfileOpen && (
-                      <div className="absolute right-0 mt-3 w-56 rounded-2xl bg-white border border-slate-200 shadow-xl overflow-hidden z-50">
-                        <div className="p-4 border-b border-slate-100">
-                          <p className="font-bold text-sm text-slate-900">{user?.name}</p>
-                          <p className="text-xs text-slate-500 mt-0.5 truncate">{user?.email}</p>
-                          <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700">
+                      <div className="absolute right-0 mt-3 w-56 rounded-2xl bg-card border border-border shadow-xl overflow-hidden z-50">
+                        <div className="p-4 border-b border-border">
+                          <p className="font-bold text-sm text-foreground">{user?.name}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 truncate">{user?.email}</p>
+                          <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-secondary text-muted-foreground">
                             {user?.role}
                           </span>
                         </div>
@@ -258,7 +258,7 @@ export const Navbar: React.FC = () => {
                             <Link
                               href="/admin"
                               onClick={() => setIsProfileOpen(false)}
-                              className="flex items-center gap-2.5 w-full p-2.5 text-xs font-bold text-amber-700 bg-amber-50 rounded-xl hover:bg-amber-100 transition-colors border border-amber-200"
+                              className="flex items-center gap-2.5 w-full p-2.5 text-xs font-bold text-warning bg-secondary rounded-xl hover:bg-secondary transition-colors border border-border"
                             >
                               <Crown className="w-4 h-4 text-amber-600" />
                               Admin Dashboard
@@ -267,14 +267,14 @@ export const Navbar: React.FC = () => {
                           <Link
                             href="/dashboard"
                             onClick={() => setIsProfileOpen(false)}
-                            className="flex items-center gap-2.5 w-full p-2.5 text-xs font-bold text-slate-700 rounded-xl hover:bg-slate-100 transition-colors"
+                            className="flex items-center gap-2.5 w-full p-2.5 text-xs font-bold text-muted-foreground rounded-xl hover:bg-secondary transition-colors"
                           >
-                            <UserIcon className="w-4 h-4 text-slate-500" />
+                            <UserIcon className="w-4 h-4 text-muted-foreground" />
                             My Dashboard
                           </Link>
                           <button
                             onClick={handleLogout}
-                            className="flex items-center gap-2.5 w-full p-2.5 text-xs font-bold text-rose-600 rounded-xl hover:bg-rose-50 transition-colors cursor-pointer"
+                            className="flex items-center gap-2.5 w-full p-2.5 text-xs font-bold text-destructive rounded-xl hover:bg-secondary transition-colors cursor-pointer"
                           >
                             <LogOut className="w-4 h-4 text-rose-500" />
                             Logout
@@ -287,7 +287,7 @@ export const Navbar: React.FC = () => {
                   {/* Direct Logout Button matching Reference Image */}
                   <button
                     onClick={handleLogout}
-                    className="hidden sm:inline-flex px-4 py-1.5 text-xs font-bold text-slate-700 border border-slate-300 rounded-full hover:bg-slate-100 transition-all cursor-pointer"
+                    className="hidden sm:inline-flex px-4 py-1.5 text-xs font-bold text-muted-foreground border border-border rounded-full hover:bg-secondary transition-all cursor-pointer"
                   >
                     Logout
                   </button>
@@ -296,13 +296,13 @@ export const Navbar: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <Link
                     href="/login"
-                    className="text-xs font-bold text-slate-700 px-4 py-2 hover:text-slate-900 transition-colors"
+                    className="text-xs font-bold text-muted-foreground px-4 py-2 hover:text-foreground transition-colors"
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/register"
-                    className="px-5 py-2 rounded-full text-xs font-bold bg-[#0F172A] text-white hover:bg-slate-800 transition-all shadow-sm"
+                    className="px-5 py-2 rounded-full text-xs font-bold bg-[#0F172A] text-foreground hover:bg-secondary transition-all shadow-sm"
                   >
                     Get Started
                   </Link>

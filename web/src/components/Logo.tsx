@@ -39,31 +39,19 @@ export const Logo: React.FC<LogoProps> = ({
         />
       )}
       
-      {/* FF Symbol */}
+      {/* CarRevive Symbol */}
       <text
-        x="55"
+        x="100"
         y="112"
+        textAnchor="middle"
         fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
         fontWeight="800"
-        fontSize="78"
-        letterSpacing="-6"
+        fontSize="52"
+        letterSpacing="-1"
         fill={textFill}
         style={{ transition: 'fill 0.3s ease' }}
       >
-        FF
-      </text>
-
-      {/* Cars Symbol */}
-      <text
-        x="114"
-        y="112"
-        fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-        fontWeight="300"
-        fontSize="28"
-        fill={textFill}
-        style={{ transition: 'fill 0.3s ease' }}
-      >
-        Cars
+        CarRevive
       </text>
 
       {/* Slogan */}
@@ -78,7 +66,7 @@ export const Logo: React.FC<LogoProps> = ({
         fill={textFill}
         style={{ transition: 'fill 0.3s ease' }}
       >
-        Buy & Sell Car Directly
+        Drive Better
       </text>
     </svg>
   );

@@ -7,7 +7,7 @@ export const Footer: React.FC = () => {
   return (
     <footer
       style={{
-        backgroundColor: 'var(--obsidian)',
+        backgroundColor: 'var(--sidebar)',
         borderTop: '1px solid var(--onyx-border)',
         position: 'relative',
         overflow: 'hidden',

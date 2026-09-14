@@ -4,9 +4,11 @@ import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api } from '../services/api';
-import { ShieldCheck, Calendar, Zap, ArrowRight, Heart, Star, MapPin } from 'lucide-react';
+import { ShieldCheck, Calendar, Zap, ArrowRight, Heart, Star, MapPin, Scale } from 'lucide-react';
 import { useWishlistStore } from '../store/useWishlistStore';
 import { useAuthStore } from '../store/useAuthStore';
+import { useCompareStore } from '../store/useCompareStore';
+import { CarComparisonDrawer } from '../components/CarComparisonDrawer';
 import { showLocalToast } from '../components/Toast';
 import { ThreeDCard } from '../components/ThreeDCard';
 
@@ -19,6 +21,7 @@ export default function HomePage() {
   const [publishedReviews, setPublishedReviews] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toggleWishlist, isWishlisted } = useWishlistStore();
+  const { addToCompare, removeFromCompare, isInCompare } = useCompareStore();
   const { user, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
@@ -150,7 +153,7 @@ export default function HomePage() {
 
             {/* Display Heading */}
             <div>
-              <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight text-slate-900 leading-none font-sans">
+              <h1 className="text-5xl sm:text-7xl font-extrabold tracking-tight text-foreground leading-none font-sans">
                 Own The <span className="block text-amber-600 font-black mt-1">Extraordinary</span>
               </h1>
 
@@ -201,11 +204,11 @@ export default function HomePage() {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/cars" className="px-7 py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer">
+              <Link href="/cars" className="px-7 py-3.5 rounded-xl bg-secondary hover:bg-secondary text-primary-foreground font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer">
                 Browse Inventory
-                <ArrowRight className="w-4 h-4 text-white" />
+                <ArrowRight className="w-4 h-4 text-primary-foreground" />
               </Link>
-              <Link href="/register" className="px-7 py-3.5 rounded-xl bg-white hover:bg-slate-50 text-slate-900 border border-slate-300 font-extrabold text-xs transition-all shadow-sm flex items-center justify-center cursor-pointer">
+              <Link href="/register" className="px-7 py-3.5 rounded-xl bg-card hover:bg-secondary text-foreground border border-border font-extrabold text-xs transition-all shadow-sm flex items-center justify-center cursor-pointer">
                 Become a Member
               </Link>
             </div>
@@ -245,7 +248,7 @@ export default function HomePage() {
           {/* ── Right: Dynamic 3D Showcase Card for Costlier Vehicle ── */}
           <div className="flex justify-center items-center z-10">
             <ThreeDCard maxTilt={10} className="w-full max-w-[440px] aspect-[4/5]">
-              <div className="relative w-full h-full rounded-3xl p-7 flex flex-col justify-between overflow-hidden shadow-2xl preserve-3d bg-white border border-slate-200/90 text-slate-900">
+              <div className="relative w-full h-full rounded-3xl p-7 flex flex-col justify-between overflow-hidden shadow-2xl preserve-3d bg-card border border-border/90 text-foreground">
                 
                 {/* Card top */}
                 <div className="flex justify-between items-start z-10 preserve-3d">
@@ -253,21 +256,21 @@ export default function HomePage() {
                     <span className="text-[10px] font-bold uppercase tracking-widest block text-amber-600 font-sans">
                       💎 Featured Showcase · Flagship Model
                     </span>
-                    <h3 className="mt-1 text-2xl font-extrabold text-slate-900 leading-tight font-sans">
+                    <h3 className="mt-1 text-2xl font-extrabold text-foreground leading-tight font-sans">
                       {costlierCar ? `${costlierCar.make || costlierCar.brand} ${costlierCar.model}` : 'Porsche 911'}
                     </h3>
-                    <p className="text-xs text-slate-500 mt-0.5 font-sans">
+                    <p className="text-xs text-muted-foreground mt-0.5 font-sans">
                       {costlierCar ? `${costlierCar.color || costlierCar.variant || 'Standard'} • ${costlierCar.transmission || 'Automatic'}` : 'GT3 RS · Weissach Package'}
                     </p>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-900 text-white shadow-sm font-sans" style={{ transform: 'translateZ(40px)' }}>
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-secondary text-primary-foreground shadow-sm font-sans" style={{ transform: 'translateZ(40px)' }}>
                     {costlierCar ? (costlierCar.manufacture_year || costlierCar.year || 2024) : '2026'}
                   </span>
                 </div>
 
                 {/* Car Image */}
                 <div
-                  className="relative w-full my-4 flex items-center justify-center z-20 preserve-3d rounded-2xl overflow-hidden aspect-video bg-slate-100 border border-slate-200"
+                  className="relative w-full my-4 flex items-center justify-center z-20 preserve-3d rounded-2xl overflow-hidden aspect-video bg-secondary border border-border"
                   style={{ transform: 'translateZ(40px)' }}
                 >
                   <img
@@ -290,12 +293,12 @@ export default function HomePage() {
                     ].map(({ label, value }) => (
                       <div
                         key={label}
-                        className="p-2.5 rounded-xl bg-slate-50 border border-slate-200"
+                        className="p-2.5 rounded-xl bg-secondary border border-border"
                       >
-                        <span className="block text-[9px] uppercase font-bold text-slate-400 font-sans">
+                        <span className="block text-[9px] uppercase font-bold text-muted-foreground font-sans">
                           {label}
                         </span>
-                        <span className="text-xs font-bold text-slate-900 mt-0.5 block font-sans truncate">
+                        <span className="text-xs font-bold text-foreground mt-0.5 block font-sans truncate">
                           {value}
                         </span>
                       </div>
@@ -303,20 +306,20 @@ export default function HomePage() {
                   </div>
 
                   <div
-                    className="flex justify-between items-center pt-2 border-t border-slate-100"
+                    className="flex justify-between items-center pt-2 border-t border-border"
                     style={{ transform: 'translateZ(25px)' }}
                   >
                     <div>
-                      <span className="text-[9px] uppercase font-bold text-slate-400 block font-sans">
+                      <span className="text-[9px] uppercase font-bold text-muted-foreground block font-sans">
                         Showcase Price
                       </span>
-                      <span className="text-xl font-black text-slate-900 block mt-0.5 font-mono">
+                      <span className="text-xl font-black text-foreground block mt-0.5 font-mono">
                         ₹{costlierCar ? Number(costlierCar.price || 0).toLocaleString() : '2,45,00,000'}
                       </span>
                     </div>
                     <button
                       onClick={() => router.push(costlierCar ? `/cars/${costlierCar.vehicle_id || costlierCar.id}` : '/cars')}
-                      className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-sm cursor-pointer"
+                      className="px-4 py-2 rounded-xl bg-secondary hover:bg-secondary text-primary-foreground font-bold text-xs transition-all shadow-sm cursor-pointer"
                     >
                       View Details &rarr;
                     </button>
@@ -493,23 +496,47 @@ export default function HomePage() {
                             background: 'linear-gradient(135deg, rgba(201,169,110,0.06) 0%, transparent 60%)',
                           }}
                         />
-                        {/* Wishlist */}
-                        <button
-                          onClick={(e) => handleWishlistToggle(e, String(id))}
-                          className="absolute top-4 right-4 p-2.5 rounded-full transition-all duration-200 preserve-3d"
-                          style={{
-                            background: isWishlisted(String(id)) ? 'var(--gold)' : 'rgba(5,6,10,0.7)',
-                            border: '1px solid rgba(201,169,110,0.3)',
-                            backdropFilter: 'blur(8px)',
-                            transform: 'translateZ(30px)',
-                            color: isWishlisted(String(id)) ? 'var(--midnight)' : 'var(--silver)',
-                          }}
-                        >
-                          <Heart
-                            className="w-4 h-4"
-                            fill={isWishlisted(String(id)) ? 'currentColor' : 'none'}
-                          />
-                        </button>
+                        {/* Wishlist & Compare Action Overlay */}
+                        <div className="absolute top-4 right-4 flex items-center gap-2 z-30 preserve-3d" style={{ transform: 'translateZ(30px)' }}>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (isInCompare(String(id))) {
+                                removeFromCompare(String(id));
+                                showLocalToast('Removed from comparison');
+                              } else {
+                                addToCompare({ id: String(id), ...car });
+                                showLocalToast('Added to comparison');
+                              }
+                            }}
+                            className="p-2.5 rounded-full transition-all duration-200"
+                            style={{
+                              background: isInCompare(String(id)) ? '#5468F0' : 'rgba(5,6,10,0.7)',
+                              border: '1px solid rgba(84,104,240,0.4)',
+                              backdropFilter: 'blur(8px)',
+                              color: 'white',
+                            }}
+                            title={isInCompare(String(id)) ? 'Remove from Compare' : 'Add to Compare'}
+                          >
+                            <Scale className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={(e) => handleWishlistToggle(e, String(id))}
+                            className="p-2.5 rounded-full transition-all duration-200"
+                            style={{
+                              background: isWishlisted(String(id)) ? 'var(--gold)' : 'rgba(5,6,10,0.7)',
+                              border: '1px solid rgba(201,169,110,0.3)',
+                              backdropFilter: 'blur(8px)',
+                              color: isWishlisted(String(id)) ? 'var(--midnight)' : 'var(--silver)',
+                            }}
+                          >
+                            <Heart
+                              className="w-4 h-4"
+                              fill={isWishlisted(String(id)) ? 'currentColor' : 'none'}
+                            />
+                          </button>
+                        </div>
                         {/* Year badge */}
                         <div
                           className="absolute bottom-4 left-4 px-3 py-1 rounded-lg text-[10px] font-bold tracking-widest uppercase preserve-3d"
@@ -759,17 +786,17 @@ export default function HomePage() {
       {/* ──────────────────────────────────────
           ANIMATED CUSTOMER REVIEWS MARQUEE SHOWCASE
       ────────────────────────────────────── */}
-      <section className="py-24 overflow-hidden relative bg-[#F8FAFC] border-t border-slate-200/90 text-slate-900">
+      <section className="py-24 overflow-hidden relative bg-background border-t border-border/90 text-foreground">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-12">
           <div className="flex items-center justify-center mb-3">
             <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
               Verified Testimonials
             </span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-sans tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground font-sans tracking-tight">
             Client <span className="text-amber-600 font-black">Experiences</span>
           </h2>
-          <p className="mt-2 text-xs text-slate-500 max-w-md mx-auto font-sans font-medium">
+          <p className="mt-2 text-xs text-muted-foreground max-w-md mx-auto font-sans font-medium">
             Hear from discerning owners who purchased their certified luxury automobiles through CarRevive.
           </p>
         </div>
@@ -791,7 +818,7 @@ export default function HomePage() {
                 return (
                   <div
                     key={idx}
-                    className="w-[380px] p-7 rounded-2xl flex-shrink-0 flex flex-col justify-between gap-5 bg-white border border-slate-200/90 shadow-sm text-slate-900"
+                    className="w-[380px] p-7 rounded-2xl flex-shrink-0 flex flex-col justify-between gap-5 bg-card border border-border/90 shadow-sm text-foreground"
                   >
                     <div className="flex flex-col gap-3">
                       <div className="flex items-center justify-between">
@@ -805,17 +832,17 @@ export default function HomePage() {
                         </span>
                       </div>
 
-                      <p className="text-xs text-slate-700 leading-relaxed font-sans font-normal">
+                      <p className="text-xs text-foreground leading-relaxed font-sans font-normal">
                         "{rev.comment}"
                       </p>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                    <div className="pt-4 border-t border-border flex items-center justify-between">
                       <div>
-                        <div className="font-bold text-xs text-slate-900 font-sans">{custName}</div>
-                        <div className="text-[11px] text-slate-500 font-semibold font-sans mt-0.5">{carModel}</div>
+                        <div className="font-bold text-xs text-foreground font-sans">{custName}</div>
+                        <div className="text-[11px] text-muted-foreground font-semibold font-sans mt-0.5">{carModel}</div>
                       </div>
-                      <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm font-sans">
+                      <div className="w-8 h-8 rounded-full bg-secondary text-primary-foreground flex items-center justify-center font-bold text-xs shadow-sm font-sans">
                         {custName.charAt(0)}
                       </div>
                     </div>
@@ -825,11 +852,14 @@ export default function HomePage() {
             </div>
           </div>
         ) : (
-          <div className="max-w-3xl mx-auto px-4 text-center text-sm text-slate-500">
+          <div className="max-w-3xl mx-auto px-4 text-center text-sm text-muted-foreground">
             No approved customer reviews yet. Once a customer review is approved, it will appear here.
           </div>
         )}
       </section>
+
+      {/* Floating Side-by-Side Car Comparison Drawer */}
+      <CarComparisonDrawer />
     </div>
   );
 }
