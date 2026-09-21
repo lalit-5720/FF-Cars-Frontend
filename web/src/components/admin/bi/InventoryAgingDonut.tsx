@@ -1,29 +1,81 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { api } from '../../../services/api';
+
+interface AgingItem {
+  label: string;
+  count: number;
+  value: number;
+  valNum?: number;
+  valueFormatted?: string;
+  percentage?: number;
+  color?: string;
+}
 
 interface InventoryAgingDonutProps {
-  data?: Array<{
-    label: string;
-    valueFormatted: string;
-    percentage: number;
-  }>;
+  data?: AgingItem[];
   loading?: boolean;
 }
 
-export function InventoryAgingDonut({ data, loading }: InventoryAgingDonutProps) {
+export function InventoryAgingDonut({ data: propData, loading: propLoading }: InventoryAgingDonutProps) {
+  const [agingData, setAgingData] = useState<AgingItem[]>([]);
+  const [internalLoading, setInternalLoading] = useState(false);
+
+  const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#b91c1c'];
+
+  const formatRupees = (val: number) => {
+    if (val >= 10000000) return `₹${(val / 10000000).toFixed(2)} Cr`;
+    if (val >= 100000) return `₹${(val / 100000).toFixed(2)} L`;
+    return `₹${Math.round(val || 0).toLocaleString('en-IN')}`;
+  };
+
+  useEffect(() => {
+    if (propData && propData.length > 0) {
+      setAgingData(propData);
+      return;
+    }
+
+    let isMounted = true;
+    setInternalLoading(true);
+
+    api.get('/bi/inventory-aging')
+      .then((res) => {
+        if (!isMounted) return;
+        const list = Array.isArray(res.data) ? res.data : [];
+        setAgingData(list);
+      })
+      .catch((err) => {
+        console.warn('Failed to load inventory aging:', err);
+      })
+      .finally(() => {
+        if (isMounted) setInternalLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [propData]);
+
+  const loading = propLoading || internalLoading;
+
   if (loading) {
     return <div className="h-72 rounded-2xl bg-[#1e293b]/60 animate-pulse border border-slate-800" />;
   }
 
-  const defaultData = [
-    { label: '0 - 30 Days', valNum: 1.25, valueFormatted: '₹1.25 Cr', percentage: 18.4, color: '#3b82f6' },
-    { label: '31 - 60 Days', valNum: 1.45, valueFormatted: '₹1.45 Cr', percentage: 21.4, color: '#10b981' },
-    { label: '61 - 90 Days', valNum: 1.35, valueFormatted: '₹1.35 Cr', percentage: 19.9, color: '#f59e0b' },
-    { label: '91 - 120 Days', valNum: 1.10, valueFormatted: '₹1.10 Cr', percentage: 16.2, color: '#ef4444' },
-    { label: '120+ Days', valNum: 1.63, valueFormatted: '₹1.63 Cr', percentage: 24.1, color: '#b91c1c' },
-  ];
+  const totalValue = agingData.reduce((sum, item) => sum + Number(item.value || 0), 0);
+
+  const chartData = agingData.map((item, idx) => {
+    const v = Number(item.value || 0);
+    return {
+      ...item,
+      valNum: v,
+      valueFormatted: formatRupees(v),
+      percentage: totalValue > 0 ? Number(((v / totalValue) * 100).toFixed(1)) : 0,
+      color: item.color || colors[idx % colors.length],
+    };
+  });
 
   return (
     <div className="rounded-2xl bg-[#1e293b]/90 border border-slate-800/90 p-5 shadow-lg flex flex-col justify-between font-sans">
@@ -31,53 +83,61 @@ export function InventoryAgingDonut({ data, loading }: InventoryAgingDonutProps)
         Inventory Aging (By Value)
       </h3>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 my-2">
-        {/* Donut Chart */}
-        <div className="relative w-44 h-44 flex items-center justify-center flex-shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Tooltip
-                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#f8fafc' }}
-                formatter={(val: any, name: any, item: any) => [item.payload.valueFormatted, item.payload.label]}
-              />
-              <Pie
-                data={defaultData}
-                dataKey="valNum"
-                nameKey="label"
-                cx="50%"
-                cy="50%"
-                innerRadius={52}
-                outerRadius={72}
-                paddingAngle={3}
-              >
-                {defaultData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} stroke="transparent" />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
+      {totalValue === 0 ? (
+        <div className="py-12 text-center text-xs text-slate-400">
+          No active inventory aging data available.
+        </div>
+      ) : (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 my-2">
+          {/* Donut Chart */}
+          <div className="relative w-44 h-44 flex items-center justify-center flex-shrink-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#f8fafc' }}
+                  formatter={(val: any, name: any, item: any) => [item.payload.valueFormatted, item.payload.label]}
+                />
+                <Pie
+                  data={chartData}
+                  dataKey="valNum"
+                  nameKey="label"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={52}
+                  outerRadius={72}
+                  paddingAngle={3}
+                >
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} stroke="transparent" />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
 
-          <div className="absolute flex flex-col items-center justify-center text-center">
-            <span className="text-lg font-extrabold text-white font-mono leading-none">₹6.78 Cr</span>
-            <span className="text-[10px] font-bold text-slate-400 uppercase mt-1">Total</span>
+            <div className="absolute flex flex-col items-center justify-center text-center pointer-events-none">
+              <span className="text-lg font-extrabold text-white font-mono leading-none">
+                {formatRupees(totalValue)}
+              </span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase mt-1">Total Value</span>
+            </div>
+          </div>
+
+          {/* Legend List */}
+          <div className="flex-1 space-y-2 text-xs">
+            {chartData.map((item) => (
+              <div key={item.label} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                  <span className="text-slate-300 font-semibold">{item.label}</span>
+                </div>
+                <span className="font-mono text-slate-400 font-bold">
+                  {item.valueFormatted} <span className="text-[10px] text-slate-500">({item.percentage}%)</span>
+                </span>
+              </div>
+            ))}
           </div>
         </div>
-
-        {/* Legend List */}
-        <div className="flex-1 space-y-2 text-xs">
-          {defaultData.map((item) => (
-            <div key={item.label} className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                <span className="text-slate-300 font-semibold">{item.label}</span>
-              </div>
-              <span className="font-mono text-slate-400 font-bold">
-                {item.valueFormatted} <span className="text-[10px] text-slate-500">({item.percentage}%)</span>
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

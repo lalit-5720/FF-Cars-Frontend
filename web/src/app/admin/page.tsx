@@ -30,22 +30,36 @@ export default function BusinessIntelligencePage() {
   const [revenueTrend, setRevenueTrend] = useState<any[]>([]);
   const [procurementData, setProcurementData] = useState<any>(null);
   const [decisionScoreData, setDecisionScoreData] = useState<any>(null);
+  const [branchSales, setBranchSales] = useState<any[]>([]);
+  const [inventoryAging, setInventoryAging] = useState<any[]>([]);
 
   const fetchBiData = async () => {
     setLoading(true);
     try {
       const branchParam = selectedBranch !== 'all' ? `?branchId=${selectedBranch}` : '';
-      const [ovRes, trRes, procRes, scoreRes] = await Promise.allSettled([
+      const [ovRes, trRes, procRes, scoreRes, branchesRes, agingRes] = await Promise.allSettled([
         api.get(`/analytics/overview${branchParam}`),
         api.get(`/analytics/revenue-trend${branchParam}`),
         api.get(`/analytics/procurement-intelligence${branchParam}`),
         api.get(`/analytics/decision-score${branchParam}`),
+        api.get(`/bi/branches${branchParam}`),
+        api.get(`/bi/inventory-aging${branchParam}`),
       ]);
 
       if (ovRes.status === 'fulfilled') setKpiData(ovRes.value.data);
       if (trRes.status === 'fulfilled') setRevenueTrend(trRes.value.data);
       if (procRes.status === 'fulfilled') setProcurementData(procRes.value.data);
       if (scoreRes.status === 'fulfilled') setDecisionScoreData(scoreRes.value.data);
+      if (branchesRes.status === 'fulfilled') {
+        const rawBranches = Array.isArray(branchesRes.value.data) ? branchesRes.value.data : [];
+        setBranchSales(rawBranches.map((b: any) => ({
+          branchName: b.branchName || b.branch_name,
+          salesCount: Number(b.salesCount ?? b._count?.sales ?? 0),
+        })));
+      }
+      if (agingRes.status === 'fulfilled') {
+        setInventoryAging(Array.isArray(agingRes.value.data) ? agingRes.value.data : []);
+      }
     } catch (err) {
       console.error('Failed to load Business Intelligence data:', err);
     } finally {
@@ -101,10 +115,10 @@ export default function BusinessIntelligencePage() {
               </span>
             </button>
 
-            {/* Date Range Badge */}
+            {/* Dynamic Date Range Badge */}
             <div className="flex items-center gap-2 rounded-xl border border-slate-800 bg-[#1e293b]/90 px-3.5 py-2 text-xs font-semibold text-slate-200 shadow">
               <Calendar size={14} className="text-slate-400" />
-              <span>Historical to Date (Sep 2026)</span>
+              <span>Historical to Date ({new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })})</span>
             </div>
 
             {/* Branch Selector */}
@@ -138,7 +152,7 @@ export default function BusinessIntelligencePage() {
         </div>
 
         {/* 6 KPI Cards Grid */}
-        <ExecutiveKpiGrid data={kpiData} loading={loading} />
+        <ExecutiveKpiGrid data={kpiData} trendData={revenueTrend} loading={loading} />
 
         {/* CORE SECTION 1: Car Procurement & Customer Preference Intelligence */}
         <ProcurementIntelligenceHub data={procurementData} loading={loading} onRefresh={fetchBiData} />
@@ -146,16 +160,16 @@ export default function BusinessIntelligencePage() {
         {/* CORE SECTION 2: Revenue Trend & Sales Breakdown Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <RevenueTrendChart data={revenueTrend} loading={loading} />
-          <SalesByBranchDonut loading={loading} />
-          <InventoryAgingDonut loading={loading} />
+          <SalesByBranchDonut data={branchSales} loading={loading} />
+          <InventoryAgingDonut data={inventoryAging} loading={loading} />
         </div>
 
         {/* CORE SECTION 3: Risk Summary, Funnel, Top Vehicles & Alerts */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          <InventoryRiskSummary />
-          <VisualSalesFunnel />
-          <TopVehiclesTable />
-          <AlertsAndActionsCard />
+          <InventoryRiskSummary branchId={selectedBranch} />
+          <VisualSalesFunnel branchId={selectedBranch} />
+          <TopVehiclesTable branchId={selectedBranch} />
+          <AlertsAndActionsCard branchId={selectedBranch} />
         </div>
 
         {/* Decision Score Intelligence Modal */}

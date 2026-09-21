@@ -17,7 +17,11 @@ interface AlertItem {
   action_label: string;
 }
 
-export function AlertsAndActionsCard() {
+interface AlertsAndActionsCardProps {
+  branchId?: string | number;
+}
+
+export function AlertsAndActionsCard({ branchId }: AlertsAndActionsCardProps = {}) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
@@ -25,11 +29,12 @@ export function AlertsAndActionsCard() {
   const fetchDynamicAlerts = async () => {
     setLoading(true);
     try {
+      const branchQuery = branchId && branchId !== 'all' ? `?branchId=${branchId}` : '';
       let res;
       try {
-        res = await api.get('/analytics/dynamic-alerts');
+        res = await api.get(`/analytics/dynamic-alerts${branchQuery}`);
       } catch {
-        res = await api.get('/bi/dynamic-alerts');
+        res = await api.get(`/bi/dynamic-alerts${branchQuery}`);
       }
       if (res.data) {
         setAlerts(res.data);
@@ -43,7 +48,7 @@ export function AlertsAndActionsCard() {
 
   useEffect(() => {
     fetchDynamicAlerts();
-  }, []);
+  }, [branchId]);
 
   return (
     <div className="space-y-4 font-sans">

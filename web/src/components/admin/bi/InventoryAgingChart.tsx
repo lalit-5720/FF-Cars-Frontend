@@ -13,13 +13,7 @@ export function InventoryAgingChart({ data, loading }: InventoryAgingChartProps)
     return <div className="h-72 rounded-2xl bg-secondary/50 animate-pulse border border-border" />;
   }
 
-  const chartData = data && data.length > 0 ? data : [
-    { label: '0-30 days', count: 5 },
-    { label: '31-60 days', count: 3 },
-    { label: '61-90 days', count: 2 },
-    { label: '91-120 days', count: 1 },
-    { label: '120+ days', count: 0 },
-  ];
+  const chartData = data && data.length > 0 ? data : [];
 
   const colors = ['#34d399', '#38bdf8', '#fbbf24', '#fb923c', '#f87171'];
 

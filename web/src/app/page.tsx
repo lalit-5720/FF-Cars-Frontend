@@ -4,13 +4,14 @@ import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api } from '../services/api';
-import { ShieldCheck, Calendar, Zap, ArrowRight, Heart, Star, MapPin, Scale } from 'lucide-react';
+import { ShieldCheck, Calendar, Zap, ArrowRight, Heart, Star, MapPin, Scale, Sparkles } from 'lucide-react';
 import { useWishlistStore } from '../store/useWishlistStore';
 import { useAuthStore } from '../store/useAuthStore';
 import { useCompareStore } from '../store/useCompareStore';
 import { CarComparisonDrawer } from '../components/CarComparisonDrawer';
 import { showLocalToast } from '../components/Toast';
 import { ThreeDCard } from '../components/ThreeDCard';
+import { AiCarMatchmakerModal } from '../components/AiCarMatchmakerModal';
 
 const FALLBACK_IMG = 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&q=80&w=1200';
 
@@ -20,6 +21,7 @@ export default function HomePage() {
   const [featuredCars, setFeaturedCars] = useState<any[]>([]);
   const [publishedReviews, setPublishedReviews] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isQuizOpen, setIsQuizOpen] = useState(false);
   const { toggleWishlist, isWishlisted } = useWishlistStore();
   const { addToCompare, removeFromCompare, isInCompare } = useCompareStore();
   const { user, isAuthenticated } = useAuthStore();
@@ -203,12 +205,19 @@ export default function HomePage() {
             </div>
 
             {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/cars" className="px-7 py-3.5 rounded-xl bg-secondary hover:bg-secondary text-primary-foreground font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link href="/cars" className="px-6 py-3.5 rounded-xl bg-secondary hover:bg-secondary text-primary-foreground font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer">
                 Browse Inventory
                 <ArrowRight className="w-4 h-4 text-primary-foreground" />
               </Link>
-              <Link href="/register" className="px-7 py-3.5 rounded-xl bg-card hover:bg-secondary text-foreground border border-border font-extrabold text-xs transition-all shadow-sm flex items-center justify-center cursor-pointer">
+              <button
+                onClick={() => setIsQuizOpen(true)}
+                className="px-5 py-3.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border border-amber-500/40 font-extrabold text-xs transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Sparkles className="w-4 h-4" />
+                AI Matchmaker
+              </button>
+              <Link href="/register" className="px-5 py-3.5 rounded-xl bg-card hover:bg-secondary text-foreground border border-border font-extrabold text-xs transition-all shadow-sm flex items-center justify-center cursor-pointer">
                 Become a Member
               </Link>
             </div>
@@ -466,7 +475,7 @@ export default function HomePage() {
                 return (
                   <ThreeDCard key={id} maxTilt={5} className="h-full">
                     <Link
-                      href={`/vehicles/${id}`}
+                      href={`/cars/${id}`}
                       className="group flex flex-col h-full rounded-3xl overflow-hidden transition-all duration-500 preserve-3d"
                       style={{
                         background: 'var(--obsidian)',
@@ -860,6 +869,12 @@ export default function HomePage() {
 
       {/* Floating Side-by-Side Car Comparison Drawer */}
       <CarComparisonDrawer />
+
+      {/* AI Vehicle Matchmaker Concierge Modal */}
+      <AiCarMatchmakerModal
+        isOpen={isQuizOpen}
+        onClose={() => setIsQuizOpen(false)}
+      />
     </div>
   );
 }

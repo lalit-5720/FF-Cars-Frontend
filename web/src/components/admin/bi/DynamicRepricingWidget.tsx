@@ -84,7 +84,7 @@ export function DynamicRepricingWidget() {
           </div>
           <div>
             <h3 className="text-sm font-extrabold text-white tracking-tight flex items-center gap-2">
-              AI Dynamic Price Optimization
+              Aging-Based Dynamic Repricing
               <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-extrabold uppercase border border-purple-500/30">
                 Feature 2
               </span>

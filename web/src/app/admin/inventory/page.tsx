@@ -6,8 +6,8 @@ import { api } from '../../../services/api';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { RequireRole } from '../../../components/auth/RequireRole';
 import { showLocalToast } from '../../../components/Toast';
-import { CarFront, Plus, Search, Filter, Trash2, Edit, CheckCircle, X, Sparkles, DollarSign, ArrowDownRight, Tag, Calculator } from 'lucide-react';
-import { VehicleValuationCalculator } from '../../../components/admin/bi/VehicleValuationCalculator';
+import { CarFront, Plus, Search, Filter, Trash2, Edit, CheckCircle, X, Sparkles, DollarSign, ArrowDownRight, Tag, Award } from 'lucide-react';
+import { VehicleInspectionReportModal } from '../../../components/VehicleInspectionReportModal';
 
 function InventoryPageInner() {
   const permissions = usePermissions();
@@ -26,6 +26,7 @@ function InventoryPageInner() {
   const [editingVehicle, setEditingVehicle] = useState<any>(null);
   const [newPrice, setNewPrice] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
+  const [inspectingVehicle, setInspectingVehicle] = useState<any>(null);
 
   const fetchVehicles = async () => {
     setLoading(true);
@@ -104,8 +105,6 @@ function InventoryPageInner() {
     return matchesSearch && matchesStatus;
   });
 
-  const [showValuationTool, setShowValuationTool] = useState(false);
-
   return (
     <RequireRole allow={['SYSTEM_ADMIN', 'BRANCH_MANAGER', 'SALES_EXECUTIVE']}>
       <div className="space-y-6">
@@ -120,14 +119,6 @@ function InventoryPageInner() {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowValuationTool(!showValuationTool)}
-              className="px-4 py-2.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold border border-amber-500/40 rounded-xl text-xs transition-colors flex items-center gap-2 cursor-pointer"
-            >
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              {showValuationTool ? 'Close AI Estimator' : 'AI Valuation Estimator'}
-            </button>
-
             {permissions.canManageInventory && (
               <button
                 onClick={() => showLocalToast('Add Vehicle feature available in Admin Console')}
@@ -138,17 +129,6 @@ function InventoryPageInner() {
             )}
           </div>
         </div>
-
-        {/* Expandable AI Valuation Calculator Tool */}
-        {showValuationTool && (
-          <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-            <VehicleValuationCalculator
-              onApplyPrice={(recommended) => {
-                showLocalToast(`AI Valuation calculated: ₹${recommended.toLocaleString('en-IN')}`);
-              }}
-            />
-          </div>
-        )}
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -246,17 +226,27 @@ function InventoryPageInner() {
                             {v.status}
                           </span>
                         </td>
-                        {permissions.canManageInventory && (
-                          <td className="py-3.5 px-4 text-right">
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
                             <button
-                              onClick={() => openEditModal(v)}
-                              className="px-3 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-bold transition-all flex items-center gap-1.5 ml-auto"
+                              onClick={() => setInspectingVehicle(v)}
+                              className="px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                              title="Audit 150-Point Inspection Certificate"
                             >
-                              <Edit className="w-3.5 h-3.5" />
-                              <span>Edit Price</span>
+                              <Award className="w-3.5 h-3.5" />
+                              <span>Audit</span>
                             </button>
-                          </td>
-                        )}
+                            {permissions.canManageInventory && (
+                              <button
+                                onClick={() => openEditModal(v)}
+                                className="px-2.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                                <span>Price</span>
+                              </button>
+                            )}
+                          </div>
+                        </td>
                       </tr>
                     );
                   })
@@ -288,11 +278,11 @@ function InventoryPageInner() {
                 </button>
               </div>
 
-              {/* AI Suggestion Badge if available */}
+              {/* Aging Suggestion Badge if available */}
               {editingVehicle.suggested_price && (
                 <div className="mb-4 p-3 rounded-xl bg-purple-950/40 border border-purple-500/30 flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-purple-400 block">AI Recommended Markdown</span>
+                    <span className="text-[10px] uppercase font-bold text-purple-400 block">Aging-Based Recommended Markdown</span>
                     <span className="text-sm font-extrabold text-white font-mono">
                       ₹{Number(editingVehicle.suggested_price).toLocaleString('en-IN')}
                     </span>
@@ -346,6 +336,12 @@ function InventoryPageInner() {
             </div>
           </div>
         )}
+        {/* 150-Point Certified Inspection Certificate Modal */}
+        <VehicleInspectionReportModal
+          car={inspectingVehicle}
+          isOpen={Boolean(inspectingVehicle)}
+          onClose={() => setInspectingVehicle(null)}
+        />
       </div>
     </RequireRole>
   );

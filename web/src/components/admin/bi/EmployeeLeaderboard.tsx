@@ -27,10 +27,7 @@ export function EmployeeLeaderboard({ data, loading }: EmployeeLeaderboardProps)
     return `₹${val.toLocaleString()}`;
   };
 
-  const employees = data && data.length > 0 ? data : [
-    { employeeId: 1, name: 'Rajkumar Swaminathan', role: 'Branch Manager', branchName: 'Anna Nagar', salesCount: 4, totalRevenue: 15400000, conversionRate: 40.0 },
-    { employeeId: 2, name: 'Ganesh Chettiar', role: 'Sales Executive', branchName: 'Anna Nagar', salesCount: 3, totalRevenue: 11340000, conversionRate: 33.3 },
-  ];
+  const employees = data && data.length > 0 ? data : [];
 
   return (
     <div className="rounded-2xl bg-card border border-border p-5 shadow-sm">

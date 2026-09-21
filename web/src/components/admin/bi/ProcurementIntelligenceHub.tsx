@@ -87,7 +87,7 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                 Vehicle Procurement & Stock Advisor
               </h2>
               <p className="text-xs text-slate-300 mt-0.5">
-                AI buying recommendations based on {summary?.totalLeadsAnalyzed || 0} customer leads & {summary?.totalTestDrivesAnalyzed || 0} test drive bookings
+                Decision support recommendations based on {summary?.totalLeadsAnalyzed || 0} customer leads & {summary?.totalTestDrivesAnalyzed || 0} test drive bookings
               </p>
             </div>
           </div>
@@ -225,7 +225,7 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
         </div>
       </div>
 
-      {/* FEATURE 2: AI DYNAMIC REPRICING WIDGET */}
+      {/* FEATURE 2: AGING-BASED DYNAMIC REPRICING WIDGET */}
       <DynamicRepricingWidget />
 
       {/* FEATURE 3: BRANCH DEMAND & CUSTOMER EVIDENCE REPORT */}

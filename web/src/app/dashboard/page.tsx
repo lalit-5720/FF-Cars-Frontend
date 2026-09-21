@@ -26,10 +26,17 @@ import {
   Building2,
   Car,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  Truck,
+  Receipt,
+  PhoneCall,
+  Award,
+  FileCheck,
+  Check,
+  X
 } from 'lucide-react';
 
-type TabType = 'bookings' | 'wishlist';
+type TabType = 'bookings' | 'purchases' | 'wishlist';
 
 function CustomerDashboard() {
   const router = useRouter();
@@ -48,8 +55,11 @@ function CustomerDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>('bookings');
   const [bookings, setBookings] = useState<any[]>([]);
   const [wishlistCars, setWishlistCars] = useState<any[]>([]);
+  const [purchases, setPurchases] = useState<any[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(true);
   const [loadingWishlist, setLoadingWishlist] = useState(false);
+  const [loadingPurchases, setLoadingPurchases] = useState(false);
+  const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
 
   // Review Modal State
@@ -66,6 +76,8 @@ function CustomerDashboard() {
       setActiveTab('wishlist');
     } else if (tabParam === 'bookings') {
       setActiveTab('bookings');
+    } else if (tabParam === 'purchases') {
+      setActiveTab('purchases');
     }
   }, [tabParam]);
 
@@ -93,6 +105,21 @@ function CustomerDashboard() {
       setBookings([]);
     } finally {
       setLoadingBookings(false);
+    }
+  };
+
+  // Fetch customer purchases and deliveries
+  const fetchUserPurchases = async () => {
+    setLoadingPurchases(true);
+    try {
+      const response = await api.get('/sales/my-purchases').catch(() => api.get('/sales'));
+      const list = Array.isArray(response.data) ? response.data : (response.data.data || []);
+      setPurchases(list);
+    } catch (error) {
+      console.error('Failed to load purchases', error);
+      setPurchases([]);
+    } finally {
+      setLoadingPurchases(false);
     }
   };
 
@@ -127,12 +154,16 @@ function CustomerDashboard() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchUserBookings();
+      fetchUserPurchases();
     }
   }, [isAuthenticated, user?.email]);
 
   useEffect(() => {
     if (isAuthenticated && activeTab === 'wishlist') {
       fetchUserWishlist();
+    }
+    if (isAuthenticated && activeTab === 'purchases') {
+      fetchUserPurchases();
     }
   }, [isAuthenticated, activeTab, user?.email]);
 
@@ -315,7 +346,7 @@ function CustomerDashboard() {
         </div>
 
         {/* 3. NAVIGATION PILL TABS */}
-        <div className="flex gap-2 border-b border-border pb-3">
+        <div className="flex gap-2 border-b border-border pb-3 flex-wrap">
           <button
             onClick={() => setActiveTab('bookings')}
             className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
@@ -326,6 +357,17 @@ function CustomerDashboard() {
           >
             <ShoppingBag className="w-4 h-4" />
             My Test Rides ({bookings.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('purchases')}
+            className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+              activeTab === 'purchases'
+                ? 'bg-secondary text-primary-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
+            }`}
+          >
+            <Truck className="w-4 h-4" />
+            My Purchases &amp; Deliveries ({purchases.length})
           </button>
           <button
             onClick={() => setActiveTab('wishlist')}
@@ -489,6 +531,190 @@ function CustomerDashboard() {
                           </button>
                         )}
                       </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          ) : activeTab === 'purchases' ? (
+            /* PURCHASES & DELIVERIES TAB */
+            loadingPurchases ? (
+              <div className="grid grid-cols-1 gap-4">
+                {[1, 2].map((n) => (
+                  <div key={n} className="h-56 rounded-3xl border border-border bg-card skeleton-shimmer" />
+                ))}
+              </div>
+            ) : purchases.length === 0 ? (
+              <div className="text-center py-16 border border-border rounded-3xl bg-card flex flex-col items-center gap-4 shadow-sm">
+                <div className="p-4 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                  <Truck className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg text-foreground font-display">No Purchases Recorded Yet</h3>
+                  <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">
+                    Once you finalize a vehicle purchase or reserve a car through our showroom, your live 5-stage handover tracking and digital receipt will appear here.
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <Link
+                    href="/cars"
+                    className="px-6 py-3 rounded-xl bg-secondary text-primary-foreground font-bold text-xs transition-all shadow-sm"
+                  >
+                    Browse Available Inventory
+                  </Link>
+                  <button
+                    onClick={() => setActiveTab('bookings')}
+                    className="px-6 py-3 rounded-xl bg-card border border-border text-foreground font-bold text-xs transition-all cursor-pointer"
+                  >
+                    View Test Drives
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-6">
+                {purchases.map((sale) => {
+                  const vehicle = sale.vehicles || {};
+                  const make = vehicle.make || 'Luxury';
+                  const model = vehicle.model || 'Automobile';
+                  const year = vehicle.manufacture_year || 2023;
+                  const reg = vehicle.registration_number || 'TN Registered';
+                  const img = vehicle.image_url || 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&q=80&w=600';
+                  const branchName = sale.branches?.branch_name || 'CarRevive Chennai Flagship';
+                  const finalAmount = Number(sale.final_amount || sale.selling_price || 0);
+                  const deliveryStatus = (sale.delivery_status || 'In Progress').toLowerCase();
+                  
+                  const isDelivered = deliveryStatus.includes('deliver') || deliveryStatus.includes('complete');
+                  const currentStage = isDelivered ? 5 : 3;
+
+                  const stages = [
+                    { id: 1, name: 'Contract Executed', desc: 'Deposit & docs verified' },
+                    { id: 2, name: '150-Pt Technical PDI', desc: 'Inspection passed' },
+                    { id: 3, name: 'RTO Registration', desc: 'Transfer in progress' },
+                    { id: 4, name: 'Ceramic Detailing', desc: 'Showroom staging' },
+                    { id: 5, name: 'Key Handover', desc: 'Ready for release' },
+                  ];
+
+                  return (
+                    <div
+                      key={sale.sale_id}
+                      className="p-6 rounded-3xl bg-card border border-border shadow-md flex flex-col gap-6"
+                    >
+                      {/* Top Bar: Vehicle Info + Payment Badge */}
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-border">
+                        <div className="flex items-center gap-4">
+                          <div className="relative w-24 h-18 rounded-2xl overflow-hidden bg-secondary flex-shrink-0 border border-border">
+                            <img src={img} alt={model} className="w-full h-full object-cover" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h4 className="font-extrabold text-foreground text-lg font-display">
+                                {year} {make} {model}
+                              </h4>
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                                Contract #{sale.sale_id}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-0.5 font-mono">
+                              Reg: {reg} &bull; Hub: {branchName}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col sm:items-end gap-1">
+                          <span className="text-[10px] uppercase font-bold text-muted-foreground">Final Agreed Amount</span>
+                          <span className="text-2xl font-black text-foreground font-mono">
+                            ₹{finalAmount.toLocaleString()}
+                          </span>
+                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 ${
+                            (sale.payment_status || '').toLowerCase().includes('paid')
+                              ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
+                              : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                          }`}>
+                            {(sale.payment_status || '').toLowerCase().includes('paid') ? '✓ Fully Paid' : '⏳ Payment In Progress'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 5-Stage Delivery Timeline Stepper */}
+                      <div className="p-5 rounded-2xl bg-secondary/50 border border-border flex flex-col gap-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Truck className="w-4 h-4 text-amber-600" />
+                            <span className="text-xs font-bold text-foreground">Live Delivery Milestone Tracker</span>
+                          </div>
+                          <span className="text-[11px] font-bold text-amber-600 font-mono">
+                            {isDelivered ? 'Milestone: 5 of 5 (Delivered)' : `Milestone: ${currentStage} of 5 (${stages[currentStage - 1].name})`}
+                          </span>
+                        </div>
+
+                        {/* Stepper Line */}
+                        <div className="grid grid-cols-5 gap-2 pt-2">
+                          {stages.map((stage) => {
+                            const isDone = stage.id <= currentStage;
+                            const isCurrent = stage.id === currentStage && !isDelivered;
+
+                            return (
+                              <div key={stage.id} className="flex flex-col items-center text-center gap-1.5">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                                  isDone
+                                    ? 'bg-emerald-600 text-white shadow-sm'
+                                    : 'bg-secondary text-muted-foreground border border-border'
+                                } ${isCurrent ? 'ring-2 ring-amber-500 ring-offset-2' : ''}`}>
+                                  {isDone ? '✓' : stage.id}
+                                </div>
+                                <span className={`text-[10px] font-bold leading-tight ${isDone ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                  {stage.name}
+                                </span>
+                                <span className="text-[9px] text-muted-foreground hidden sm:block">
+                                  {stage.desc}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Concierge Specialist Handler & Actions */}
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-secondary border border-border flex items-center justify-center text-foreground font-bold text-xs">
+                            {sale.employees?.first_name ? sale.employees.first_name[0] : 'S'}
+                          </div>
+                          <div>
+                            <span className="text-[10px] uppercase font-bold text-muted-foreground block">Allocated Delivery Concierge</span>
+                            <span className="font-bold text-foreground text-xs block">
+                              {sale.employees ? `${sale.employees.first_name} ${sale.employees.last_name || ''}` : 'Showroom Delivery Manager'}
+                            </span>
+                          </div>
+                          {sale.employees?.phone && (
+                            <a
+                              href={`tel:${sale.employees.phone}`}
+                              className="px-3 py-1.5 rounded-lg bg-secondary hover:bg-secondary/80 text-foreground text-xs font-semibold flex items-center gap-1.5 transition-colors border border-border"
+                            >
+                              <PhoneCall className="w-3 h-3 text-emerald-600" />
+                              <span>{sale.employees.phone}</span>
+                            </a>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                          <button
+                            onClick={() => setSelectedReceipt(sale)}
+                            className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-card border border-border hover:bg-secondary text-foreground text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <Receipt className="w-3.5 h-3.5" />
+                            Digital Receipt
+                          </button>
+                          <button
+                            onClick={() => openWriteReviewModal(sale)}
+                            className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-secondary hover:bg-secondary/90 text-primary-foreground text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                          >
+                            <Star className="w-3.5 h-3.5 fill-current text-amber-400" />
+                            Review Car
+                          </button>
+                        </div>
+                      </div>
+
                     </div>
                   );
                 })}
@@ -704,6 +930,130 @@ function CustomerDashboard() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DIGITAL RECEIPT & CONTRACT MODAL */}
+      {selectedReceipt && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm overflow-y-auto print:p-0 print:bg-white">
+          <div className="bg-[#0B0F1A] border border-gray-800 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden print:border-none print:shadow-none print:w-full print:max-w-none print:text-black">
+            
+            {/* Header */}
+            <div className="p-6 bg-[#141A2A] border-b border-gray-800 flex justify-between items-center print:bg-white print:border-b-2 print:border-black">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 print:text-black print:bg-gray-100">
+                  <Receipt className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-white print:text-black font-display">
+                    Sales Agreement &amp; Official Receipt
+                  </h3>
+                  <p className="text-[11px] text-gray-400 print:text-gray-600 font-mono">
+                    CR-RCPT-2026-{String(selectedReceipt.sale_id).padStart(4, '0')}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 print:hidden">
+                <button
+                  onClick={() => window.print()}
+                  className="px-3 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xs font-semibold transition-colors cursor-pointer"
+                >
+                  Print
+                </button>
+                <button
+                  onClick={() => setSelectedReceipt(null)}
+                  className="text-gray-400 hover:text-white text-xs font-bold p-1 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Receipt Body */}
+            <div className="p-6 space-y-5 text-xs">
+              {/* Showroom & Client Info */}
+              <div className="grid grid-cols-2 gap-4 pb-4 border-b border-gray-800 print:border-gray-300">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 print:text-gray-600 block">Dealership Showroom</span>
+                  <span className="font-bold text-white print:text-black mt-0.5 block">{selectedReceipt.branches?.branch_name || 'CarRevive Chennai'}</span>
+                  <span className="text-gray-400 print:text-gray-600 text-[11px] block">{selectedReceipt.branches?.address || 'Chennai, Tamil Nadu'}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 print:text-gray-600 block">Purchased By</span>
+                  <span className="font-bold text-white print:text-black mt-0.5 block">{user.name}</span>
+                  <span className="text-gray-400 print:text-gray-600 text-[11px] block">{user.email}</span>
+                </div>
+              </div>
+
+              {/* Vehicle Particulars */}
+              <div className="p-4 rounded-2xl bg-[#141A2A] border border-gray-800 print:bg-gray-50 print:border-gray-200">
+                <span className="text-[10px] uppercase font-bold text-amber-400 print:text-black block mb-2">Automobile Details</span>
+                <div className="flex justify-between items-center font-bold text-white print:text-black text-sm">
+                  <span>{selectedReceipt.vehicles?.manufacture_year || 2023} {selectedReceipt.vehicles?.make} {selectedReceipt.vehicles?.model}</span>
+                  <span className="font-mono text-amber-400 print:text-black">{selectedReceipt.vehicles?.registration_number || 'TN Registration'}</span>
+                </div>
+                <div className="text-[11px] text-gray-400 print:text-gray-600 mt-1">
+                  Color: {selectedReceipt.vehicles?.color || 'Standard'} &bull; Fuel: {selectedReceipt.vehicles?.fuel_type || 'Petrol'} &bull; Gearbox: {selectedReceipt.vehicles?.transmission || 'Automatic'}
+                </div>
+              </div>
+
+              {/* Financial Calculation Sheet */}
+              <div className="space-y-2 pt-2 border-t border-gray-800 print:border-gray-300">
+                <div className="flex justify-between text-gray-300 print:text-black">
+                  <span>Showroom Selling Price</span>
+                  <span className="font-mono font-bold">₹{Number(selectedReceipt.selling_price || 0).toLocaleString()}</span>
+                </div>
+                {Number(selectedReceipt.discount || 0) > 0 && (
+                  <div className="flex justify-between text-emerald-400 print:text-emerald-700">
+                    <span>Promotional Dealership Discount</span>
+                    <span className="font-mono font-bold">-₹{Number(selectedReceipt.discount).toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-gray-400 print:text-gray-600">
+                  <span>GST &amp; RTO Registration Duties</span>
+                  <span className="font-mono">Included in Total</span>
+                </div>
+                <div className="flex justify-between text-white print:text-black text-base font-black pt-3 border-t border-gray-800 print:border-black">
+                  <span>Final Net Amount</span>
+                  <span className="font-mono text-amber-400 print:text-black">
+                    ₹{Number(selectedReceipt.final_amount || selectedReceipt.selling_price || 0).toLocaleString()}
+                  </span>
+                </div>
+              </div>
+
+              {/* Payments Status */}
+              <div className="p-3.5 rounded-xl bg-[#0E1424] border border-gray-800 print:bg-white print:border-gray-300 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-gray-400 print:text-gray-600 block">Payment Settlement</span>
+                  <span className="font-bold text-emerald-400 print:text-emerald-700 text-xs mt-0.5 block">
+                    Status: {selectedReceipt.payment_status || 'Paid in Full'}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] uppercase font-bold text-gray-400 print:text-gray-600 block">Date of Sale</span>
+                  <span className="font-mono text-xs text-white print:text-black">
+                    {selectedReceipt.sale_date ? new Date(selectedReceipt.sale_date).toLocaleDateString() : 'September 2026'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Dealership Stamp */}
+              <div className="text-center pt-2 text-[10px] text-gray-500 print:text-gray-700 font-mono">
+                OFFICIALLY CERTIFIED BY CARREVIVE DEALERSHIP MANAGEMENT &bull; ISO 9001:2015 AUDITED
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 bg-[#141A2A] border-t border-gray-800 flex justify-end print:hidden">
+              <button
+                onClick={() => setSelectedReceipt(null)}
+                className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs transition-all cursor-pointer"
+              >
+                Close Receipt
+              </button>
+            </div>
+
           </div>
         </div>
       )}

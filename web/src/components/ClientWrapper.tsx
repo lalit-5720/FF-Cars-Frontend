@@ -7,6 +7,9 @@ import { Footer } from './Footer';
 import { Toast } from './Toast';
 import { useSocket } from '../hooks/useSocket';
 
+import { CarComparisonDrawer } from './CarComparisonDrawer';
+import { ConciergeChatWidget } from './ConciergeChatWidget';
+
 interface ClientWrapperProps {
   children: React.ReactNode;
 }
@@ -25,6 +28,8 @@ export const ClientWrapper: React.FC<ClientWrapperProps> = ({ children }) => {
       <Navbar />
       <main className="flex-1 flex flex-col">{children}</main>
       <Footer />
+      <CarComparisonDrawer />
+      <ConciergeChatWidget />
       <Toast />
     </div>
   );

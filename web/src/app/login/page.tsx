@@ -28,7 +28,7 @@ export default function LoginPage() {
       setAuth(user, accessToken, refreshToken);
       showLocalToast(`Welcome back, ${user.name}`);
       if (user.role !== 'CUSTOMER') {
-        router.push('/admin/overview');
+        router.push('/admin');
       } else {
         router.push('/cars');
       }
@@ -42,12 +42,12 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 py-8 relative overflow-hidden text-foreground font-sans">
-      
+
       <div className="relative w-full max-w-md">
 
         {/* Card */}
         <div className="relative rounded-3xl p-8 sm:p-10 bg-card text-foreground shadow-xl overflow-hidden border border-border/90">
-          
+
           {/* Header */}
           <div className="relative text-center mb-8">
             {/* Brand mark */}

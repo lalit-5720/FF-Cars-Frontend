@@ -14,13 +14,6 @@ export function SalesFunnelChart({ data, loading }: SalesFunnelChartProps) {
     return <div className="h-72 rounded-2xl bg-secondary/50 animate-pulse border border-border" />;
   }
 
-  const defaultStages = [
-    { label: 'Total Inquiries / Leads', count: 42, color: 'bg-sky-500', width: 'w-full' },
-    { label: 'Test Drives Scheduled', count: 28, color: 'bg-indigo-500', width: 'w-4/5' },
-    { label: 'Sales Negotiated', count: 18, color: 'bg-purple-500', width: 'w-3/5' },
-    { label: 'Vehicles Delivered', count: 12, color: 'bg-emerald-500', width: 'w-2/5' },
-  ];
-
   const stages = data?.stages?.map((stage, index) => {
     const colors = ['bg-sky-500', 'bg-indigo-500', 'bg-purple-500', 'bg-emerald-500'];
     const widths = ['w-full', 'w-4/5', 'w-3/5', 'w-2/5'];
@@ -30,7 +23,7 @@ export function SalesFunnelChart({ data, loading }: SalesFunnelChartProps) {
       color: colors[index % colors.length],
       width: widths[index % widths.length],
     };
-  }) || defaultStages;
+  }) || [];
 
   const topCount = stages[0]?.count || 1;
 

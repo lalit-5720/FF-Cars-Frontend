@@ -21,8 +21,10 @@ import {
   Wrench,
   HelpCircle,
   TrendingUp,
-  CircleDollarSign
+  CircleDollarSign,
+  Award
 } from 'lucide-react';
+import { VehicleInspectionReportModal } from '../../../components/VehicleInspectionReportModal';
 
 interface CarDetailProps {
   params: Promise<{ id: string }>;
@@ -38,6 +40,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isBooking, setIsBooking] = useState(false);
+  const [isInspectionOpen, setIsInspectionOpen] = useState(false);
 
   // EMI Calculator States
   const [downPaymentPct, setDownPaymentPct] = useState(20); // 20% default
@@ -374,12 +377,20 @@ export default function CarDetailPage({ params }: CarDetailProps) {
               Experience this luxury vehicle firsthand. Schedule your personalized test ride concierge appointment.
             </p>
 
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/90 border border-border text-emerald-400">
-              <ShieldCheck className="w-5 h-5 flex-shrink-0" />
-              <div className="text-[11px] font-bold leading-normal font-sans">
-                Inspected &bull; Doorstep Delivery &bull; Certified
+            {/* 150-Point Certified Inspection Button */}
+            <button
+              onClick={() => setIsInspectionOpen(true)}
+              className="flex items-center justify-between p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-400 transition-all cursor-pointer group"
+            >
+              <div className="flex items-center gap-2.5">
+                <Award className="w-5 h-5 flex-shrink-0 text-amber-400" />
+                <div className="text-left">
+                  <div className="text-xs font-bold text-white">150-Point Certified Inspection</div>
+                  <div className="text-[10px] text-emerald-400 font-semibold">Gold Certified (98/100 Score) &bull; Verified</div>
+                </div>
               </div>
-            </div>
+              <span className="text-xs font-bold text-amber-400 group-hover:translate-x-0.5 transition-transform">&rarr;</span>
+            </button>
 
             <button
               onClick={handleBooking}
@@ -477,8 +488,15 @@ export default function CarDetailPage({ params }: CarDetailProps) {
 
         </div>
 
+        </div>
       </div>
-      </div>
+
+      {/* 150-Point Certified Inspection Certificate Modal */}
+      <VehicleInspectionReportModal
+        car={car}
+        isOpen={isInspectionOpen}
+        onClose={() => setIsInspectionOpen(false)}
+      />
     </div>
   );
 }

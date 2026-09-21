@@ -18,10 +18,7 @@ export function BranchComparisonChart({ data, loading }: BranchComparisonChartPr
     return <div className="h-72 rounded-2xl bg-secondary/50 animate-pulse border border-border" />;
   }
 
-  const chartData = data && data.length > 0 ? data : [
-    { branchName: 'Anna Nagar', totalRevenue: 15400000, totalSalesCount: 4, availableInventoryCount: 12 },
-    { branchName: 'Velachery', totalRevenue: 11340000, totalSalesCount: 3, availableInventoryCount: 8 },
-  ];
+  const chartData = data && data.length > 0 ? data : [];
 
   const formatLakhs = (value: number) => {
     if (value >= 10000000) return `₹${(value / 10000000).toFixed(1)}Cr`;

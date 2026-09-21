@@ -85,7 +85,9 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                       </span>
                     </div>
                     <p className="text-xs text-slate-400 max-w-md">
-                      The business is performing well overall (+18.6% revenue growth), with slow-moving inventory (8 vehicles) dragging the overall rating.
+                      {data?.status === 'Excellent' || data?.status === 'Healthy'
+                        ? `Operational health score is solid (${data?.decision_score || 80}/100) based on active customer demand and inventory status.`
+                        : `Operational decision score currently calculated at ${data?.decision_score || 70}/100 across 6 operational pillars.`}
                     </p>
                   </div>
                 </div>

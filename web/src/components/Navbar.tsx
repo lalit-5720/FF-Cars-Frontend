@@ -6,8 +6,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '../store/useAuthStore';
 import { useWishlistStore } from '../store/useWishlistStore';
 import { useNotificationStore } from '../store/useNotificationStore';
-import { Heart, Bell, User as UserIcon, LogOut, ChevronDown, Check, Menu, X, Crown } from 'lucide-react';
+import { Heart, Bell, User as UserIcon, LogOut, ChevronDown, Check, Menu, X, Crown, Scale, Sparkles } from 'lucide-react';
 import { Logo } from './Logo';
+import { useCompareStore } from '../store/useCompareStore';
+import { AiCarMatchmakerModal } from './AiCarMatchmakerModal';
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
@@ -15,10 +17,12 @@ export const Navbar: React.FC = () => {
   const { user, isAuthenticated, clearAuth } = useAuthStore();
   const { wishlistIds, fetchWishlist, clearWishlist } = useWishlistStore();
   const { notifications, unreadCount, fetchNotifications, markAsRead, markAllAsRead } = useNotificationStore();
+  const { compareList } = useCompareStore();
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMatchmakerOpen, setIsMatchmakerOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   const notifRef = useRef<HTMLDivElement>(null);
@@ -97,19 +101,20 @@ export const Navbar: React.FC = () => {
             </Link>
 
             {/* Desktop Navigation - Reference Match Dark Pills */}
-            <div className="hidden md:flex items-center justify-center gap-2 flex-1 max-w-md mx-auto">
+            <div className="hidden md:flex items-center justify-center gap-1.5 flex-1 max-w-lg mx-auto">
               {[
                 { href: '/', label: 'Home' },
                 { href: '/cars', label: 'Inventory' },
-                ...(isAuthenticated ? [{ href: '/dashboard', label: 'My Bookings' }] : []),
-                ...(isAuthenticated && (user?.role === 'ADMIN' || user?.role !== 'CUSTOMER' || user?.email?.toLowerCase().includes('admin')) ? [{ href: '/admin', label: 'Admin Dashboard' }] : []),
-              ].map(({ href, label }) => {
+                { href: '/compare', label: 'Compare', badge: compareList.length > 0 ? compareList.length : null },
+                ...(isAuthenticated ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
+                ...(isAuthenticated && (user?.role === 'ADMIN' || user?.role !== 'CUSTOMER' || user?.email?.toLowerCase().includes('admin')) ? [{ href: '/admin', label: 'Admin' }] : []),
+              ].map(({ href, label, badge }) => {
                 const active = isActive(href);
                 return (
                   <Link
                     key={href}
                     href={href}
-                    className={`text-xs font-bold transition-all duration-200 px-4 py-2 rounded-full cursor-pointer ${
+                    className={`relative text-xs font-bold transition-all duration-200 px-3.5 py-1.5 rounded-full cursor-pointer flex items-center gap-1.5 ${
                       active
                         ? 'bg-[#5468F0] text-foreground shadow-md'
                         : 'text-[#a5b0c2] hover:text-foreground hover:bg-secondary/[0.06]'
@@ -118,10 +123,25 @@ export const Navbar: React.FC = () => {
                       fontFamily: "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif",
                     }}
                   >
-                    {label}
+                    <span>{label}</span>
+                    {badge !== null && badge !== undefined && (
+                      <span className="w-4 h-4 rounded-full bg-amber-500 text-black text-[9px] font-black flex items-center justify-center">
+                        {badge}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
+
+              {/* AI Matchmaker trigger button */}
+              <button
+                onClick={() => setIsMatchmakerOpen(true)}
+                className="flex items-center gap-1.5 text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/25 px-3 py-1.5 rounded-full transition-all cursor-pointer shadow-sm ml-1"
+                title="Find your perfect car with AI"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>AI Matchmaker</span>
+              </button>
             </div>
 
             {/* Right Actions */}
@@ -399,6 +419,12 @@ export const Navbar: React.FC = () => {
 
       {/* Spacer for fixed nav */}
       <div className="h-[70px]" />
+
+      {/* AI Matchmaker Modal */}
+      <AiCarMatchmakerModal
+        isOpen={isMatchmakerOpen}
+        onClose={() => setIsMatchmakerOpen(false)}
+      />
     </>
   );
 };

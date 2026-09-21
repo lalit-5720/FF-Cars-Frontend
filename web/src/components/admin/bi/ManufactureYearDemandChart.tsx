@@ -39,12 +39,7 @@ export function ManufactureYearDemandChart({ data, loading }: ManufactureYearDem
         SalesCount: d.salesCount,
         ActiveStock: d.availableStock,
       }))
-    : [
-        { year: '2023 - 2024', CustomerDemand: 18, SalesCount: 8, ActiveStock: 3 },
-        { year: '2021 - 2022', CustomerDemand: 24, SalesCount: 12, ActiveStock: 5 },
-        { year: '2018 - 2020', CustomerDemand: 12, SalesCount: 5, ActiveStock: 4 },
-        { year: 'Before 2018', CustomerDemand: 4, SalesCount: 2, ActiveStock: 2 },
-      ];
+    : [];
 
   return (
     <div className="rounded-2xl bg-[#1e293b]/90 border border-slate-800 p-5 shadow-lg flex flex-col justify-between">
