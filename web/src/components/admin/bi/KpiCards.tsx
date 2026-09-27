@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { DollarSign, ShoppingBag, Target, TrendingUp, Award } from 'lucide-react';
+import { RevenueBreakdownModal } from './RevenueBreakdownModal';
 
 interface KpiCardsProps {
   data: {
@@ -15,6 +16,8 @@ interface KpiCardsProps {
 }
 
 export function KpiCards({ data, loading }: KpiCardsProps) {
+  const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
+
   const formatCurrency = (val?: number) => {
     if (!val) return '₹0';
     if (val >= 10000000) return `₹${(val / 10000000).toFixed(2)} Cr`;
@@ -68,38 +71,59 @@ export function KpiCards({ data, loading }: KpiCardsProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      {cards.map((card) => {
-        const Icon = card.icon;
-        return (
-          <div
-            key={card.title}
-            className="rounded-2xl bg-card border border-border p-5 shadow-sm hover:border-slate-700 transition-all"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                {card.title}
-              </span>
-              <div className={`p-2 rounded-xl border ${card.color}`}>
-                <Icon size={18} />
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {cards.map((card) => {
+          const Icon = card.icon;
+          const isRevenue = card.title === 'Total Revenue';
+
+          return (
+            <div
+              key={card.title}
+              onClick={() => {
+                if (isRevenue) setIsBreakdownOpen(true);
+              }}
+              className={`rounded-2xl bg-card border border-border p-5 shadow-sm transition-all ${
+                isRevenue
+                  ? 'cursor-pointer hover:border-emerald-500/50 hover:bg-secondary/40 ring-1 ring-emerald-500/20 group'
+                  : 'hover:border-slate-700'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  {card.title}
+                  {isRevenue && (
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20 group-hover:bg-emerald-500/20">
+                      Breakdown ↗
+                    </span>
+                  )}
+                </span>
+                <div className={`p-2 rounded-xl border ${card.color}`}>
+                  <Icon size={18} />
+                </div>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-2xl font-extrabold tracking-tight text-foreground font-mono">
+                  {card.value}
+                </span>
+                <span
+                  className={`text-xs font-bold flex items-center gap-0.5 ${
+                    card.isPositive ? 'text-emerald-400' : 'text-rose-400'
+                  }`}
+                >
+                  <TrendingUp size={12} />
+                  {card.change}
+                </span>
               </div>
             </div>
-            <div className="flex items-baseline justify-between">
-              <span className="text-2xl font-extrabold tracking-tight text-foreground font-mono">
-                {card.value}
-              </span>
-              <span
-                className={`text-xs font-bold flex items-center gap-0.5 ${
-                  card.isPositive ? 'text-emerald-400' : 'text-rose-400'
-                }`}
-              >
-                <TrendingUp size={12} />
-                {card.change}
-              </span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+
+      <RevenueBreakdownModal 
+        isOpen={isBreakdownOpen} 
+        onClose={() => setIsBreakdownOpen(false)} 
+      />
+    </>
   );
 }

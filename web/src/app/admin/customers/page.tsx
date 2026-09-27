@@ -174,7 +174,7 @@ export default function AdminCustomersPage() {
   });
 
   return (
-    <RequireRole allow={['SYSTEM_ADMIN', 'BRANCH_MANAGER', 'SALES_EXECUTIVE']}>
+    <RequireRole allow={['SYSTEM_ADMIN', 'BRANCH_MANAGER']}>
       <div className="space-y-6 text-slate-100 font-sans pb-12">
         {/* Header Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#141A2A] border border-[#5468F0]/40 p-6 rounded-3xl shadow-xl">

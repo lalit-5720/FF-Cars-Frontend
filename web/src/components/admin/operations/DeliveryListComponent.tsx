@@ -3,109 +3,43 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../../services/api';
 import { showLocalToast } from '../../Toast';
-import { PackageCheck, CheckCircle2, Clock, User, Building2, Car, RefreshCw, FileText } from 'lucide-react';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { PackageCheck, CheckCircle2, Clock, User, Building2, Car, RefreshCw, FileText, X, Loader2, Phone } from 'lucide-react';
 
 interface DeliveryListComponentProps {
   initialDeliveriesList?: any[];
 }
 
 export function DeliveryListComponent({ initialDeliveriesList }: DeliveryListComponentProps) {
+  const { user } = useAuthStore();
   const [deliveries, setDeliveries] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<'ALL' | 'PENDING' | 'COMPLETED'>('ALL');
+
+  // Handover action modal state
+  const [selectedDelivery, setSelectedDelivery] = useState<any>(null);
+  const [odometerInput, setOdometerInput] = useState<number | string>('');
+  const [notesInput, setNotesInput] = useState('');
+  const [statusInput, setStatusInput] = useState('Delivered');
+  const [customerReceivedInput, setCustomerReceivedInput] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  const isSalesExecutive = user?.role === 'SALES_EXECUTIVE';
 
   const fetchDeliveries = async () => {
     setLoading(true);
     try {
       const res = await api.get('/deliveries');
-      if (res.data && Array.isArray(res.data) && res.data.length > 0) {
+      if (res.data && Array.isArray(res.data)) {
         setDeliveries(res.data);
       } else if (initialDeliveriesList && initialDeliveriesList.length > 0) {
         setDeliveries(initialDeliveriesList);
       } else {
-        setDeliveries([
-          {
-            delivery_id: 101,
-            sale_id: 881,
-            customer_name: 'Keerthana Ramanathan',
-            phone: '9840112233',
-            vehicle_name: 'BMW 3 Series 330i M Sport (2022)',
-            branch_name: 'CarRevive - Anna Nagar',
-            delivery_date: '2026-09-06',
-            odometer_reading: 14200,
-            customer_received: false,
-            delivery_status: 'Scheduled (Not Completed)',
-            loan_status: 'No Loan (Direct Payment)',
-          },
-          {
-            delivery_id: 102,
-            sale_id: 882,
-            customer_name: 'Dinesh Rajendran',
-            phone: '9840223344',
-            vehicle_name: 'Mahindra XUV700 AX7 Luxury (2023)',
-            branch_name: 'CarRevive - Velachery',
-            delivery_date: '2026-09-06',
-            odometer_reading: 9800,
-            customer_received: false,
-            delivery_status: 'Ready for Handover (Not Completed)',
-            loan_status: 'No Loan (Direct Payment)',
-          },
-          {
-            delivery_id: 103,
-            sale_id: 883,
-            customer_name: 'Rajesh Kumar Swamy',
-            phone: '9840334455',
-            vehicle_name: 'Kia Seltos GTX Plus (2022)',
-            branch_name: 'CarRevive - Anna Nagar',
-            delivery_date: '2026-09-07',
-            odometer_reading: 18500,
-            customer_received: true,
-            delivery_status: 'Delivered (Completed)',
-            loan_status: 'No Loan (Full Cash)',
-          },
-          {
-            delivery_id: 104,
-            sale_id: 884,
-            customer_name: 'Ananya Sundaram',
-            phone: '9840445566',
-            vehicle_name: 'Tata Harrier Fearless Edition (2023)',
-            branch_name: 'CarRevive - T. Nagar',
-            delivery_date: '2026-09-07',
-            odometer_reading: 11200,
-            customer_received: true,
-            delivery_status: 'Delivered (Completed)',
-            loan_status: 'No Loan (Direct Payment)',
-          },
-          {
-            delivery_id: 105,
-            sale_id: 885,
-            customer_name: 'Vikram Krishnan',
-            phone: '9840556677',
-            vehicle_name: 'Hyundai Alcazar Signature (2022)',
-            branch_name: 'CarRevive - Anna Nagar',
-            delivery_date: '2026-09-08',
-            odometer_reading: 16400,
-            customer_received: false,
-            delivery_status: 'Scheduled (Not Completed)',
-            loan_status: 'No Loan (Direct Payment)',
-          },
-          {
-            delivery_id: 106,
-            sale_id: 886,
-            customer_name: 'Karthik Subramanian',
-            phone: '9840776655',
-            vehicle_name: 'Volkswagen Virtus GT 1.5 TSI (2023)',
-            branch_name: 'CarRevive - Velachery',
-            delivery_date: '2026-09-08',
-            odometer_reading: 12000,
-            customer_received: false,
-            delivery_status: 'Ready for Handover (Not Completed)',
-            loan_status: 'No Loan (Full Cash)',
-          },
-        ]);
+        setDeliveries([]);
       }
     } catch (err) {
-      console.warn('Fallback to sample delivery list:', err);
+      console.warn('Failed to load deliveries from API:', err);
+      setDeliveries([]);
     } finally {
       setLoading(false);
     }
@@ -115,37 +49,73 @@ export function DeliveryListComponent({ initialDeliveriesList }: DeliveryListCom
     fetchDeliveries();
   }, []);
 
-  const handleIssueHandover = (id: number) => {
-    setDeliveries((prev) =>
-      prev.map((d) =>
-        d.delivery_id === id
-          ? { ...d, customer_received: true, delivery_status: 'Delivered (Completed)' }
-          : d
-      )
-    );
-    showLocalToast(`Handover note generated & Delivery #${id} marked Completed!`);
+  const openHandoverModal = (del: any) => {
+    setSelectedDelivery(del);
+    setOdometerInput(del.odometer_reading || 14000);
+    setNotesInput(del.delivery_notes || 'Vehicle inspected, documents verified, keys handed over.');
+    setStatusInput('Delivered');
+    setCustomerReceivedInput(true);
+  };
+
+  const closeHandoverModal = () => {
+    setSelectedDelivery(null);
+  };
+
+  const handleHandoverSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDelivery) return;
+
+    setSubmitting(true);
+    try {
+      const res = await api.patch(`/deliveries/${selectedDelivery.delivery_id}`, {
+        delivery_status: statusInput,
+        customer_received: customerReceivedInput,
+        odometer_reading: Number(odometerInput),
+        delivery_notes: notesInput,
+      });
+
+      setDeliveries((prev) =>
+        prev.map((d) => (d.delivery_id === selectedDelivery.delivery_id ? res.data : d))
+      );
+
+      showLocalToast(`Delivery #${selectedDelivery.delivery_id} successfully updated!`);
+      closeHandoverModal();
+    } catch (err: any) {
+      console.error('Failed to submit delivery handover:', err);
+      showLocalToast(err.response?.data?.message || 'Failed to update delivery');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Filter deliveries by Completed vs Not Completed
   const filteredDeliveries = deliveries.filter((d) => {
-    if (filterType === 'COMPLETED') return d.customer_received === true;
-    if (filterType === 'PENDING') return d.customer_received !== true;
+    const isCompleted = d.customer_received || (d.delivery_status || '').toLowerCase() === 'delivered';
+    if (filterType === 'COMPLETED') return isCompleted;
+    if (filterType === 'PENDING') return !isCompleted;
     return true;
   });
 
-  const pendingCount = deliveries.filter((d) => !d.customer_received).length;
-  const completedCount = deliveries.filter((d) => d.customer_received).length;
+  const pendingCount = deliveries.filter(
+    (d) => !d.customer_received && (d.delivery_status || '').toLowerCase() !== 'delivered'
+  ).length;
+  const completedCount = deliveries.filter(
+    (d) => d.customer_received || (d.delivery_status || '').toLowerCase() === 'delivered'
+  ).length;
 
   return (
     <div className="rounded-2xl bg-[#1e293b]/90 border border-slate-800 overflow-hidden shadow-xl space-y-4 font-sans p-5">
-      {/* Header & Category PII Controls */}
+      {/* Header & Category Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-4">
         <div>
           <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-            <PackageCheck size={18} className="text-sky-400" /> All Vehicle Deliveries ({deliveries.length})
+            <PackageCheck size={18} className="text-sky-400" />
+            {isSalesExecutive ? 'My Assigned Vehicle Deliveries' : 'All Vehicle Deliveries'} ({deliveries.length})
           </h2>
           <p className="text-xs text-slate-400 mt-0.5">
-            Complete categorization of completed handovers vs pending/scheduled deliveries
+            {isSalesExecutive
+              ? 'Strictly filtered to vehicles assigned to you for customer handover and action'
+              : 'Complete categorization of completed handovers vs pending/scheduled deliveries'}
           </p>
         </div>
 
@@ -274,14 +244,16 @@ export function DeliveryListComponent({ initialDeliveriesList }: DeliveryListCom
                     <td className="py-3.5 px-4 text-right">
                       {!isCompleted ? (
                         <button
-                          onClick={() => handleIssueHandover(d.delivery_id)}
+                          onClick={() => openHandoverModal(d)}
                           className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-[11px] transition-all shadow cursor-pointer flex items-center gap-1 justify-end ml-auto"
                         >
                           <FileText size={12} />
-                          <span>Verify &amp; Complete Handover</span>
+                          <span>Execute Handover</span>
                         </button>
                       ) : (
-                        <span className="text-slate-500 text-[11px] italic font-semibold">Completed Handover</span>
+                        <span className="text-emerald-500/80 text-[11px] font-bold flex items-center gap-1 justify-end">
+                          <CheckCircle2 size={12} /> Handover Completed
+                        </span>
                       )}
                     </td>
                   </tr>
@@ -291,6 +263,117 @@ export function DeliveryListComponent({ initialDeliveriesList }: DeliveryListCom
           </tbody>
         </table>
       </div>
+
+      {/* Interactive Delivery Handover Modal */}
+      {selectedDelivery && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg rounded-3xl bg-[#1e293b] border border-slate-700 p-6 sm:p-8 shadow-2xl space-y-6">
+            <button
+              onClick={closeHandoverModal}
+              className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <X size={20} />
+            </button>
+
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider border border-emerald-500/30">
+                  Execution Action
+                </span>
+                <span className="font-mono text-xs text-sky-400 font-bold">
+                  DELIVERY #{selectedDelivery.delivery_id}
+                </span>
+              </div>
+              <h2 className="text-xl font-extrabold text-white mt-1">
+                Vehicle Delivery &amp; Customer Handover
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Complete handover documentation for {selectedDelivery.sales?.customers?.first_name || selectedDelivery.customer_name}
+              </p>
+            </div>
+
+            <form onSubmit={handleHandoverSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                  Odometer Reading at Handover (km)
+                </label>
+                <input
+                  type="number"
+                  required
+                  value={odometerInput}
+                  onChange={(e) => setOdometerInput(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-white focus:outline-none focus:border-sky-500 transition-colors"
+                  placeholder="e.g. 14250"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                  Delivery Handover Status
+                </label>
+                <select
+                  value={statusInput}
+                  onChange={(e) => setStatusInput(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-sky-500 transition-colors"
+                >
+                  <option value="Delivered">Delivered (Handover Completed)</option>
+                  <option value="Ready for Handover">Ready for Handover</option>
+                  <option value="In Progress">In Progress (PDI Pending)</option>
+                  <option value="Pending">Scheduled / Pending</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1">
+                  Executive Handover Remarks &amp; Checklist Notes
+                </label>
+                <textarea
+                  rows={3}
+                  value={notesInput}
+                  onChange={(e) => setNotesInput(e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-xs font-medium text-white focus:outline-none focus:border-sky-500 transition-colors"
+                  placeholder="e.g. Verified customer ID, keys handed over, full warranty kit provided."
+                />
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                <input
+                  type="checkbox"
+                  id="customerReceivedDelivery"
+                  checked={customerReceivedInput}
+                  onChange={(e) => setCustomerReceivedInput(e.target.checked)}
+                  className="w-4 h-4 rounded text-emerald-500 focus:ring-emerald-400 bg-slate-800 border-slate-700 cursor-pointer"
+                />
+                <label htmlFor="customerReceivedDelivery" className="text-xs text-slate-200 font-semibold cursor-pointer">
+                  Customer has received vehicle and signed delivery handover receipt
+                </label>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={closeHandoverModal}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold cursor-pointer transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold cursor-pointer transition-all shadow flex items-center gap-2 disabled:opacity-50"
+                >
+                  {submitting ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <CheckCircle2 size={14} />
+                  )}
+                  <span>Save &amp; Complete Handover</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

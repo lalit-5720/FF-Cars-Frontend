@@ -46,7 +46,7 @@ export default function AdminDemandPage() {
   }, []);
 
   return (
-    <RequireRole allow={['SYSTEM_ADMIN', 'BRANCH_MANAGER', 'SALES_EXECUTIVE']}>
+    <RequireRole allow={['SYSTEM_ADMIN', 'BRANCH_MANAGER']}>
       <div className="space-y-6 text-slate-100 font-sans pb-10">
         
         {/* Page Header */}

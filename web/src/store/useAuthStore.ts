@@ -6,7 +6,8 @@ export type UserRole =
   | 'ADMIN'
   | 'SYSTEM_ADMIN'
   | 'BRANCH_MANAGER'
-  | 'SALES_EXECUTIVE';
+  | 'SALES_EXECUTIVE'
+  | (string & {});
 
 export interface User {
   id: string | number;
@@ -15,6 +16,7 @@ export interface User {
   role: UserRole;
   branch_id?: number | null;
   job_title?: string;
+  permissions?: Record<string, boolean>;
   createdAt?: string;
 }
 

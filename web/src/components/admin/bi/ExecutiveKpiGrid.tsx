@@ -1,12 +1,15 @@
 'use client';
 
-import React from 'react';
-import { DollarSign, ShoppingCart, FileText, Box, Clock, Target, TrendingUp, TrendingDown } from 'lucide-react';
+import React, { useState } from 'react';
+import { DollarSign, ShoppingCart, FileText, Box, Clock, Target, TrendingUp, TrendingDown, ExternalLink } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
+import { RevenueBreakdownModal } from './RevenueBreakdownModal';
+import { GrossProfitBreakdownModal } from './GrossProfitBreakdownModal';
 
 interface ExecutiveKpiGridProps {
   data: {
     totalRevenue?: number;
+    totalContractValue?: number;
     totalSales?: number;
     grossProfit?: number;
     inventoryValue?: number;
@@ -21,6 +24,9 @@ interface ExecutiveKpiGridProps {
 }
 
 export function ExecutiveKpiGrid({ data, trendData, loading }: ExecutiveKpiGridProps) {
+  const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
+  const [isGrossProfitOpen, setIsGrossProfitOpen] = useState(false);
+
   const formatCurrency = (val?: number) => {
     if (!val && val !== 0) return '₹0';
     return `₹${Math.round(val).toLocaleString('en-IN')}`;
@@ -86,7 +92,9 @@ export function ExecutiveKpiGrid({ data, trendData, loading }: ExecutiveKpiGridP
       title: 'Gross Profit',
       value: data?.grossProfit != null ? formatCurrency(data.grossProfit) : 'N/A',
       change: null,
-      subtitle: data?.totalRevenue && data?.grossProfit ? `${((data.grossProfit / data.totalRevenue) * 100).toFixed(1)}% margin` : 'Net sales margin',
+      subtitle: data?.grossProfit && (data?.totalContractValue || data?.totalRevenue)
+        ? `${((data.grossProfit / (data.totalContractValue || data.totalRevenue!)) * 100).toFixed(1)}% margin`
+        : 'Net sales margin',
       isUp: true,
       icon: FileText,
       iconBg: 'bg-purple-500/20 text-purple-400',
@@ -139,64 +147,99 @@ export function ExecutiveKpiGrid({ data, trendData, loading }: ExecutiveKpiGridP
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 mb-6 font-sans">
-      {cards.map((card) => {
-        const Icon = card.icon;
-        return (
-          <div
-            key={card.title}
-            className="rounded-2xl bg-[#1e293b]/90 border border-slate-800/90 p-4 shadow-lg hover:border-slate-700 transition-all flex flex-col justify-between"
-          >
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-bold text-slate-400">
-                  {card.title}
-                </span>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${card.iconBg}`}>
-                  <Icon size={16} />
-                </div>
-              </div>
-              <strong className="text-xl font-extrabold text-white tracking-tight font-mono block">
-                {card.value}
-              </strong>
-            </div>
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 mb-6 font-sans">
+        {cards.map((card) => {
+          const Icon = card.icon;
+          const isRevenueCard = card.title === 'Total Revenue';
+          const isGrossProfitCard = card.title === 'Gross Profit';
 
-            <div className="mt-3">
-              {card.change ? (
-                <div className="flex items-center gap-1 text-[10px] font-bold mb-1">
-                  {card.isUp ? (
-                    <span className="text-emerald-400 flex items-center gap-0.5">
-                      <TrendingUp size={11} /> ↑ {card.change}
-                    </span>
-                  ) : (
-                    <span className="text-amber-400 flex items-center gap-0.5">
-                      <TrendingDown size={11} /> ↓ {card.change}
-                    </span>
-                  )}
+          return (
+            <div
+              key={card.title}
+              onClick={() => {
+                if (isRevenueCard) setIsBreakdownOpen(true);
+                if (isGrossProfitCard) setIsGrossProfitOpen(true);
+              }}
+              className={`rounded-2xl bg-[#1e293b]/90 border border-slate-800/90 p-4 shadow-lg transition-all flex flex-col justify-between ${
+                isRevenueCard 
+                  ? 'cursor-pointer hover:border-emerald-500/50 hover:bg-slate-800/80 hover:shadow-emerald-950/20 group ring-1 ring-emerald-500/20' 
+                  : isGrossProfitCard
+                  ? 'cursor-pointer hover:border-purple-500/50 hover:bg-slate-800/80 hover:shadow-purple-950/20 group ring-1 ring-purple-500/20'
+                  : 'hover:border-slate-700'
+              }`}
+            >
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+                    {card.title}
+                    {isRevenueCard && (
+                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20 group-hover:bg-emerald-500/20">
+                        View Split ↗
+                      </span>
+                    )}
+                    {isGrossProfitCard && (
+                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-400 font-bold border border-purple-500/20 group-hover:bg-purple-500/20">
+                        Difference ↗
+                      </span>
+                    )}
+                  </span>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${card.iconBg}`}>
+                    <Icon size={16} />
+                  </div>
                 </div>
-              ) : (
-                <div className="text-[10px] text-slate-400 font-medium mb-1 truncate">{card.subtitle || 'Current period'}</div>
-              )}
-              {card.sparkData && card.sparkData.length > 0 ? (
-                <div className="h-8 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={card.sparkData}>
-                      <Area
-                        type="monotone"
-                        dataKey="v"
-                        stroke={card.sparkColor}
-                        strokeWidth={2}
-                        fill={card.sparkColor}
-                        fillOpacity={0.15}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : null}
+                <strong className="text-xl font-extrabold text-white tracking-tight font-mono block">
+                  {card.value}
+                </strong>
+              </div>
+
+              <div className="mt-3">
+                {card.change ? (
+                  <div className="flex items-center gap-1 text-[10px] font-bold mb-1">
+                    {card.isUp ? (
+                      <span className="text-emerald-400 flex items-center gap-0.5">
+                        <TrendingUp size={11} /> ↑ {card.change}
+                      </span>
+                    ) : (
+                      <span className="text-amber-400 flex items-center gap-0.5">
+                        <TrendingDown size={11} /> ↓ {card.change}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-[10px] text-slate-400 font-medium mb-1 truncate">{card.subtitle || 'Current period'}</div>
+                )}
+                {card.sparkData && card.sparkData.length > 0 ? (
+                  <div className="h-8 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={card.sparkData}>
+                        <Area
+                          type="monotone"
+                          dataKey="v"
+                          stroke={card.sparkColor}
+                          strokeWidth={2}
+                          fill={card.sparkColor}
+                          fillOpacity={0.15}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : null}
+              </div>
             </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+
+      <RevenueBreakdownModal 
+        isOpen={isBreakdownOpen} 
+        onClose={() => setIsBreakdownOpen(false)} 
+      />
+
+      <GrossProfitBreakdownModal
+        isOpen={isGrossProfitOpen}
+        onClose={() => setIsGrossProfitOpen(false)}
+      />
+    </>
   );
 }

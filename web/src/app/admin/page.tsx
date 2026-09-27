@@ -14,12 +14,21 @@ import { TopVehiclesTable } from '../../components/admin/bi/TopVehiclesTable';
 import { AlertsAndActionsCard } from '../../components/admin/bi/AlertsAndActionsCard';
 import { DecisionScoreModal } from '../../components/admin/bi/DecisionScoreModal';
 import { ProcurementIntelligenceHub } from '../../components/admin/bi/ProcurementIntelligenceHub';
+import { SalesExecutiveDashboard } from '../../components/admin/dashboard/SalesExecutiveDashboard';
 import { useSocket } from '../../hooks/useSocket';
 import { Calendar, Building2, SlidersHorizontal, RefreshCw, Sparkles, Activity } from 'lucide-react';
 
 export default function BusinessIntelligencePage() {
   const permissions = usePermissions();
   useSocket(); // Hook up real-time WebSockets
+
+  if (permissions.isSalesExecutive) {
+    return (
+      <RequireRole allow={['SALES_EXECUTIVE']}>
+        <SalesExecutiveDashboard />
+      </RequireRole>
+    );
+  }
 
   const [loading, setLoading] = useState(true);
   const [selectedBranch, setSelectedBranch] = useState<string>('all');
@@ -48,7 +57,15 @@ export default function BusinessIntelligencePage() {
 
       if (ovRes.status === 'fulfilled') setKpiData(ovRes.value.data);
       if (trRes.status === 'fulfilled') setRevenueTrend(trRes.value.data);
-      if (procRes.status === 'fulfilled') setProcurementData(procRes.value.data);
+      const pData = procRes.status === 'fulfilled' ? procRes.value.data : {};
+      const sData = scoreRes.status === 'fulfilled' ? scoreRes.value.data : {};
+      if (procRes.status === 'fulfilled' || scoreRes.status === 'fulfilled') {
+        setProcurementData({
+          ...pData,
+          brand_decision_scores: pData?.brand_decision_scores?.length ? pData.brand_decision_scores : (sData?.brand_decision_scores || []),
+          vehicle_decision_scores: pData?.vehicle_decision_scores?.length ? pData.vehicle_decision_scores : (sData?.vehicle_decision_scores || []),
+        });
+      }
       if (scoreRes.status === 'fulfilled') setDecisionScoreData(scoreRes.value.data);
       if (branchesRes.status === 'fulfilled') {
         const rawBranches = Array.isArray(branchesRes.value.data) ? branchesRes.value.data : [];

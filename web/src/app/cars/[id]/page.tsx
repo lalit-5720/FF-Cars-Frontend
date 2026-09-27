@@ -386,7 +386,9 @@ export default function CarDetailPage({ params }: CarDetailProps) {
                 <Award className="w-5 h-5 flex-shrink-0 text-amber-400" />
                 <div className="text-left">
                   <div className="text-xs font-bold text-white">150-Point Certified Inspection</div>
-                  <div className="text-[10px] text-emerald-400 font-semibold">Gold Certified (98/100 Score) &bull; Verified</div>
+                  <div className={`text-[10px] font-semibold ${car.inspectionReport?.isGoodToUse !== false ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    {car.inspectionReport?.isGoodToUse !== false ? '✓ Certified Good to Use' : 'Attention Needed'} &bull; ({car.inspectionReport?.overallScore ?? 98}/100) &bull; {car.inspectionReport?.certificationTier || 'Gold Certified'}
+                  </div>
                 </div>
               </div>
               <span className="text-xs font-bold text-amber-400 group-hover:translate-x-0.5 transition-transform">&rarr;</span>
@@ -496,6 +498,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
         car={car}
         isOpen={isInspectionOpen}
         onClose={() => setIsInspectionOpen(false)}
+        onUpdated={(updatedCar) => setCar(updatedCar)}
       />
     </div>
   );

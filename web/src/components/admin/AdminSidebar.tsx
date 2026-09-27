@@ -17,6 +17,8 @@ import {
   ExternalLink,
   ChevronDown,
   Award,
+  GitBranch,
+  Sliders,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -27,24 +29,32 @@ export function AdminSidebar() {
   const { user } = useAuthStore();
   const permissions = usePermissions();
 
-  const mainItems = [
+  const isSalesExecutive = permissions.isSalesExecutive;
+
+  const executiveItems = [
+    { label: 'Executive Analytics', icon: Activity, href: '/admin', show: true },
+    { label: 'Customer Leads', icon: Target, href: '/admin/leads', show: true },
+    { label: 'Delivery Actions', icon: ShoppingCart, href: '/admin/deliveries', show: true },
+  ];
+
+  const adminItems = [
     { label: 'Business Intelligence', icon: Activity, href: '/admin', show: permissions.canAccessOverview },
     { label: 'Sales Analytics', icon: TrendingUp, href: '/admin/sales', show: permissions.canAccessSales },
     { label: 'Inventory Intelligence', icon: CarFront, href: '/admin/inventory', show: permissions.canAccessInventory },
     { label: 'Test Drives', icon: Gauge, href: '/admin/test-drives', show: permissions.canAccessLeads },
     { label: 'Customer Leads', icon: Target, href: '/admin/leads', show: permissions.canAccessLeads },
-    { label: 'Vehicle Deliveries', icon: ShoppingCart, href: '/admin/deliveries', show: permissions.canAccessSales },
+    { label: 'Vehicle Deliveries', icon: ShoppingCart, href: '/admin/deliveries', show: permissions.canAccessDeliveries },
     { label: 'Customer Analytics', icon: Users, href: '/admin/customers', show: permissions.canAccessLeads },
     { label: 'Vehicle Demand', icon: Gauge, href: '/admin/demand', show: permissions.canAccessInventory },
     { label: 'Branch Performance', icon: Building2, href: '/admin/branches', show: permissions.canAccessOverview },
     { label: 'Reports', icon: CircleDollarSign, href: '/admin/reports', show: permissions.canAccessReports },
     { label: 'Alerts & Actions', icon: ShieldAlert, href: '/admin/alerts', show: permissions.canAccessOverview },
-    { label: 'Budget Simulator', icon: ShoppingCart, href: '/admin/budget-simulator', show: permissions.canAccessOverview },
+    { label: 'Deal Profit Simulator', icon: Sliders, href: '/admin/budget-simulator', show: permissions.canAccessOverview },
     { label: 'Reviews & Ratings', icon: Award, href: '/admin/reviews', show: permissions.canAccessReviews },
     { label: 'Settings', icon: Settings, href: '/admin/settings', show: permissions.canAccessSettings },
   ];
 
-  const visibleItems = mainItems.filter((i) => i.show);
+  const visibleItems = isSalesExecutive ? executiveItems : adminItems.filter((i) => i.show);
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-slate-800/80 bg-[#0f172a] font-sans lg:flex flex-col text-slate-300">
@@ -89,13 +99,23 @@ export function AdminSidebar() {
               <span>Customer Portal</span>
               <ExternalLink size={13} />
             </button>
-            <button
-              onClick={() => router.push('/admin')}
-              className="flex w-full items-center justify-between rounded-xl px-3.5 py-2 text-left text-xs font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-100 transition-colors"
-            >
-              <span>Admin Portal</span>
-              <ExternalLink size={13} />
-            </button>
+            {!isSalesExecutive ? (
+              <button
+                onClick={() => router.push('/admin')}
+                className="flex w-full items-center justify-between rounded-xl px-3.5 py-2 text-left text-xs font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-100 transition-colors"
+              >
+                <span>Admin Portal</span>
+                <ExternalLink size={13} />
+              </button>
+            ) : (
+              <button
+                onClick={() => router.push('/admin')}
+                className="flex w-full items-center justify-between rounded-xl px-3.5 py-2 text-left text-xs font-medium text-slate-400 hover:bg-slate-800/60 hover:text-slate-100 transition-colors"
+              >
+                <span>Sales Executive Console</span>
+                <ExternalLink size={13} />
+              </button>
+            )}
           </div>
         </div>
       </nav>
@@ -104,12 +124,17 @@ export function AdminSidebar() {
       <div className="p-3 border-t border-slate-800">
         <div className="rounded-xl border border-slate-800 bg-[#1e293b]/60 p-3 text-xs">
           <div className="flex items-center justify-between text-[11px] text-slate-400 font-bold">
-            <span>Current Branch</span>
+            <span>{isSalesExecutive ? 'Assigned Branch' : 'Current Branch'}</span>
             <ChevronDown size={13} />
           </div>
           <strong className="mt-1 block font-extrabold text-slate-100">
             {user?.branch_id ? `Branch #${user.branch_id}` : 'CarRevive HQ'}
           </strong>
+          {isSalesExecutive && (
+            <span className="mt-1 inline-block text-[10px] text-sky-400 font-bold bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
+              Sales Executive
+            </span>
+          )}
         </div>
       </div>
     </aside>

@@ -2,16 +2,19 @@
 
 import React from 'react';
 import { useAuthStore, UserRole } from '@/store/useAuthStore';
+import { usePermissions, PermissionMatrix } from '@/hooks/usePermissions';
 import { ShieldAlert, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 interface RequireRoleProps {
-  allow: UserRole[];
+  allow?: (UserRole | string)[];
+  permission?: keyof PermissionMatrix;
   children: React.ReactNode;
 }
 
-export function RequireRole({ allow, children }: RequireRoleProps) {
+export function RequireRole({ allow, permission, children }: RequireRoleProps) {
   const { user, isAuthenticated } = useAuthStore();
+  const permissions = usePermissions();
 
   if (!isAuthenticated || !user) {
     return (
@@ -33,9 +36,23 @@ export function RequireRole({ allow, children }: RequireRoleProps) {
     );
   }
 
-  const roleMatched = allow.includes(user.role);
+  const isSuperAdmin = user.role === 'SYSTEM_ADMIN' || user.role === 'ADMIN';
 
-  if (!roleMatched) {
+  // Permission-based check
+  let hasPermission = true;
+  if (permission && !isSuperAdmin) {
+    hasPermission = Boolean(permissions[permission]);
+  }
+
+  // Role-based check
+  let roleMatched = true;
+  if (allow && allow.length > 0 && !isSuperAdmin) {
+    roleMatched = allow.map(r => String(r).toUpperCase()).includes(String(user.role).toUpperCase());
+  }
+
+  const isAuthorized = isSuperAdmin || (hasPermission && roleMatched);
+
+  if (!isAuthorized) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center p-6">
         <div className="w-16 h-16 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center mb-4 border border-rose-500/20">
@@ -43,7 +60,7 @@ export function RequireRole({ allow, children }: RequireRoleProps) {
         </div>
         <h2 className="text-2xl font-bold text-slate-100 mb-2">Access Restricted</h2>
         <p className="text-slate-400 max-w-md mb-6">
-          Your role (<span className="text-sky-400 font-semibold">{user.role}</span>) does not have permission to view or manage this module.
+          Your role (<span className="text-sky-400 font-semibold">{user.role}</span>) does not have authorization to view or execute actions in this module.
         </p>
         <Link
           href="/admin"

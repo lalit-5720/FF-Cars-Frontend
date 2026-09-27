@@ -14,7 +14,7 @@ export default function TestDrivesPage() {
   };
 
   return (
-    <RequireRole allow={['SYSTEM_ADMIN', 'BRANCH_MANAGER', 'SALES_EXECUTIVE']}>
+    <RequireRole allow={['SYSTEM_ADMIN', 'BRANCH_MANAGER']}>
       <div className="space-y-6 font-sans">
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border border-slate-700/60 p-5 rounded-2xl shadow-xl">
