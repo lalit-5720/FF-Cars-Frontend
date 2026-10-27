@@ -64,31 +64,31 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
   const avgPrice = selectedVehicle?.avg_price || (selectedVehicle?.sales > 0 ? Math.round(selectedVehicle.revenue / selectedVehicle.sales) : 0);
 
   return (
-    <div className="rounded-2xl bg-[#1e293b]/90 border border-slate-800/90 p-4 shadow-lg flex flex-col justify-between font-sans transition-all">
+    <div className="rounded-2xl bg-white border border-slate-200/90 p-4 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between font-sans text-slate-800">
       {/* Header with Minimize Toggle */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
+            <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
               <CarFront size={15} />
             </div>
             <div>
-              <h3 className="text-xs font-extrabold text-white tracking-tight flex items-center gap-1.5">
+              <h3 className="text-xs font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
                 <span>Top Performing Models</span>
               </h3>
-              <span className="text-[10px] text-slate-400 font-semibold block -mt-0.5">
+              <span className="text-[10px] text-slate-500 font-semibold block -mt-0.5">
                 Aggregated by Model Line
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[9px] font-extrabold border border-emerald-500/20">
+            <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[9px] font-extrabold border border-emerald-200">
               Live Sales
             </span>
             <button
               onClick={() => setIsMinimized(!isMinimized)}
-              className="p-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-colors cursor-pointer border border-slate-700/60"
+              className="p-1 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer border border-slate-200"
               title={isMinimized ? 'Expand details' : 'Minimize widget'}
             >
               {isMinimized ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
@@ -100,16 +100,16 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
         {isMinimized ? (
           <div
             onClick={() => setIsMinimized(false)}
-            className="rounded-xl bg-slate-900/80 border border-slate-800 p-2.5 flex items-center justify-between cursor-pointer hover:border-slate-700 transition-colors"
+            className="rounded-xl bg-slate-50 border border-slate-200 p-2.5 flex items-center justify-between cursor-pointer hover:border-slate-300 transition-colors"
           >
             <div className="flex items-center gap-2 truncate">
-              <Award size={14} className="text-amber-400 shrink-0" />
-              <span className="text-xs font-bold text-slate-200 truncate">
+              <Award size={14} className="text-amber-500 shrink-0" />
+              <span className="text-xs font-bold text-slate-800 truncate">
                 #1 {selectedVehicle?.vehicle || 'Loading...'}
               </span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              <span className="text-[11px] font-mono font-bold text-emerald-400">
+              <span className="text-[11px] font-mono font-bold text-emerald-600">
                 {selectedVehicle ? `${selectedVehicle.sales} sold • ${formatCurrency(selectedVehicle.revenue)}` : ''}
               </span>
               <ChevronDown size={13} className="text-slate-400" />
@@ -117,24 +117,24 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
           </div>
         ) : loading ? (
           <div className="space-y-2 py-3">
-            <div className="h-9 rounded-xl bg-slate-800/60 animate-pulse" />
-            <div className="h-24 rounded-xl bg-slate-800/40 animate-pulse" />
+            <div className="h-9 rounded-xl bg-slate-100 animate-pulse" />
+            <div className="h-24 rounded-xl bg-slate-100 animate-pulse" />
           </div>
         ) : vehicles.length === 0 ? (
-          <div className="py-6 text-center text-xs text-slate-400">
+          <div className="py-6 text-center text-xs text-slate-400 font-medium">
             No completed vehicle sales recorded yet.
           </div>
         ) : (
           <div className="space-y-3">
             {/* View Mode Switcher: Dropdown Details vs Compact List */}
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center bg-slate-950 p-0.5 rounded-lg border border-slate-800 text-[10px]">
+              <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[10px]">
                 <button
                   onClick={() => setViewMode('dropdown')}
                   className={`px-2 py-1 rounded font-bold transition-all cursor-pointer ${
                     viewMode === 'dropdown'
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-white text-slate-900 shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
                   Dropdown Inspector
@@ -143,14 +143,14 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
                   onClick={() => setViewMode('compact')}
                   className={`px-2 py-1 rounded font-bold transition-all cursor-pointer ${
                     viewMode === 'compact'
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-white text-slate-900 shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
                   Compact List ({vehicles.length})
                 </button>
               </div>
-              <span className="text-[10px] text-slate-400 font-mono">
+              <span className="text-[10px] text-slate-500 font-mono font-bold">
                 {vehicles.length} top models
               </span>
             </div>
@@ -163,10 +163,10 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
                   <select
                     value={selectedIndex}
                     onChange={(e) => setSelectedIndex(Number(e.target.value))}
-                    className="w-full appearance-none pl-3 pr-8 py-2 rounded-xl bg-slate-950 border border-slate-700/80 text-white text-xs font-bold focus:outline-none focus:border-blue-500 cursor-pointer"
+                    className="w-full appearance-none pl-3 pr-8 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs font-bold focus:outline-none focus:border-blue-500 cursor-pointer shadow-2xs"
                   >
                     {vehicles.map((v, i) => (
-                      <option key={v.vehicle || i} value={i} className="bg-slate-900 text-white">
+                      <option key={v.vehicle || i} value={i} className="bg-white text-slate-900">
                         #{i + 1} {v.vehicle} • {v.sales} {v.sales === 1 ? 'sale' : 'sales'} ({formatCurrency(v.revenue)})
                       </option>
                     ))}
@@ -176,28 +176,28 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
 
                 {/* Selected Model Detailed Card */}
                 {selectedVehicle && (
-                  <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3 space-y-2.5">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 space-y-2.5">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
                         {selectedVehicle.image_url ? (
                           <img
                             src={selectedVehicle.image_url}
                             alt={selectedVehicle.vehicle}
-                            className="w-10 h-8 object-cover rounded-md border border-slate-700 shrink-0"
+                            className="w-10 h-8 object-cover rounded-md border border-slate-200 shrink-0"
                             onError={(e) => {
                               (e.target as HTMLElement).style.display = 'none';
                             }}
                           />
                         ) : (
-                          <div className="w-10 h-8 bg-slate-800 rounded-md border border-slate-700 flex items-center justify-center text-slate-400 shrink-0">
+                          <div className="w-10 h-8 bg-white rounded-md border border-slate-200 flex items-center justify-center text-slate-400 shrink-0">
                             <CarFront size={14} />
                           </div>
                         )}
                         <div className="min-w-0">
-                          <span className="text-xs font-extrabold text-white block truncate">
+                          <span className="text-xs font-extrabold text-slate-900 block truncate">
                             {selectedVehicle.vehicle}
                           </span>
-                          <span className="text-[10px] text-sky-400 font-semibold block">
+                          <span className="text-[10px] text-blue-600 font-semibold block">
                             {selectedVehicle.make || 'Certified Pre-Owned'} Lineup
                           </span>
                         </div>
@@ -205,32 +205,32 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
 
                       <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold shrink-0 border ${
                         selectedIndex === 0
-                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                          ? 'bg-amber-50 text-amber-800 border-amber-200'
                           : selectedIndex === 1
-                          ? 'bg-slate-300/20 text-slate-200 border-slate-400/30'
-                          : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                          ? 'bg-slate-100 text-slate-700 border-slate-200'
+                          : 'bg-blue-50 text-blue-700 border-blue-200'
                       }`}>
                         #{selectedIndex + 1} Rank
                       </span>
                     </div>
 
                     {/* 3 Metrics Strip */}
-                    <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-800/80 text-[10px]">
-                      <div className="bg-slate-900 rounded-lg p-1.5 text-center">
-                        <span className="text-slate-400 block text-[9px]">UNITS SOLD</span>
-                        <strong className="text-white font-mono text-xs font-black">
+                    <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-200 text-[10px]">
+                      <div className="bg-white rounded-lg p-1.5 text-center border border-slate-100">
+                        <span className="text-slate-400 block text-[9px] font-semibold">UNITS SOLD</span>
+                        <strong className="text-slate-900 font-mono text-xs font-black">
                           {selectedVehicle.sales}
                         </strong>
                       </div>
-                      <div className="bg-slate-900 rounded-lg p-1.5 text-center">
-                        <span className="text-slate-400 block text-[9px]">TOTAL REVENUE</span>
-                        <strong className="text-emerald-400 font-mono text-xs font-black">
+                      <div className="bg-white rounded-lg p-1.5 text-center border border-slate-100">
+                        <span className="text-slate-400 block text-[9px] font-semibold">TOTAL REVENUE</span>
+                        <strong className="text-emerald-600 font-mono text-xs font-black">
                           {formatCurrency(selectedVehicle.revenue)}
                         </strong>
                       </div>
-                      <div className="bg-slate-900 rounded-lg p-1.5 text-center">
-                        <span className="text-slate-400 block text-[9px]">AVG PRICE</span>
-                        <strong className="text-sky-300 font-mono text-xs font-black">
+                      <div className="bg-white rounded-lg p-1.5 text-center border border-slate-100">
+                        <span className="text-slate-400 block text-[9px] font-semibold">AVG PRICE</span>
+                        <strong className="text-blue-600 font-mono text-xs font-black">
                           {formatCurrency(avgPrice)}
                         </strong>
                       </div>
@@ -238,13 +238,13 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
 
                     {/* Revenue Contribution Progress Bar */}
                     <div className="space-y-1 pt-1">
-                      <div className="flex items-center justify-between text-[9px] text-slate-400">
+                      <div className="flex items-center justify-between text-[9px] text-slate-500 font-medium">
                         <span>Revenue Contribution</span>
-                        <strong className="text-slate-200 font-mono">{revenueShare}% of top sales</strong>
+                        <strong className="text-slate-800 font-mono font-bold">{revenueShare}% of top sales</strong>
                       </div>
-                      <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                      <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
                         <div
-                          className="bg-gradient-to-r from-blue-500 to-emerald-400 h-full rounded-full transition-all"
+                          className="bg-blue-600 h-full rounded-full transition-all"
                           style={{ width: `${revenueShare}%` }}
                         />
                       </div>
@@ -253,8 +253,8 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
                 )}
               </div>
             ) : (
-              /* MODE 2: Clean Compact List (NO Registration Numbers) */
-              <div className="rounded-xl border border-slate-800 bg-slate-950/40 divide-y divide-slate-800/60 max-h-52 overflow-y-auto">
+              /* MODE 2: Clean Compact List */
+              <div className="rounded-xl border border-slate-200 bg-white divide-y divide-slate-100 max-h-52 overflow-y-auto">
                 {vehicles.map((v, idx) => (
                   <div
                     key={v.vehicle || idx}
@@ -262,14 +262,14 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
                       setSelectedIndex(idx);
                       setViewMode('dropdown');
                     }}
-                    className="p-2 flex items-center justify-between hover:bg-slate-800/40 transition-colors cursor-pointer text-xs"
+                    className="p-2 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer text-xs"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[10px] font-mono text-slate-400 w-4 shrink-0">
+                      <span className="text-[10px] font-mono text-slate-400 w-4 shrink-0 font-bold">
                         #{idx + 1}
                       </span>
                       <div className="min-w-0">
-                        <span className="font-bold text-slate-200 block truncate text-[11px]">
+                        <span className="font-bold text-slate-800 block truncate text-[11px]">
                           {v.vehicle}
                         </span>
                         <span className="text-[9px] text-slate-400 block -mt-0.5">
@@ -278,10 +278,10 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="font-mono font-bold text-emerald-400 block text-[11px]">
+                      <span className="font-mono font-bold text-emerald-600 block text-[11px]">
                         {formatCurrency(v.revenue)}
                       </span>
-                      <span className="text-[9px] font-mono text-slate-400 block -mt-0.5">
+                      <span className="text-[9px] font-mono text-slate-400 block -mt-0.5 font-medium">
                         {v.sales} {v.sales === 1 ? 'unit' : 'units'}
                       </span>
                     </div>
@@ -296,7 +296,7 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
       {/* Footer Link */}
       <button
         onClick={() => router.push('/admin/inventory')}
-        className="mt-3 w-full py-2 rounded-xl bg-slate-800/60 hover:bg-slate-800 text-sky-400 font-bold text-xs border border-slate-700/60 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+        className="mt-3 w-full py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-blue-600 font-extrabold text-xs border border-slate-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
       >
         <span>View All Vehicles in Inventory</span>
         <ExternalLink size={12} />

@@ -4,7 +4,7 @@ import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { api } from '../../services/api';
-import { Heart, Search, SlidersHorizontal, RefreshCw, Scale } from 'lucide-react';
+import { Heart, Search, SlidersHorizontal, RefreshCw, Scale, MapPin, Building2 } from 'lucide-react';
 import { useWishlistStore } from '../../store/useWishlistStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useCompareStore } from '../../store/useCompareStore';
@@ -139,12 +139,11 @@ function CarsListingPage() {
   const activeFilterCount = [search, selectedBrand, fuelType, transmission, minPrice, maxPrice]
     .filter(Boolean).length;
 
-  // Prioritize Available vehicles first in the inventory list
   const sortedCars = useMemo(() => {
     return [...cars].sort((a, b) => {
       const isAvailA = (a.status || '').toLowerCase() === 'available' ? 0 : 1;
       const isAvailB = (b.status || '').toLowerCase() === 'available' ? 0 : 1;
-      if (isAvailA !== isAvailB) return isAvailA - isAvailB; // Available vehicles come first!
+      if (isAvailA !== isAvailB) return isAvailA - isAvailB;
 
       if (sortBy === 'price') {
         return sortOrder === 'asc' ? Number(a.price) - Number(b.price) : Number(b.price) - Number(a.price);
@@ -159,18 +158,18 @@ function CarsListingPage() {
   }, [cars, sortBy, sortOrder]);
 
   return (
-    <div
-      className="flex-1 flex flex-col bg-background text-foreground min-h-screen"
-    >
+    <div className="flex-1 flex flex-col bg-bg-page text-text-primary min-h-screen">
       {/* ── Page Header ── */}
-      <div className="bg-card border-b border-border py-7 px-4 sm:px-6 lg:px-8 shadow-sm">
+      <div className="bg-bg-surface border-b border-border py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-2">Vehicle Inventory</div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight font-display">
-            Certified <em className="italic text-amber-600 font-normal">Collection</em>
+          <span className="helper-text font-bold uppercase tracking-wider block mb-1">
+            Vehicle Inventory
+          </span>
+          <h1 className="page-title text-text-primary">
+            Certified Inventory
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground max-w-lg font-sans">
-            Explore our curated selection of inspected and certified premium vehicles across all showroom locations.
+          <p className="body-text text-text-secondary mt-1 max-w-lg">
+            Explore inspected and certified quality pre-owned vehicles across our showrooms.
           </p>
         </div>
       </div>
@@ -181,22 +180,16 @@ function CarsListingPage() {
 
           {/* SIDEBAR FILTERS */}
           <aside className="w-full lg:w-72 flex-shrink-0">
-            <div className="sticky top-24 rounded-2xl p-6 flex flex-col gap-6 bg-card border border-border/90 shadow-sm">
+            <div className="sticky top-20 rounded-lg p-6 flex flex-col gap-6 bg-bg-surface border border-border">
               {/* Filter Header */}
               <div className="flex items-center justify-between pb-4 border-b border-border">
-                <div className="flex items-center gap-2.5">
-                  <SlidersHorizontal className="w-4 h-4" style={{ color: 'var(--gold)' }} />
-                  <span
-                    className="font-semibold text-sm"
-                    style={{ color: 'var(--platinum)', fontFamily: "'DM Sans', sans-serif" }}
-                  >
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal className="w-4 h-4 text-accent" />
+                  <span className="section-heading text-sm text-text-primary">
                     Filters
                   </span>
                   {activeFilterCount > 0 && (
-                    <span
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold"
-                      style={{ background: 'var(--gold)', color: 'var(--midnight)' }}
-                    >
+                    <span className="badge badge-info text-[10px] px-1.5 py-0">
                       {activeFilterCount}
                     </span>
                   )}
@@ -204,8 +197,7 @@ function CarsListingPage() {
                 {activeFilterCount > 0 && (
                   <button
                     onClick={handleClearFilters}
-                    className="flex items-center gap-1 text-xs font-medium transition-colors"
-                    style={{ color: 'var(--gold)', fontFamily: "'DM Sans', sans-serif" }}
+                    className="flex items-center gap-1 helper-text font-bold text-accent hover:underline cursor-pointer"
                   >
                     <RefreshCw className="w-3 h-3" />
                     Reset
@@ -215,66 +207,52 @@ function CarsListingPage() {
 
               {/* Search */}
               <div>
-                <label
-                  className="block text-[10px] uppercase tracking-widest font-semibold mb-2"
-                  style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-                >
+                <label className="block helper-text font-bold uppercase tracking-wider mb-2">
                   Search
                 </label>
                 <div className="relative">
-                  <Search
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-                    style={{ color: 'var(--silver-dim)' }}
-                  />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
                   <input
                     type="text"
                     value={search}
                     onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                     placeholder="Make or model..."
-                    className="input-luxury pl-10 text-sm"
+                    className="w-full bg-bg-surface border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent focus:outline-none"
                   />
                 </div>
               </div>
 
               {/* Brand */}
               <div>
-                <label
-                  className="block text-[10px] uppercase tracking-widest font-semibold mb-2"
-                  style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-                >
-                  Marque
+                <label className="block helper-text font-bold uppercase tracking-wider mb-2">
+                  Brand / Make
                 </label>
                 <select
                   value={selectedBrand}
                   onChange={(e) => { setSelectedBrand(e.target.value); setPage(1); }}
-                  className="input-luxury text-sm cursor-pointer"
-                  style={{ WebkitAppearance: 'none', appearance: 'none' }}
+                  className="w-full bg-bg-surface border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none cursor-pointer"
                 >
-                  <option value="" style={{ background: '#0C0E14' }}>All Marques</option>
+                  <option value="">All Brands</option>
                   {brands.map((b) => (
-                    <option key={b} value={b} style={{ background: '#0C0E14' }}>{b}</option>
+                    <option key={b} value={b}>{b}</option>
                   ))}
                 </select>
               </div>
 
               {/* Showroom Branch */}
               <div>
-                <label
-                  className="block text-[10px] uppercase tracking-widest font-semibold mb-2"
-                  style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-                >
+                <label className="block helper-text font-bold uppercase tracking-wider mb-2">
                   Showroom Location
                 </label>
                 <select
                   value={selectedBranch}
                   onChange={(e) => { setSelectedBranch(e.target.value); setPage(1); }}
-                  className="input-luxury text-sm cursor-pointer"
-                  style={{ WebkitAppearance: 'none', appearance: 'none' }}
+                  className="w-full bg-bg-surface border border-border rounded-lg px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none cursor-pointer"
                 >
-                  <option value="" style={{ background: '#0C0E14' }}>All Showrooms (Chennai)</option>
+                  <option value="">All Showroom Locations</option>
                   {branchesList.map((br) => (
-                    <option key={br.branch_id} value={br.branch_id} style={{ background: '#0C0E14' }}>
-                      📍 {br.branch_name} ({br.city || 'Chennai'})
+                    <option key={br.branch_id} value={br.branch_id}>
+                      {br.branch_name} {br.city ? `(${br.city})` : ''}
                     </option>
                   ))}
                 </select>
@@ -282,10 +260,7 @@ function CarsListingPage() {
 
               {/* Fuel Type */}
               <div>
-                <label
-                  className="block text-[10px] uppercase tracking-widest font-semibold mb-2.5"
-                  style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-                >
+                <label className="block helper-text font-bold uppercase tracking-wider mb-2">
                   Fuel Type
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -293,13 +268,11 @@ function CarsListingPage() {
                     <button
                       key={type}
                       onClick={() => { setFuelType(fuelType === type ? '' : type); setPage(1); }}
-                      className="px-3.5 py-1.5 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer"
-                      style={{
-                        background: fuelType === type ? 'var(--gold)' : 'rgba(255,255,255,0.03)',
-                        border: fuelType === type ? '1px solid var(--gold)' : '1px solid var(--onyx-border)',
-                        color: fuelType === type ? 'var(--midnight)' : 'var(--silver)',
-                        fontFamily: "'DM Sans', sans-serif",
-                      }}
+                      className={`px-3 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                        fuelType === type
+                          ? 'bg-accent text-accent-text border-accent'
+                          : 'bg-bg-surface border-border text-text-secondary hover:text-text-primary'
+                      }`}
                     >
                       {type}
                     </button>
@@ -309,10 +282,7 @@ function CarsListingPage() {
 
               {/* Transmission */}
               <div>
-                <label
-                  className="block text-[10px] uppercase tracking-widest font-semibold mb-2.5"
-                  style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-                >
+                <label className="block helper-text font-bold uppercase tracking-wider mb-2">
                   Transmission
                 </label>
                 <div className="flex gap-2">
@@ -320,13 +290,11 @@ function CarsListingPage() {
                     <button
                       key={trans}
                       onClick={() => { setTransmission(transmission === trans ? '' : trans); setPage(1); }}
-                      className="flex-1 py-2 rounded-xl text-xs font-medium transition-all duration-200 cursor-pointer text-center"
-                      style={{
-                        background: transmission === trans ? 'var(--gold)' : 'rgba(255,255,255,0.03)',
-                        border: transmission === trans ? '1px solid var(--gold)' : '1px solid var(--onyx-border)',
-                        color: transmission === trans ? 'var(--midnight)' : 'var(--silver)',
-                        fontFamily: "'DM Sans', sans-serif",
-                      }}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer text-center ${
+                        transmission === trans
+                          ? 'bg-accent text-accent-text border-accent'
+                          : 'bg-bg-surface border-border text-text-secondary hover:text-text-primary'
+                      }`}
                     >
                       {trans}
                     </button>
@@ -336,10 +304,7 @@ function CarsListingPage() {
 
               {/* Price Range */}
               <div>
-                <label
-                  className="block text-[10px] uppercase tracking-widest font-semibold mb-2"
-                  style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-                >
+                <label className="block helper-text font-bold uppercase tracking-wider mb-2">
                   Budget Range (₹)
                 </label>
                 <div className="flex items-center gap-2">
@@ -348,44 +313,32 @@ function CarsListingPage() {
                     placeholder="Min"
                     value={minPrice}
                     onChange={(e) => { setMinPrice(e.target.value); setPage(1); }}
-                    className="input-luxury text-xs text-center py-2.5"
+                    className="w-full bg-bg-surface border border-border rounded-lg px-2 py-1.5 text-xs text-center text-text-primary placeholder:text-text-secondary focus:border-accent focus:outline-none"
                   />
-                  <span style={{ color: 'var(--silver-dim)' }}>—</span>
+                  <span className="text-text-secondary">—</span>
                   <input
                     type="number"
                     placeholder="Max"
                     value={maxPrice}
                     onChange={(e) => { setMaxPrice(e.target.value); setPage(1); }}
-                    className="input-luxury text-xs text-center py-2.5"
+                    className="w-full bg-bg-surface border border-border rounded-lg px-2 py-1.5 text-xs text-center text-text-primary placeholder:text-text-secondary focus:border-accent focus:outline-none"
                   />
                 </div>
               </div>
             </div>
           </aside>
 
-          {/* ─────────────────────────────
-              VEHICLES GRID
-          ───────────────────────────── */}
-          <div className="flex-1 flex flex-col gap-8">
+          {/* ── VEHICLES GRID ── */}
+          <div className="flex-1 flex flex-col gap-6">
 
             {/* Sort / Meta Bar */}
-            <div
-              className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-5"
-              style={{ borderBottom: '1px solid var(--onyx-border)' }}
-            >
-              <span
-                className="text-sm"
-                style={{ color: 'var(--silver)', fontFamily: "'DM Sans', sans-serif" }}
-              >
-                <span style={{ color: 'var(--platinum)', fontWeight: 600 }}>{cars.length}</span>
-                {' '}vehicles found
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-border">
+              <span className="body-text text-text-secondary">
+                <strong className="text-text-primary">{cars.length}</strong> vehicles found
               </span>
 
-              <div className="flex items-center gap-3">
-                <span
-                  className="text-xs"
-                  style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-                >
+              <div className="flex items-center gap-2">
+                <span className="helper-text font-bold">
                   Sort:
                 </span>
                 <select
@@ -396,19 +349,13 @@ function CarsListingPage() {
                     setSortOrder(order);
                     setPage(1);
                   }}
-                  className="text-xs py-2 px-3 rounded-xl cursor-pointer focus:outline-none"
-                  style={{
-                    background: 'var(--obsidian)',
-                    border: '1px solid var(--onyx-border)',
-                    color: 'var(--platinum)',
-                    fontFamily: "'DM Sans', sans-serif",
-                  }}
+                  className="bg-bg-surface border border-border rounded-lg text-xs py-1.5 px-3 text-text-primary focus:border-accent focus:outline-none cursor-pointer"
                 >
-                  <option value="createdAt-desc" style={{ background: '#0C0E14' }}>Newest Arrivals</option>
-                  <option value="price-asc" style={{ background: '#0C0E14' }}>Price: Low to High</option>
-                  <option value="price-desc" style={{ background: '#0C0E14' }}>Price: High to Low</option>
-                  <option value="year-desc" style={{ background: '#0C0E14' }}>Year: Newest First</option>
-                  <option value="kmDriven-asc" style={{ background: '#0C0E14' }}>Lowest Mileage</option>
+                  <option value="createdAt-desc">Newest Arrivals</option>
+                  <option value="price-asc">Price: Low to High</option>
+                  <option value="price-desc">Price: High to Low</option>
+                  <option value="year-desc">Year: Newest First</option>
+                  <option value="kmDriven-asc">Lowest Mileage</option>
                 </select>
               </div>
             </div>
@@ -419,37 +366,21 @@ function CarsListingPage() {
                 {[1, 2, 3, 4, 5, 6].map((n) => (
                   <div
                     key={n}
-                    className="rounded-2xl skeleton-shimmer"
-                    style={{ height: '380px', border: '1px solid var(--onyx-border)' }}
+                    className="rounded-lg h-80 bg-bg-surface border border-border animate-pulse"
                   />
                 ))}
               </div>
             ) : cars.length === 0 ? (
-              <div
-                className="flex-1 flex flex-col items-center justify-center p-16 text-center rounded-3xl"
-                style={{ border: '1px dashed var(--charcoal)' }}
-              >
-                <h3
-                  style={{
-                    fontFamily: "'Cormorant Garamond', Georgia, serif",
-                    fontSize: '1.75rem',
-                    fontWeight: 400,
-                    fontStyle: 'italic',
-                    color: 'var(--silver)',
-                  }}
-                >
+              <div className="flex-1 flex flex-col items-center justify-center p-12 text-center rounded-lg border border-border bg-bg-surface">
+                <h3 className="section-heading text-text-primary">
                   No vehicles match your criteria
                 </h3>
-                <p
-                  className="mt-2 text-sm max-w-sm"
-                  style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif", fontWeight: 300 }}
-                >
+                <p className="body-text text-text-secondary mt-1 max-w-sm">
                   Try adjusting your filters or broadening your search.
                 </p>
                 <button
                   onClick={handleClearFilters}
-                  className="btn-gold mt-6"
-                  style={{ padding: '0.625rem 1.5rem', fontSize: '0.7rem' }}
+                  className="btn-primary mt-4"
                 >
                   Reset All Filters
                 </button>
@@ -468,32 +399,34 @@ function CarsListingPage() {
                   const status = car.status || 'Available';
                   const isAvailable = status === 'Available' || status === 'AVAILABLE';
 
-                  return (
-                    <Link
-                      key={id}
-                      href={`/cars/${id}`}
-                      className="group flex flex-col rounded-2xl overflow-hidden transition-all duration-300 relative bg-card border border-border/90 shadow-sm hover:border-border hover:shadow-md"
-                      style={{
-                        opacity: isAvailable ? 1 : 0.75,
-                      }}
-                    >
-                      {/* Status */}
-                      {!isAvailable && (
-                        <div className="absolute top-3 left-3 z-10 px-3 py-0.5 rounded-full text-[9px] font-bold uppercase bg-rose-600 text-primary-foreground shadow-sm">
-                          {status}
-                        </div>
-                      )}
+                  // Branch lookup dynamically from car.branches or branchesList
+                  const matchedBranch = car.branches || branchesList.find((b) => (b.branch_id || b.id) === car.branch_id);
+                  const branchName = matchedBranch?.branch_name || 'CarRevive Showroom';
+                  const branchCity = matchedBranch?.city || '';
 
+                  return (
+                    <div
+                      key={id}
+                      className="group flex flex-col rounded-lg border border-border bg-bg-surface overflow-hidden transition-colors"
+                      style={{ opacity: isAvailable ? 1 : 0.8 }}
+                    >
                       {/* Image */}
-                      <div className="relative overflow-hidden aspect-video bg-secondary">
+                      <div className="relative overflow-hidden aspect-video bg-bg-surface-alt border-b border-border">
                         <img
                           src={image}
                           alt={`${make} ${car.model}`}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          className="w-full h-full object-cover"
                         />
 
+                        {/* Status badge */}
+                        {!isAvailable && (
+                          <div className="absolute top-3 left-3 badge badge-danger">
+                            {status}
+                          </div>
+                        )}
+
                         {/* Wishlist & Compare Overlay */}
-                        <div className="absolute top-3 right-3 flex items-center gap-1.5 z-20">
+                        <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
                           <button
                             onClick={(e) => {
                               e.preventDefault();
@@ -506,22 +439,22 @@ function CarsListingPage() {
                                 showLocalToast('Added to comparison');
                               }
                             }}
-                            className="p-2 rounded-full backdrop-blur-md shadow-sm transition-all border text-white hover:scale-110"
-                            style={{
-                              background: isInCompare(String(id)) ? '#5468F0' : 'rgba(15,23,42,0.8)',
-                              borderColor: isInCompare(String(id)) ? '#5468F0' : 'rgba(255,255,255,0.15)',
-                            }}
+                            className={`p-1.5 rounded-lg border text-xs font-bold transition-colors ${
+                              isInCompare(String(id))
+                                ? 'bg-accent text-accent-text border-accent'
+                                : 'bg-bg-surface border-border text-text-secondary hover:text-text-primary'
+                            }`}
                             title={isInCompare(String(id)) ? 'Remove from Compare' : 'Add to Compare'}
                           >
                             <Scale className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={(e) => handleWishlistToggle(e, String(id))}
-                            className="p-2 rounded-full backdrop-blur-md shadow-sm transition-all border text-rose-500 hover:scale-110"
-                            style={{
-                              background: 'rgba(15,23,42,0.8)',
-                              borderColor: 'rgba(255,255,255,0.15)',
-                            }}
+                            className={`p-1.5 rounded-lg border text-xs font-bold transition-colors ${
+                              isWishlisted(String(id))
+                                ? 'bg-status-danger text-white border-status-danger'
+                                : 'bg-bg-surface border-border text-text-secondary hover:text-text-primary'
+                            }`}
                           >
                             <Heart
                               className="w-3.5 h-3.5"
@@ -530,68 +463,82 @@ function CarsListingPage() {
                           </button>
                         </div>
 
-                        {/* Year */}
-                        <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase bg-secondary/90 text-primary-foreground">
-                          {year}
+                        {/* Year & Branch Location Badges */}
+                        <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
+                          <span className="badge badge-info">{year}</span>
+                          <span className="badge badge-neutral flex items-center gap-1">
+                            <MapPin className="w-3 h-3 text-accent" />
+                            <span>{branchCity || 'Showroom'}</span>
+                          </span>
                         </div>
                       </div>
 
                       {/* Content */}
-                      <div className="p-5 flex-1 flex flex-col">
-                        <div className="flex justify-between items-start gap-2 mb-3">
-                          <div>
-                            <h3 className="font-extrabold text-base leading-tight text-foreground group-hover:text-foreground transition-colors font-display">
-                              {make} {car.model}
-                            </h3>
-                            <p className="text-xs text-muted-foreground mt-0.5 font-sans">
-                              {car.color || 'Standard Edition'}
-                            </p>
-                          </div>
-                          <span className="flex-shrink-0 px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-secondary border border-border text-foreground">
-                            {car.transmission || 'Auto'}
-                          </span>
-                        </div>
-
-                        {/* Specs */}
-                        <div className="grid grid-cols-3 gap-2 py-3 text-xs my-2 border-y border-border text-muted-foreground">
-                          {[
-                            { label: 'Driven', val: `${km.toLocaleString()} km` },
-                            { label: 'Fuel', val: fuel },
-                            { label: 'Owner', val: owner },
-                          ].map(({ label, val }) => (
-                            <div key={label}>
-                              <span className="block text-[9px] uppercase font-bold text-muted-foreground">
-                                {label}
-                              </span>
-                              <span className="font-bold text-foreground mt-0.5 block font-sans">
-                                {val}
-                              </span>
+                      <div className="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                          <div className="flex justify-between items-start gap-2 mb-2">
+                            <div>
+                              <h3 className="section-heading text-text-primary">
+                                {make} {car.model}
+                              </h3>
+                              <p className="helper-text mt-0.5">
+                                {car.color || 'Standard Edition'}
+                              </p>
                             </div>
-                          ))}
+                            <span className="badge badge-info">
+                              {car.transmission || 'Auto'}
+                            </span>
+                          </div>
+
+                          {/* Specs */}
+                          <div className="grid grid-cols-3 gap-2 py-2.5 my-2 border-y border-border text-xs">
+                            {[
+                              { label: 'Driven', val: `${km.toLocaleString()} km` },
+                              { label: 'Fuel', val: fuel },
+                              { label: 'Owner', val: owner },
+                            ].map(({ label, val }) => (
+                              <div key={label}>
+                                <span className="helper-text uppercase block">
+                                  {label}
+                                </span>
+                                <span className="body-text font-bold text-xs block truncate mt-0.5">
+                                  {val}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Branch Location Row */}
+                          <div className="flex items-center gap-1.5 text-xs text-text-secondary mt-2.5 pt-2 border-t border-border">
+                            <Building2 className="w-3.5 h-3.5 text-accent shrink-0" />
+                            <span className="font-bold text-text-primary truncate">
+                              {branchName}
+                            </span>
+                            {branchCity && (
+                              <span className="helper-text shrink-0 text-[11px]">
+                                &bull; {branchCity}
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         {/* Price + CTA */}
-                        <div className="flex items-end justify-between mt-auto pt-3">
+                        <div className="flex items-center justify-between pt-3 mt-auto">
                           <div>
-                            <span className="text-[9px] uppercase font-bold text-muted-foreground block">
-                              Price
-                            </span>
-                            <span className="text-lg font-black text-foreground block font-mono">
+                            <span className="helper-text block">Price</span>
+                            <span className="section-heading text-text-primary block">
                               ₹{price.toLocaleString()}
                             </span>
                           </div>
-                          {isAvailable ? (
-                            <span className="text-xs font-bold text-foreground group-hover:text-foreground flex items-center gap-1">
-                              View Details &rarr;
-                            </span>
-                          ) : (
-                            <span className="text-xs font-bold text-rose-500">
-                              Reserved / Sold
-                            </span>
-                          )}
+                          <Link
+                            href={`/cars/${id}`}
+                            className="btn-primary"
+                          >
+                            View Details
+                          </Link>
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   );
                 })}
               </div>
@@ -599,19 +546,11 @@ function CarsListingPage() {
 
             {/* Pagination */}
             {meta.totalPages > 1 && (
-              <div
-                className="flex items-center justify-center gap-2 pt-8"
-                style={{ borderTop: '1px solid var(--onyx-border)' }}
-              >
+              <div className="flex items-center justify-center gap-2 pt-6 border-t border-border">
                 <button
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 text-xs font-medium rounded-xl transition-all cursor-pointer disabled:opacity-30"
-                  style={{
-                    border: '1px solid var(--onyx-border)',
-                    color: 'var(--silver)',
-                    fontFamily: "'DM Sans', sans-serif",
-                  }}
+                  className="btn-neutral"
                 >
                   Previous
                 </button>
@@ -619,11 +558,7 @@ function CarsListingPage() {
                   <button
                     key={p}
                     onClick={() => setPage(p)}
-                    className={`w-9 h-9 flex items-center justify-center text-xs font-bold rounded-xl transition-all cursor-pointer ${
-                      page === p
-                        ? 'bg-primary text-primary-foreground shadow-sm'
-                        : 'bg-card border border-border text-foreground hover:bg-secondary'
-                    }`}
+                    className={page === p ? 'btn-primary' : 'btn-neutral'}
                   >
                     {p}
                   </button>
@@ -631,7 +566,7 @@ function CarsListingPage() {
                 <button
                   onClick={() => setPage(Math.min(meta.totalPages, page + 1))}
                   disabled={page === meta.totalPages}
-                  className="px-4 py-2 text-xs font-bold rounded-xl bg-card border border-border text-foreground hover:bg-secondary transition-all cursor-pointer disabled:opacity-30"
+                  className="btn-neutral"
                 >
                   Next
                 </button>
@@ -649,17 +584,8 @@ export default function CarsPage() {
   return (
     <Suspense
       fallback={
-        <div
-          className="flex-1 flex items-center justify-center p-12"
-          style={{ backgroundColor: 'var(--midnight)' }}
-        >
-          <div
-            className="w-10 h-10 rounded-full border-2 animate-spin"
-            style={{
-              borderColor: 'var(--onyx-border)',
-              borderTopColor: 'var(--gold)',
-            }}
-          />
+        <div className="flex-1 flex items-center justify-center p-12 bg-bg-page">
+          <div className="w-8 h-8 rounded-full border-2 border-border border-t-accent animate-spin" />
         </div>
       }
     >

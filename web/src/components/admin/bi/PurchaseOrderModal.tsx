@@ -49,25 +49,25 @@ export function PurchaseOrderModal({ isOpen, onClose, initialData, onSuccess }: 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 font-sans">
-      <div className="w-full max-w-xl rounded-2xl bg-[#0f172a] border border-sky-500/30 p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 font-sans animate-in fade-in">
+      <div className="w-full max-w-xl rounded-2xl bg-white border border-slate-200 p-6 shadow-2xl space-y-5">
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-400">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
               <ShoppingBag size={20} />
             </div>
             <div>
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-sky-400 block">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600 block">
                 Automated Procurement System
               </span>
-              <h2 className="text-lg font-extrabold text-white">Create Purchase Order</h2>
+              <h2 className="text-lg font-black text-slate-900">Create Purchase Order</h2>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -76,23 +76,23 @@ export function PurchaseOrderModal({ isOpen, onClose, initialData, onSuccess }: 
         {/* Modal Body / Form */}
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           <div>
-            <label className="block text-slate-300 font-bold mb-1">Order Title</label>
+            <label className="block text-slate-700 font-bold mb-1">Order Title</label>
             <input
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
-              className="w-full rounded-xl bg-slate-900 border border-slate-700 p-2.5 text-white font-semibold focus:border-sky-500 focus:outline-none"
+              className="w-full rounded-xl bg-slate-50 border border-slate-200 p-2.5 text-slate-900 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-slate-300 font-bold mb-1">Manufacture Year Range</label>
+              <label className="block text-slate-700 font-bold mb-1">Manufacture Year Range</label>
               <select
                 value={formData.manufacture_year_range}
                 onChange={(e) => setFormData({ ...formData, manufacture_year_range: e.target.value })}
-                className="w-full rounded-xl bg-slate-900 border border-slate-700 p-2.5 text-white font-semibold focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 p-2.5 text-slate-900 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition cursor-pointer"
               >
                 <option value="2023 - 2024">2023 - 2024</option>
                 <option value="2021 - 2022">2021 - 2022</option>
@@ -102,11 +102,11 @@ export function PurchaseOrderModal({ isOpen, onClose, initialData, onSuccess }: 
             </div>
 
             <div>
-              <label className="block text-slate-300 font-bold mb-1">Target Budget Band</label>
+              <label className="block text-slate-700 font-bold mb-1">Target Budget Band</label>
               <select
                 value={formData.price_band}
                 onChange={(e) => setFormData({ ...formData, price_band: e.target.value })}
-                className="w-full rounded-xl bg-slate-900 border border-slate-700 p-2.5 text-white font-semibold focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 p-2.5 text-slate-900 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition cursor-pointer"
               >
                 <option value="< ₹10 Lakhs">&lt; ₹10 Lakhs</option>
                 <option value="₹10L - ₹20L">₹10L - ₹20L</option>
@@ -119,18 +119,18 @@ export function PurchaseOrderModal({ isOpen, onClose, initialData, onSuccess }: 
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-slate-300 font-bold mb-1">Vehicle Category</label>
+              <label className="block text-slate-700 font-bold mb-1">Vehicle Category</label>
               <input
                 type="text"
                 value={formData.vehicle_category}
                 onChange={(e) => setFormData({ ...formData, vehicle_category: e.target.value })}
                 required
-                className="w-full rounded-xl bg-slate-900 border border-slate-700 p-2.5 text-white font-semibold focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 p-2.5 text-slate-900 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 font-bold mb-1">Quantity to Procure</label>
+              <label className="block text-slate-700 font-bold mb-1">Quantity to Procure</label>
               <input
                 type="number"
                 min="1"
@@ -138,52 +138,52 @@ export function PurchaseOrderModal({ isOpen, onClose, initialData, onSuccess }: 
                 value={formData.quantity}
                 onChange={(e) => setFormData({ ...formData, quantity: Number(e.target.value) })}
                 required
-                className="w-full rounded-xl bg-slate-900 border border-slate-700 p-2.5 text-white font-semibold focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 p-2.5 text-slate-900 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-slate-300 font-bold mb-1">Auction / Vendor Partner</label>
+              <label className="block text-slate-700 font-bold mb-1">Auction / Vendor Partner</label>
               <input
                 type="text"
                 value={formData.vendor_name}
                 onChange={(e) => setFormData({ ...formData, vendor_name: e.target.value })}
                 required
-                className="w-full rounded-xl bg-slate-900 border border-slate-700 p-2.5 text-white font-semibold focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 p-2.5 text-slate-900 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 font-bold mb-1">Estimated Total Budget (₹)</label>
+              <label className="block text-slate-700 font-bold mb-1">Estimated Total Budget (₹)</label>
               <input
                 type="number"
                 step="100000"
                 value={formData.estimated_budget}
                 onChange={(e) => setFormData({ ...formData, estimated_budget: Number(e.target.value) })}
                 required
-                className="w-full rounded-xl bg-slate-900 border border-slate-700 p-2.5 text-white font-semibold focus:border-sky-500 focus:outline-none"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 p-2.5 text-slate-900 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-slate-300 font-bold mb-1">Internal Procurement Notes</label>
+            <label className="block text-slate-700 font-bold mb-1">Internal Procurement Notes</label>
             <textarea
               rows={2}
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full rounded-xl bg-slate-900 border border-slate-700 p-2.5 text-white font-medium focus:border-sky-500 focus:outline-none resize-none"
+              className="w-full rounded-xl bg-slate-50 border border-slate-200 p-2.5 text-slate-900 font-medium focus:border-blue-500 focus:bg-white focus:outline-none resize-none transition"
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition-colors cursor-pointer"
             >
               Cancel
             </button>
@@ -191,7 +191,7 @@ export function PurchaseOrderModal({ isOpen, onClose, initialData, onSuccess }: 
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-extrabold flex items-center gap-2 transition-all shadow-md cursor-pointer disabled:opacity-50"
+              className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold flex items-center gap-2 transition-all shadow-sm cursor-pointer disabled:opacity-50"
             >
               <Send size={14} />
               <span>{loading ? 'Issuing Order...' : 'Issue Purchase Order'}</span>

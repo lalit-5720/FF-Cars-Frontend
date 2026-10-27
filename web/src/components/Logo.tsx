@@ -15,9 +15,8 @@ export const Logo: React.FC<LogoProps> = ({
   circular = true,
   textColor,
 }) => {
-  // If circular is true, the background is white and the text is dark grey/black (#1a1a1a).
-  // Otherwise, the logo is transparent and text color inherits currentColor or a custom prop.
-  const textFill = circular ? '#1a1a1a' : (textColor || 'currentColor');
+  const circleFill = 'var(--accent)';
+  const textFill = textColor || 'var(--accent-text)';
 
   return (
     <svg
@@ -33,9 +32,7 @@ export const Logo: React.FC<LogoProps> = ({
           cx="100"
           cy="100"
           r="96"
-          fill="#FFFFFF"
-          className="logo-circle"
-          style={{ transition: 'fill 0.3s ease' }}
+          fill={circleFill}
         />
       )}
       
@@ -44,14 +41,13 @@ export const Logo: React.FC<LogoProps> = ({
         x="100"
         y="112"
         textAnchor="middle"
-        fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-        fontWeight="800"
-        fontSize="52"
+        fontFamily="Arial, Helvetica, sans-serif"
+        fontWeight="700"
+        fontSize="50"
         letterSpacing="-1"
-        fill={textFill}
-        style={{ transition: 'fill 0.3s ease' }}
+        fill={circular ? textFill : (textColor || 'var(--text-primary)')}
       >
-        CarRevive
+        CR
       </text>
 
       {/* Slogan */}
@@ -59,14 +55,13 @@ export const Logo: React.FC<LogoProps> = ({
         x="100"
         y="142"
         textAnchor="middle"
-        fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
-        fontWeight="800"
-        fontSize="15.5"
-        letterSpacing="-0.3"
-        fill={textFill}
-        style={{ transition: 'fill 0.3s ease' }}
+        fontFamily="Arial, Helvetica, sans-serif"
+        fontWeight="700"
+        fontSize="14"
+        letterSpacing="1"
+        fill={circular ? textFill : (textColor || 'var(--text-secondary)')}
       >
-        Drive Better
+        CARREVIVE
       </text>
     </svg>
   );

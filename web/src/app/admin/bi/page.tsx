@@ -2,7 +2,40 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Activity, Bell, Building2, CalendarDays, CarFront, ChevronDown, CircleDollarSign, Clock3, Gauge, LayoutDashboard, Loader2, Menu, Search, Settings, ShieldAlert, ShoppingCart, SlidersHorizontal, Target, TrendingUp, Users, X } from 'lucide-react';
+import {
+  Activity,
+  Bell,
+  Building2,
+  CalendarDays,
+  CarFront,
+  ChevronDown,
+  CircleDollarSign,
+  Clock3,
+  Gauge,
+  LayoutDashboard,
+  Loader2,
+  Menu,
+  Search,
+  Settings,
+  ShieldAlert,
+  ShoppingCart,
+  SlidersHorizontal,
+  Target,
+  TrendingUp,
+  Users,
+  X,
+  Heart,
+  MessageSquare,
+  CheckCircle2,
+  ArrowRight,
+  ShieldCheck,
+  RotateCcw,
+  Sparkles,
+  BarChart3,
+  Layers,
+  Eye,
+  FileText,
+} from 'lucide-react';
 import { api } from '../../../services/api';
 import { useAuthStore } from '../../../store/useAuthStore';
 import { WhatIfFinancialSimulator } from '../../../components/admin/bi/WhatIfFinancialSimulator';
@@ -11,13 +44,36 @@ import { ProcurementIntelligenceHub } from '../../../components/admin/bi/Procure
 import { InventoryRiskSummary } from '../../../components/admin/bi/InventoryRiskSummary';
 import { RevenueBreakdownModal } from '../../../components/admin/bi/RevenueBreakdownModal';
 import { TopVehiclesTable } from '../../../components/admin/bi/TopVehiclesTable';
+import { OwnerDecisionCentre } from '../../../components/admin/bi/OwnerDecisionCentre';
+import { CustomerDemandTable } from '../../../components/admin/bi/CustomerDemandTable';
+import { MultiBranchIntelligenceView } from '../../../components/admin/bi/MultiBranchIntelligenceView';
+import { OwnerHistoricalCharts } from '../../../components/admin/bi/OwnerHistoricalCharts';
 
-const money = (value: number) => value >= 10000000 ? `₹${(value / 10000000).toFixed(2)} Cr` : value >= 100000 ? `₹${(value / 100000).toFixed(2)} L` : `₹${Math.round(value || 0).toLocaleString('en-IN')}`;
-const navItems = [['Dashboard', LayoutDashboard, '/admin'], ['Executive Overview', Activity, '/admin/overview'], ['Sales Analytics', TrendingUp, '/admin/sales'], ['Inventory Intelligence', CarFront, '/admin/inventory'], ['Lead Management', Target, '/admin/leads'], ['Test Drive Requests', Target, '/admin/test-drives'], ['Customer Analytics', Users, '/admin/customers'], ['Vehicle Demand', Gauge, '/admin/demand'], ['Branch Performance', Building2, '/admin/branches'], ['Reports', CircleDollarSign, '/admin/reports'], ['Alerts & Actions', ShieldAlert, '/admin/alerts'], ['Budget Simulator', ShoppingCart, '/admin/budget-simulator'], ['Reviews & Ratings', Activity, '/admin/reviews'], ['Settings', Settings, '/admin/settings']] as const;
+const money = (value: number) =>
+  value >= 10000000
+    ? `₹${(value / 10000000).toFixed(2)} Cr`
+    : value >= 100000
+    ? `₹${(value / 100000).toFixed(2)} L`
+    : `₹${Math.round(value || 0).toLocaleString('en-IN')}`;
+
+const navItems = [
+  ['Dashboard', LayoutDashboard, '/admin'],
+  ['Executive BI Overview', Activity, '/admin/bi'],
+  ['Sales Analytics', TrendingUp, '/admin/sales'],
+  ['Inventory Intelligence', CarFront, '/admin/inventory'],
+  ['Lead Management', Target, '/admin/leads'],
+  ['Test Drive Requests', Target, '/admin/test-drives'],
+  ['Branch Performance', Building2, '/admin/branches'],
+  ['Settings', Settings, '/admin/settings'],
+] as const;
 
 export default function BiOverviewPage() {
   const router = useRouter();
   const { user, isAuthenticated } = useAuthStore();
+  const isOwner = user?.role === 'SYSTEM_ADMIN';
+  const canAccess = useMemo(() => ['SYSTEM_ADMIN', 'BRANCH_MANAGER', 'ADMIN'].includes(user?.role ?? ''), [user]);
+
+  const [activeViewTab, setActiveViewTab] = useState<'OVERVIEW' | 'DEMAND' | 'PROCUREMENT' | 'BRANCHES' | 'DECISIONS'>('OVERVIEW');
   const [branch, setBranch] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -26,118 +82,479 @@ export default function BiOverviewPage() {
   const [inventory, setInventory] = useState<any>({});
   const [executive, setExecutive] = useState<any>({});
   const [trendData, setTrendData] = useState<any[]>([]);
-  const [topVehicles, setTopVehicles] = useState<any[]>([]);
   const [funnel, setFunnel] = useState<any>({ stages: [] });
   const [procurementData, setProcurementData] = useState<any>(null);
   const [alerts, setAlerts] = useState<any[]>([]);
-  const [granularity, setGranularity] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const [loading, setLoading] = useState(true);
   const [mobileNav, setMobileNav] = useState(false);
   const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
-  const canAccess = useMemo(() => ['SYSTEM_ADMIN', 'BRANCH_MANAGER', 'ADMIN'].includes(user?.role ?? ''), [user]);
+
+  const setDatePreset = (days: number) => {
+    const end = new Date();
+    const start = new Date();
+    start.setDate(end.getDate() - days);
+    setStartDate(start.toISOString().split('T')[0]);
+    setEndDate(end.toISOString().split('T')[0]);
+  };
+
+  const loadData = async () => {
+    setLoading(true);
+    const params = {
+      ...(branch === 'all' ? {} : { branchId: branch }),
+      ...(startDate ? { startDate } : {}),
+      ...(endDate ? { endDate } : {}),
+    };
+    const empty = (data: any) => ({ data });
+
+    try {
+      const [branchRes, overviewRes, inventoryRes, executiveRes, trendRes, funnelRes, procRes, alertsRes] =
+        await Promise.all([
+          api.get('/branches').catch(() => empty([])),
+          api.get('/bi/overview', { params }).catch(() => empty({})),
+          api.get('/bi/inventory', { params }).catch(() => empty({ ageing: {} })),
+          api.get('/bi/executive', { params }).catch(() => empty({ branchPerformance: [] })),
+          api.get('/bi/revenue-trend', { params: { ...params, granularity: 'monthly' } }).catch(() => empty([])),
+          api.get('/bi/funnel', { params }).catch(() => empty({ stages: [] })),
+          api.get('/analytics/procurement-intelligence', { params }).catch(() => empty({})),
+          api.get('/analytics/dynamic-alerts', { params }).catch(() => empty([])),
+        ]);
+
+      setBranches(Array.isArray(branchRes.data) ? branchRes.data : branchRes.data?.data ?? []);
+      setOverview(overviewRes.data ?? {});
+      setInventory(inventoryRes.data ?? {});
+      setExecutive(executiveRes.data ?? {});
+      setTrendData(Array.isArray(trendRes.data) ? trendRes.data : trendRes.data?.data ?? []);
+      setFunnel(funnelRes.data ?? { stages: [] });
+      setProcurementData(procRes.data ?? {});
+      setAlerts(Array.isArray(alertsRes.data) ? alertsRes.data : alertsRes.data?.data ?? []);
+    } catch (err) {
+      console.warn('Failed to load BI overview metrics:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!isAuthenticated) { router.push('/login?redirect=/admin/overview'); return; }
-    if (!canAccess) { router.push('/admin'); return; }
-    const load = async () => {
-      setLoading(true);
-      const params = { ...(branch === 'all' ? {} : { branchId: branch }), ...(startDate ? { startDate } : {}), ...(endDate ? { endDate } : {}) };
-      const empty = (data: any) => ({ data });
-      const [branchRes, overviewRes, inventoryRes, executiveRes, trendRes, topVehiclesRes, funnelRes, procRes, alertsRes] = await Promise.all([
-        api.get('/branches').catch(() => empty([])), api.get('/bi/overview', { params }).catch(() => empty({})), api.get('/bi/inventory', { params }).catch(() => empty({ ageing: {} })), api.get('/bi/executive', { params }).catch(() => empty({ branchPerformance: [] })), api.get('/bi/revenue-trend', { params: { ...params, granularity } }).catch(() => empty([])), api.get('/bi/top-vehicles', { params: { ...params, limit: 5 } }).catch(() => empty([])), api.get('/bi/funnel', { params }).catch(() => empty({ stages: [] })),
-        api.get('/analytics/procurement-intelligence', { params }).catch(() => empty({})),
-        api.get('/analytics/dynamic-alerts', { params }).catch(() => empty([])),
-      ]);
-      setBranches(Array.isArray(branchRes.data) ? branchRes.data : branchRes.data?.data ?? []); setOverview(overviewRes.data ?? {}); setInventory(inventoryRes.data ?? {}); setExecutive(executiveRes.data ?? {}); setTrendData(Array.isArray(trendRes.data) ? trendRes.data : trendRes.data?.data ?? []); setTopVehicles(Array.isArray(topVehiclesRes.data) ? topVehiclesRes.data : topVehiclesRes.data?.data ?? []); setFunnel(funnelRes.data ?? { stages: [] }); setProcurementData(procRes.data ?? {}); setAlerts(Array.isArray(alertsRes.data) ? alertsRes.data : alertsRes.data?.data ?? []); setLoading(false);
-    };
-    load();
-  }, [branch, canAccess, endDate, granularity, isAuthenticated, router, startDate]);
+    if (!isAuthenticated) {
+      router.push('/login?redirect=/admin/bi');
+      return;
+    }
+    if (!canAccess) {
+      router.push('/admin');
+      return;
+    }
+    loadData();
+  }, [branch, canAccess, endDate, isAuthenticated, router, startDate]);
 
   const revenue = Number(overview.totalRevenue ?? executive.totalRevenue ?? 0);
   const totalSales = Number(overview.totalSales ?? executive.totalSales ?? 0);
-  const inventoryValue = Number(inventory.inventoryValue ?? executive.inventoryValue ?? 0);
-  const leadConversion = Number(executive.leadConversion ?? 0);
-  const performance = executive.branchPerformance ?? [];
-  const ageing = inventory.ageing ?? {};
-  const ageItems = [['0-30 Days', ageing['0-30'] ?? 0, '#527fe9'], ['31-60 Days', ageing['31-60'] ?? 0, '#6bae72'], ['61-90 Days', ageing['61-90'] ?? 0, '#d99b3f'], ['91-120 Days', ageing['91-120'] ?? 0, '#db5b4e'], ['120+ Days', ageing['120+'] ?? 0, '#a34945']] as const;
-  const ageTotal = Math.max(ageItems.reduce((sum, item) => sum + Number(item[1]), 0), 1);
-  const donut = ageItems.map((item) => `${item[2]} ${(Number(item[1]) / ageTotal) * 100}%`).join(', ');
-  const branchTotal = Math.max(performance.reduce((sum: number, item: any) => sum + Number(item.salesCount ?? 0), 0), 1);
-  const branchDonut = performance.map((item: any, index: number, list: any[]) => {
-    const start = list.slice(0, index).reduce((sum: number, previous: any) => sum + (Number(previous.salesCount ?? 0) / branchTotal) * 100, 0);
-    const end = start + (Number(item.salesCount ?? 0) / branchTotal) * 100;
-    return `${['#527fe9', '#6bae72', '#d99b3f', '#7b4fc0', '#a65e4a'][index % 5]} ${start}% ${end}%`;
-  }).join(', ');
-  const trend = trendData.map((item) => ({ label: item.period ?? 'Unknown', revenue: Number(item.revenue ?? 0) }));
-  const trendMax = Math.max(...trend.map((item) => item.revenue), 1);
-  const cards = [['Total Revenue', money(revenue), CircleDollarSign, '#4fce81'], ['Total Sales', totalSales.toLocaleString('en-IN'), ShoppingCart, '#5169f4'], ['Gross Profit', executive.grossProfit == null ? 'N/A' : money(Number(executive.grossProfit)), CircleDollarSign, '#9d62d5'], ['Inventory Value', money(inventoryValue), CarFront, '#c5762d'], ['Avg. Days to Sell', 'N/A', Clock3, '#4d9ab7'], ['Lead Conversion', `${leadConversion.toFixed(1)}%`, Target, '#55a863']] as const;
+  const inventoryValue = Number(overview.inventoryValue ?? inventory.inventoryValue ?? 0);
+  const currentStockCount = Number(overview.vehiclesCurrentlyAvailable ?? overview.currentInventory ?? 0);
+  const pendingDecisionsCount = Number(overview.pendingRecommendationsCount ?? 0);
+  const uniqueInterested = Number(overview.uniqueInterestedCustomers ?? 0);
+  const topViewModel = overview.mostViewedModels?.[0]?.model || 'Honda City';
+  const topViewCount = overview.mostViewedModels?.[0]?.count || 0;
+  const wishlists = Number(overview.wishlistAdditions ?? 0);
+  const enquiries = Number(overview.customerEnquiries ?? overview.leadsCount ?? 0);
+  const testDrives = Number(overview.testDriveBookings ?? overview.testDrivesCount ?? 0);
+  const comp = overview.comparison || {};
 
-  return <div className="min-h-screen bg-[#111827] text-[#e7edf8] selection:bg-blue-500/30">
-    <aside className={`fixed inset-y-0 left-0 z-40 w-[236px] border-r border-border/[0.07] bg-[#101827] transition-transform lg:translate-x-0 ${mobileNav ? 'translate-x-0' : '-translate-x-full'}`}>
-      <div className="flex h-[58px] items-center gap-3 border-b border-border/[0.07] px-7"><div className="relative h-8 w-12"><span className="absolute left-0 top-2 h-3 w-12 rounded-[50%] border-t-2 border-blue-400 rotate-[-9deg]" /><span className="absolute left-2 top-5 h-1 w-9 rounded-full bg-blue-300/80" /></div><span className="text-[18px] font-semibold tracking-[-0.04em]">Car<span className="font-normal text-[#dae2ef]">Revive</span></span><button className="ml-auto lg:hidden" onClick={() => setMobileNav(false)} aria-label="Close navigation"><X size={17} /></button></div>
-      <nav className="space-y-1 px-2 py-4">{navItems.map(([label, Icon, href], index) => <button key={label} onClick={() => router.push(href)} className={`flex w-full items-center gap-3 rounded-md px-3 py-[8px] text-left text-[11px] font-medium transition ${index === 1 ? 'bg-[#293c91] text-foreground shadow-[inset_3px_0_0_#6e99ff]' : 'text-[#8c98ad] hover:bg-secondary/[0.05] hover:text-foreground'}`}><Icon size={14} strokeWidth={1.8} />{label}</button>)}</nav>
-      <div className="absolute bottom-3 left-2 right-2 rounded-md border border-border/[0.12] bg-secondary/[0.025] p-3 text-[10px] text-[#aeb8c9]"><div className="mb-2 flex items-center justify-between"><span>Current Branch</span><ChevronDown size={12} /></div><strong className="font-medium text-foreground">{branches[0]?.branch_name ?? 'No branch selected'}</strong></div>
-    </aside>
-    <main className="min-h-screen lg:pl-[236px]">
-      <header className="flex h-[58px] items-center justify-between border-b border-border/[0.07] bg-[#141c2b] px-4 sm:px-7"><div className="flex items-center gap-4"><button className="text-[#aab5c7] lg:hidden" onClick={() => setMobileNav(true)} aria-label="Open navigation"><Menu size={18} /></button><div className="hidden items-center gap-2 rounded-md border border-border/[0.12] bg-secondary/[0.02] px-3 py-1.5 text-[11px] text-[#7d899e] sm:flex"><Search size={13} />Search anything...</div></div><div className="flex items-center gap-4 text-[#b3bdd0]"><Bell size={17} /><div className="hidden items-center gap-2 border-l border-border/[0.1] pl-4 sm:flex"><div className="grid h-7 w-7 place-items-center rounded-full bg-[#bf9d80] text-[10px] font-bold text-[#251e1b]">AU</div><div className="text-[10px] leading-tight"><strong className="block text-foreground">Admin User</strong><span>Super Admin</span></div><ChevronDown size={12} /></div></div></header>
-      <div className="mx-auto max-w-[1320px] px-4 py-6 sm:px-7"><div className="mb-4 flex flex-col justify-between gap-4 xl:flex-row xl:items-center"><div><h1 className="text-[20px] font-semibold tracking-[-0.03em] text-foreground">Executive Overview</h1><p className="mt-1 text-[10px] text-[#8995a9]">Real-time overview of your dealership performance</p></div><div className="flex flex-wrap gap-2"><label className="flex items-center gap-2 rounded-md border border-border/[0.18] bg-[#1b2434] px-3 py-2 text-[10px] text-[#d5dbea]"><CalendarDays size={13} /><input aria-label="Start date" type="date" value={startDate} max={endDate || undefined} onChange={(e) => setStartDate(e.target.value)} className="w-[108px] bg-transparent text-[10px] outline-none" /><span className="text-[#68758b]">to</span><input aria-label="End date" type="date" value={endDate} min={startDate || undefined} onChange={(e) => setEndDate(e.target.value)} className="w-[108px] bg-transparent text-[10px] outline-none" /></label><label className="flex items-center gap-2 rounded-md border border-border/[0.18] bg-[#1b2434] px-3 py-2 text-[10px] text-[#d5dbea]"><Building2 size={13} /><select value={branch} onChange={(e) => setBranch(e.target.value)} className="bg-transparent outline-none"><option value="all">All Branches</option>{branches.map((item) => <option key={item.branch_id} value={item.branch_id}>{item.branch_name}</option>)}</select><ChevronDown size={12} /></label><button className="flex items-center gap-2 rounded-md bg-[#314ed0] px-3 py-2 text-[10px] font-semibold text-foreground"><SlidersHorizontal size={13} />Filters</button></div></div>
-        {loading ? <div className="grid min-h-[500px] place-items-center"><Loader2 className="animate-spin text-blue-400" /></div> : <><div className="mb-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-6">{cards.map(([label, value, Icon, color]) => {
-          const isRevenue = label === 'Total Revenue';
-          return (
-            <div
-              key={label}
-              onClick={() => { if (isRevenue) setIsBreakdownOpen(true); }}
-              className={`relative overflow-hidden rounded-md border border-border/[0.08] bg-[#202a39] px-3 py-3 shadow-xl shadow-black/10 transition-all ${
-                isRevenue ? 'cursor-pointer hover:border-emerald-500/50 hover:bg-[#253245] ring-1 ring-emerald-500/20 group' : ''
-              }`}
+  return (
+    <div className="space-y-6 font-sans text-slate-800 pb-12">
+      {/* Dashboard Header Bar & Global Filters */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">
+              Showroom BI • Owner Decision Support
+            </span>
+            <span className="text-[11px] text-slate-400 font-medium">• Live Telemetry</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+            Business Intelligence &amp; Decision Support
+          </h1>
+          <p className="mt-1 text-xs sm:text-sm text-slate-500 font-medium">
+            Live database analytics for customer demand tracking, multi-branch stock allocation, and owner-approved procurement.
+          </p>
+        </div>
+
+        {/* Filter controls */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Preset buttons */}
+          <div className="hidden md:flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-2xs text-[11px] font-bold">
+            <button
+              onClick={() => setDatePreset(7)}
+              className="px-2.5 py-1 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer transition"
             >
-              <div className="mb-2 flex items-center justify-between text-[10px] text-[#a6b0c0]">
-                <span className="flex items-center gap-1.5 font-medium">
-                  {label}
-                  {isRevenue && (
-                    <span className="text-[8px] px-1 py-0.2 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20 group-hover:bg-emerald-500/20">
-                      Split ↗
-                    </span>
-                  )}
-                </span>
-                <span className="grid h-7 w-7 place-items-center rounded-full" style={{ backgroundColor: `${color}38`, color }}>
-                  <Icon size={14} />
+              7d
+            </button>
+            <button
+              onClick={() => setDatePreset(30)}
+              className="px-2.5 py-1 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer transition"
+            >
+              30d
+            </button>
+            <button
+              onClick={() => setDatePreset(90)}
+              className="px-2.5 py-1 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer transition"
+            >
+              90d
+            </button>
+            <button
+              onClick={() => { setStartDate(''); setEndDate(''); }}
+              className="px-2.5 py-1 rounded-lg hover:bg-slate-100 text-slate-600 hover:text-slate-900 cursor-pointer transition"
+            >
+              All Time
+            </button>
+          </div>
+
+          {/* Date pickers */}
+          <label className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-2xs">
+            <CalendarDays size={13} className="text-slate-400" />
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-[110px] bg-transparent text-xs font-medium text-slate-800 outline-none cursor-pointer"
+              aria-label="Start date"
+            />
+            <span className="text-slate-400 font-medium">to</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-[110px] bg-transparent text-xs font-medium text-slate-800 outline-none cursor-pointer"
+              aria-label="End date"
+            />
+          </label>
+
+          {/* Branch selector */}
+          <label className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-2xs">
+            <Building2 size={13} className="text-slate-400" />
+            <select
+              value={branch}
+              onChange={(e) => setBranch(e.target.value)}
+              className="bg-transparent outline-none cursor-pointer text-xs font-bold text-slate-800 pr-1"
+            >
+              <option value="all">All Showroom Branches</option>
+              {branches.map((item) => (
+                <option key={item.branch_id} value={item.branch_id}>
+                  {item.branch_name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={13} className="text-slate-400" />
+          </label>
+
+          <button
+            onClick={() => router.push('/admin/reports')}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 cursor-pointer transition shadow-2xs hover:border-blue-400"
+            title="Generate Owner Executive Business Intelligence PDF Report"
+          >
+            <FileText size={13} className="text-blue-600" />
+            <span>Business Reports</span>
+          </button>
+
+          <button
+            onClick={loadData}
+            disabled={loading}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-extrabold text-white cursor-pointer transition shadow-sm"
+          >
+            <RotateCcw size={13} className={loading ? 'animate-spin' : ''} />
+            <span>Refresh</span>
+          </button>
+        </div>
+      </div>
+
+      {/* SECTION A: EXECUTIVE OVERVIEW KPI CARDS (8 REAL KPI CARDS) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
+        {/* 1. Unique Interested Customers */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-1">
+          <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+            <span>Interested Buyers</span>
+            <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <Users size={13} />
+            </div>
+          </div>
+          <strong className="block text-2xl font-black font-mono text-slate-900">{uniqueInterested}</strong>
+          <div className="text-[10px] text-slate-500 font-medium">
+            {comp.enquiriesDelta != null ? (
+              <span className={`font-bold mr-1 ${comp.enquiriesDelta >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                {comp.enquiriesDelta >= 0 ? '↑ +' : '↓ '}{comp.enquiriesDelta}%
+              </span>
+            ) : null}
+            <span>{comp.periodLabel || 'in period'}</span>
+          </div>
+        </div>
+
+        {/* 2. Most Viewed Car Model */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-1">
+          <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+            <span>Top Viewed Model</span>
+            <div className="w-6 h-6 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+              <Eye size={13} />
+            </div>
+          </div>
+          <strong className="block text-sm font-extrabold text-slate-900 truncate" title={topViewModel}>
+            {topViewModel}
+          </strong>
+          <div className="text-[10px] text-purple-700 font-mono font-bold">
+            {topViewCount} page views
+          </div>
+        </div>
+
+        {/* 3. Wishlist Additions */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-1">
+          <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+            <span>Wishlist Adds</span>
+            <div className="w-6 h-6 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+              <Heart size={13} />
+            </div>
+          </div>
+          <strong className="block text-2xl font-black font-mono text-slate-900">{wishlists}</strong>
+          <div className="text-[10px] text-slate-500 font-medium">Saved vehicle intent</div>
+        </div>
+
+        {/* 4. Customer Enquiries */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-1">
+          <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+            <span>Enquiries</span>
+            <div className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+              <MessageSquare size={13} />
+            </div>
+          </div>
+          <strong className="block text-2xl font-black font-mono text-slate-900">{enquiries}</strong>
+          <div className="text-[10px] text-slate-500 font-medium">
+            {comp.enquiriesDelta != null ? (
+              <span className={`font-bold mr-1 ${comp.enquiriesDelta >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                {comp.enquiriesDelta >= 0 ? '↑ +' : '↓ '}{comp.enquiriesDelta}%
+              </span>
+            ) : null}
+            <span>leads</span>
+          </div>
+        </div>
+
+        {/* 5. Test-Drive Bookings */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-1">
+          <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+            <span>Test Drives</span>
+            <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <CarFront size={13} />
+            </div>
+          </div>
+          <strong className="block text-2xl font-black font-mono text-slate-900">{testDrives}</strong>
+          <div className="text-[10px] text-slate-500 font-medium">
+            {comp.testDrivesDelta != null ? (
+              <span className={`font-bold mr-1 ${comp.testDrivesDelta >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                {comp.testDrivesDelta >= 0 ? '↑ +' : '↓ '}{comp.testDrivesDelta}%
+              </span>
+            ) : null}
+            <span>scheduled</span>
+          </div>
+        </div>
+
+        {/* 6. Confirmed Sales */}
+        <div
+          onClick={() => setIsBreakdownOpen(true)}
+          className="p-4 rounded-2xl bg-white border border-slate-200/90 hover:border-emerald-300 shadow-2xs hover:shadow-md transition-all space-y-1 cursor-pointer group"
+        >
+          <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+            <span className="group-hover:text-emerald-700 font-bold transition-colors">Sales Rev ↗</span>
+            <div className="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <CircleDollarSign size={13} />
+            </div>
+          </div>
+          <strong className="block text-2xl font-black font-mono text-emerald-600">{money(revenue)}</strong>
+          <div className="text-[10px] text-slate-500 font-medium">
+            {totalSales} sold &bull; Click split
+          </div>
+        </div>
+
+        {/* 7. Available Inventory */}
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-1">
+          <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+            <span>Available Stock</span>
+            <div className="w-6 h-6 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+              <CarFront size={13} />
+            </div>
+          </div>
+          <strong className="block text-2xl font-black font-mono text-slate-900">{currentStockCount} Cars</strong>
+          <div className="text-[10px] text-slate-500 font-medium">{money(inventoryValue)} capital</div>
+        </div>
+
+        {/* 8. Pending Decisions */}
+        <div
+          onClick={() => setActiveViewTab('DECISIONS')}
+          className={`p-4 rounded-2xl border shadow-2xs hover:shadow-md transition-all space-y-1 cursor-pointer ${
+            pendingDecisionsCount > 0
+              ? 'bg-amber-50/80 border-amber-300 hover:bg-amber-100/60'
+              : 'bg-white border-slate-200/90'
+          }`}
+        >
+          <div className="flex items-center justify-between text-[11px] text-amber-800 font-bold">
+            <span>Pending Action</span>
+            <div className="w-6 h-6 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
+              <ShieldCheck size={13} />
+            </div>
+          </div>
+          <strong className="block text-2xl font-black font-mono text-amber-800">
+            {pendingDecisionsCount} Items
+          </strong>
+          <div className="text-[10px] text-amber-700 font-semibold">Click for Decisions</div>
+        </div>
+      </div>
+
+      <RevenueBreakdownModal isOpen={isBreakdownOpen} onClose={() => setIsBreakdownOpen(false)} />
+
+      {/* NAVIGATION SUB-TABS ACROSS SECTIONS B, C, D, E, F */}
+      <div className="flex items-center gap-2 border-b border-slate-200 overflow-x-auto pb-2 text-xs">
+        <button
+          onClick={() => setActiveViewTab('OVERVIEW')}
+          className={`px-4 py-2.5 rounded-xl font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+            activeViewTab === 'OVERVIEW'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 shadow-2xs'
+          }`}
+        >
+          <BarChart3 size={14} />
+          <span>Executive Overview &amp; Trends</span>
+        </button>
+
+        <button
+          onClick={() => setActiveViewTab('DEMAND')}
+          className={`px-4 py-2.5 rounded-xl font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+            activeViewTab === 'DEMAND'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 shadow-2xs'
+          }`}
+        >
+          <Users size={14} />
+          <span>Customer Demand Intelligence</span>
+        </button>
+
+        <button
+          onClick={() => setActiveViewTab('PROCUREMENT')}
+          className={`px-4 py-2.5 rounded-xl font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+            activeViewTab === 'PROCUREMENT'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 shadow-2xs'
+          }`}
+        >
+          <ShoppingCart size={14} />
+          <span>Inventory Purchase Advisor</span>
+        </button>
+
+        <button
+          onClick={() => setActiveViewTab('BRANCHES')}
+          className={`px-4 py-2.5 rounded-xl font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+            activeViewTab === 'BRANCHES'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200 shadow-2xs'
+          }`}
+        >
+          <Building2 size={14} />
+          <span>Multi-Branch Intelligence</span>
+        </button>
+
+        <button
+          onClick={() => setActiveViewTab('DECISIONS')}
+          className={`px-4 py-2.5 rounded-xl font-bold transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+            activeViewTab === 'DECISIONS'
+              ? 'bg-amber-600 text-white shadow-sm'
+              : 'bg-white text-amber-700 hover:text-amber-900 border border-amber-300 shadow-2xs'
+          }`}
+        >
+          <ShieldCheck size={14} />
+          <span>Owner Decision Centre ({pendingDecisionsCount})</span>
+        </button>
+      </div>
+
+      {/* TAB 1: EXECUTIVE OVERVIEW & HISTORICAL CHARTS */}
+      {activeViewTab === 'OVERVIEW' && (
+        <div className="space-y-6">
+          {/* Historical Recharts Grid */}
+          <OwnerHistoricalCharts branchId={branch} startDate={startDate} endDate={endDate} />
+
+          {/* Conversion Funnel & Top Vehicles Table */}
+          <div className="grid gap-4 xl:grid-cols-3">
+            <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs hover:shadow-md transition-all space-y-3 text-slate-800">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xs font-extrabold text-slate-900 flex items-center gap-1.5">
+                  <Target size={14} className="text-purple-600" />
+                  <span>Dealership Conversion Funnel</span>
+                </h2>
+                <span className="text-[10px] font-mono text-emerald-700 font-extrabold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                  {overview.leadConversion ?? 0}% Win Rate
                 </span>
               </div>
-              <strong className="block text-[16px] font-semibold text-[#f6f8fc] font-mono">{value}</strong>
-              <span className="text-[9px] text-[#7b879a]">{isRevenue ? 'Click for cash vs loan split' : 'Live metric'}</span>
+              <div className="space-y-2 pt-1 text-[10px]">
+                <div className="p-2.5 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between">
+                  <span className="font-semibold text-blue-950">Total Customer Leads</span>
+                  <strong className="font-mono text-blue-950 text-xs font-bold">{enquiries}</strong>
+                </div>
+                <div className="p-2.5 rounded-xl bg-purple-50 border border-purple-200 flex items-center justify-between">
+                  <span className="font-semibold text-purple-950">Test Drives Scheduled</span>
+                  <strong className="font-mono text-purple-950 text-xs font-bold">{testDrives}</strong>
+                </div>
+                <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between">
+                  <span className="font-semibold text-amber-950">Test Drives Completed</span>
+                  <strong className="font-mono text-amber-950 text-xs font-bold">{overview.completedTestDrivesCount ?? 0}</strong>
+                </div>
+                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
+                  <span className="font-semibold text-emerald-950">Final Handover Sales</span>
+                  <strong className="font-mono text-emerald-700 text-xs font-bold">{totalSales}</strong>
+                </div>
+              </div>
+            </section>
+
+            <div className="xl:col-span-2">
+              <TopVehiclesTable branchId={branch} />
             </div>
-          );
-        })}</div>
-          <RevenueBreakdownModal isOpen={isBreakdownOpen} onClose={() => setIsBreakdownOpen(false)} />
-          <div className="grid gap-3 xl:grid-cols-[1.1fr_.9fr_1fr]"><section className="rounded-md border border-border/[0.08] bg-[#202a39] p-3"><div className="mb-2 flex items-center justify-between"><h2 className="text-[12px] font-semibold text-foreground">Revenue Trend</h2><div className="flex overflow-hidden rounded border border-border/[0.12] text-[9px]"><button className="px-2 py-1 text-[#aab4c6]">Daily</button><button className="px-2 py-1 text-[#aab4c6]">Weekly</button><button className="bg-[#3e5edc] px-2 py-1 text-foreground">Monthly</button></div></div><div className="relative h-[155px] rounded bg-[#1b2534] p-3"><div className="absolute inset-3 flex flex-col justify-between opacity-20">{[1, 2, 3, 4].map((item) => <div key={item} className="border-t border-dashed border-[#8290a6]" />)}</div><svg viewBox="0 0 600 170" preserveAspectRatio="none" className="relative h-full w-full"><polyline fill="rgba(75,123,239,.12)" stroke="#5790f7" strokeWidth="3" points={trend.map((value: any, index: number) => `${index * 100},${160 - (Number(value.revenue) / (trendMax || 1)) * 135}`).join(' ') + ' 600,170 0,170'} /><polyline fill="none" stroke="#5790f7" strokeWidth="3" points={trend.map((value: any, index: number) => `${index * 100},${160 - (Number(value.revenue) / (trendMax || 1)) * 135}`).join(' ')} />{trend.map((value: any, index: number) => <circle key={index} cx={index * 100} cy={160 - (Number(value.revenue) / (trendMax || 1)) * 135} r="4" fill="#5790f7" />)}</svg><div className="absolute bottom-1 left-3 right-3 flex justify-between text-[8px] text-[#8490a5]">{trend.length > 0 ? trend.map((t, idx) => <span key={idx}>{t.label}</span>) : <span>No trend data</span>}</div></div></section><section className="rounded-md border border-border/[0.08] bg-[#202a39] p-3"><h2 className="mb-2 text-[12px] font-semibold text-foreground">Sales Breakdown</h2><div className="flex min-h-[155px] items-center justify-center gap-4"><div className="relative grid h-[128px] w-[128px] place-items-center rounded-full" style={{ background: branchDonut ? `conic-gradient(${branchDonut})` : '#2d374a' }}><div className="grid h-[74px] w-[74px] place-items-center rounded-full bg-[#202a39] text-center"><strong className="block text-[18px] text-foreground">{totalSales}</strong><span className="text-[8px] text-[#9ca8ba]">Total Sales</span></div></div><div className="space-y-2 text-[9px] text-[#b7c0cf]">{(performance.length ? performance.slice(0, 5) : [{ branchName: 'CarRevive HQ', salesCount: totalSales }]).map((item: any, index: number) => <div key={item.branchName} className="flex items-center gap-2"><i className="h-2 w-2 rounded-sm" style={{ backgroundColor: ['#527fe9', '#6bae72', '#d99b3f', '#7b4fc0', '#a65e4a'][index] }} />{item.branchName}<span className="ml-auto text-[#a5b0c2]">{item.salesCount ?? 0}</span></div>)}</div></div></section><section className="rounded-md border border-border/[0.08] bg-[#202a39] p-3"><h2 className="mb-2 text-[12px] font-semibold text-foreground">Inventory Aging <span className="font-normal text-[#8995a9]">(By Vehicles)</span></h2><div className="flex min-h-[155px] items-center justify-center gap-4"><div className="relative grid h-[128px] w-[128px] place-items-center rounded-full" style={{ background: `conic-gradient(${donut})` }}><div className="grid h-[74px] w-[74px] place-items-center rounded-full bg-[#202a39] text-center"><strong className="block text-[15px] text-foreground">{money(inventoryValue)}</strong><span className="text-[8px] text-[#9ca8ba]">Total</span></div></div><div className="space-y-2 text-[9px] text-[#b7c0cf]">{ageItems.map((item) => <div key={item[0]} className="flex items-center gap-2"><i className="h-2 w-2 rounded-sm" style={{ backgroundColor: item[2] }} />{item[0]}<span className="ml-auto text-[#a5b0c2]">{item[1]}</span></div>)}</div></div></section></div>
-
-          {/* Car Buying Intelligence Hub */}
-          <div className="my-6">
-            <ProcurementIntelligenceHub data={procurementData} loading={loading} />
           </div>
 
-          {/* Executive Customer Preference & Demand Intelligence Report */}
-          <div className="my-4">
-            <CustomerDemandIntelligenceReport />
-          </div>
+          {/* Interactive Repricing Simulator */}
+          <WhatIfFinancialSimulator
+            agingCount60Plus={Number(inventory?.ageing?.['61-90'] ?? 0) + Number(inventory?.ageing?.['120+'] ?? 0)}
+            totalAgingCapital={inventoryValue ? inventoryValue * 0.35 : 0}
+          />
+        </div>
+      )}
 
+      {/* TAB 2: CUSTOMER DEMAND INTELLIGENCE (SECTION B) */}
+      {activeViewTab === 'DEMAND' && (
+        <div className="space-y-6">
+          <CustomerDemandTable branchId={branch} startDate={startDate} endDate={endDate} />
+          <CustomerDemandIntelligenceReport />
+        </div>
+      )}
 
-          {/* Interactive What-If Repricing Simulator */}
-          <div className="my-4">
-            <WhatIfFinancialSimulator
-              agingCount60Plus={Number(ageing['61-90'] ?? 0) + Number(ageing['91-120'] ?? 0) + Number(ageing['120+'] ?? 0)}
-              totalAgingCapital={inventoryValue ? inventoryValue * 0.35 : 0}
-            />
-          </div>
+      {/* TAB 3: INVENTORY PURCHASE ADVISOR (SECTION C) */}
+      {activeViewTab === 'PROCUREMENT' && (
+        <div className="space-y-6">
+          <ProcurementIntelligenceHub data={procurementData} loading={loading} onRefresh={loadData} />
+          <InventoryRiskSummary />
+        </div>
+      )}
 
-          <div className="mt-3 grid gap-3 xl:grid-cols-[1.2fr_1fr_1.08fr_.95fr]">
-            <InventoryRiskSummary />
-            <section className="rounded-md border border-border/[0.08] bg-[#202a39] p-3"><h2 className="mb-2 text-[12px] font-semibold text-foreground">Lead to Sale Funnel</h2><div className="flex flex-col items-center gap-1 pt-1 text-center text-[9px]"><div className="w-[86%] bg-[#527fe9] py-2 text-foreground">Leads <strong className="block text-[12px]">{funnel.stages?.[0]?.count ?? 0}</strong></div><div className="w-[70%] bg-[#64a76d] py-2 text-foreground">Test Drives <strong className="block text-[12px]">{funnel.stages?.[1]?.count ?? 0}</strong></div><div className="w-[56%] bg-[#d59a3c] py-2 text-foreground">Qualified <strong className="block text-[12px]">{totalSales}</strong></div><div className="w-[42%] bg-[#bb515a] py-2 text-foreground">Sales <strong className="block text-[12px]">{funnel.stages?.[2]?.count ?? 0}</strong></div></div><div className="mt-3 rounded border border-border/[0.1] py-2 text-center text-[9px] text-[#aeb9c9]">Conversion Rate: <strong className="text-foreground">{leadConversion.toFixed(1)}%</strong></div></section>
-            <TopVehiclesTable branchId={branch} />
-            <section className="space-y-3"><div className="rounded-md border border-border/[0.08] bg-[#202a39] p-3"><h2 className="mb-3 text-[12px] font-semibold text-foreground">Recent Alerts</h2>{alerts && alerts.length > 0 ? alerts.slice(0, 4).map((alert: any) => { const isRisk = alert.type === 'RISK' || alert.priority === 'HIGH'; const color = isRisk ? '#e25c50' : alert.type === 'SLOW_MOVING' ? '#db983b' : '#6287e6'; return <div key={alert.id || alert.title} className="mb-3 flex gap-2 text-[9px]"><span style={{ color }}>{isRisk ? <ShieldAlert size={15} /> : <Activity size={15} />}</span><span><strong className="block font-medium text-[#e5eaf2]">{alert.title}</strong><small className="text-[#8692a6] line-clamp-2">{alert.sub}</small></span></div>; }) : <div className="py-4 text-center text-[10px] text-[#8692a6]">No active alerts for this branch.</div>}<button onClick={() => router.push('/admin/alerts')} className="w-full text-center text-[9px] text-[#8faef8]">View All Alerts</button></div><div className="rounded-md border border-border/[0.08] bg-[#202a39] p-3"><h2 className="mb-2 text-[12px] font-semibold text-foreground">Quick Actions</h2><div className="grid grid-cols-2 gap-1"><button onClick={() => router.push('/admin/inventory')} className="rounded bg-[#3855d2] p-2 text-[9px] text-foreground">Add Vehicle</button><button onClick={() => router.push('/admin/leads')} className="rounded bg-[#39764c] p-2 text-[9px] text-foreground">Add Lead</button><button onClick={() => router.push('/admin/reports')} className="rounded bg-[#6241a2] p-2 text-[9px] text-foreground">View Reports</button><button onClick={() => router.push('/admin/budget-simulator')} className="rounded bg-[#a85d20] p-2 text-[9px] text-foreground">Budget Simulator</button></div></div></section>
-          </div></>}
-      </div><footer className="border-t border-border/[0.07] px-7 py-4 text-[9px] text-[#748095]"><span>© {new Date().getFullYear()} CarRevive. All rights reserved.</span><span className="float-right">Version 1.0.0</span></footer>
-    </main>
-  </div>;
+      {/* TAB 4: MULTI-BRANCH INTELLIGENCE (SECTION D) */}
+      {activeViewTab === 'BRANCHES' && (
+        <div className="space-y-6">
+          <MultiBranchIntelligenceView onSelectBranch={(bId) => setBranch(bId)} />
+        </div>
+      )}
+
+      {/* TAB 5: OWNER DECISION CENTRE (SECTION E) */}
+      {activeViewTab === 'DECISIONS' && (
+        <div className="space-y-6">
+          <OwnerDecisionCentre branchId={branch} onDecisionMade={loadData} />
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer className="border-t border-slate-200 pt-4 text-[11px] text-slate-400 mt-8 flex flex-col sm:flex-row items-center justify-between gap-2 font-medium">
+        <span>&copy; {new Date().getFullYear()} CARREVIVE Automotive Dealership ERP &bull; Owner Decision Support</span>
+        <span className="font-mono text-[10px]">Secure Owner Module v2.0</span>
+      </footer>
+    </div>
+  );
 }

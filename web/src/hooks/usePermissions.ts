@@ -38,8 +38,8 @@ const DEFAULT_ROLE_PERMISSIONS: Record<string, Partial<PermissionMatrix>> = {
     canManageDeliveries: true,
     canAccessLeads: true,
     canManageLeads: true,
-    canAccessTestDrives: true,
-    canManageTestDrives: true,
+    canAccessTestDrives: false, // Manager & Admin do not need to see test drive requests
+    canManageTestDrives: false,
     canAccessReviews: true,
     canAccessReports: true,
     canAccessEmployees: true,
@@ -57,8 +57,8 @@ const DEFAULT_ROLE_PERMISSIONS: Record<string, Partial<PermissionMatrix>> = {
     canManageDeliveries: true,
     canAccessLeads: true,
     canManageLeads: true,
-    canAccessTestDrives: true,
-    canManageTestDrives: true,
+    canAccessTestDrives: false, // Manager & Admin do not need to see test drive requests
+    canManageTestDrives: false,
     canAccessReviews: true,
     canAccessReports: true,
     canAccessEmployees: true,
@@ -70,15 +70,15 @@ const DEFAULT_ROLE_PERMISSIONS: Record<string, Partial<PermissionMatrix>> = {
     canAccessOverview: true,
     canAccessInventory: true,
     canManageInventory: true,
-    canAccessSales: true,
+    canAccessSales: true, // Branch manager handles all payment, token advance, loan & full cash
     canManageSales: true,
-    canAccessDeliveries: true,
+    canAccessDeliveries: true, // Manager assigns delivery entry to sales executive
     canManageDeliveries: true,
-    canAccessLeads: true,
+    canAccessLeads: true, // Branch manager assigns leads to sales executives
     canManageLeads: true,
-    canAccessTestDrives: true,
-    canManageTestDrives: true,
-    canAccessReviews: true,
+    canAccessTestDrives: false, // Manager & Admin do not need to see test drive requests
+    canManageTestDrives: false,
+    canAccessReviews: true, // Branch manager approves reviews and publishes to website
     canAccessReports: true,
     canAccessEmployees: true,
     canManageEmployees: false,
@@ -87,17 +87,17 @@ const DEFAULT_ROLE_PERMISSIONS: Record<string, Partial<PermissionMatrix>> = {
   },
   SALES_EXECUTIVE: {
     canAccessOverview: true,
-    canAccessInventory: false,
+    canAccessInventory: true,
     canManageInventory: false,
-    canAccessSales: false,
+    canAccessSales: false, // Sales executive does NOT handle payments or have sales in sidebar
     canManageSales: false,
-    canAccessDeliveries: true,
+    canAccessDeliveries: true, // Sales executive performs car delivery based on customer dates
     canManageDeliveries: true,
-    canAccessLeads: true,
+    canAccessLeads: true, // Sales executive adds follow-up notes and makes test drive contact
     canManageLeads: true,
-    canAccessTestDrives: true,
+    canAccessTestDrives: true, // Dedicated to Sales Executive
     canManageTestDrives: true,
-    canAccessReviews: false,
+    canAccessReviews: false, // Sales executive does not moderate reviews
     canAccessReports: false,
     canAccessEmployees: false,
     canManageEmployees: false,

@@ -250,14 +250,14 @@ export default function SettingsPage() {
 
   return (
     <RequireRole allow={['SYSTEM_ADMIN']}>
-      <div className="space-y-6 max-w-7xl mx-auto font-sans">
+      <div className="space-y-6 max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#1e293b]/90 border border-slate-800 p-6 rounded-2xl shadow-xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-bg-surface border border-border p-6 rounded-[8px]">
           <div>
-            <h1 className="text-xl font-extrabold tracking-tight text-white flex items-center gap-2.5">
-              <Settings className="w-5 h-5 text-amber-400" /> Dealership Architecture & Role Governance
+            <h1 className="text-[24px] font-bold text-text-primary flex items-center gap-2">
+              <Settings className="w-5 h-5 text-accent" /> Dealership Architecture & Role Governance
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-[12px] text-text-secondary mt-1">
               System Admin Console: Manage multi-branch locations and configure custom roles with dynamic functionality
             </p>
           </div>
@@ -266,14 +266,14 @@ export default function SettingsPage() {
             {activeTab === 'branches' ? (
               <button
                 onClick={() => setShowBranchModal(true)}
-                className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs transition-colors flex items-center gap-2 shadow cursor-pointer"
+                className="btn-primary flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" /> Add New Branch
               </button>
             ) : (
               <button
                 onClick={() => setShowRoleModal(true)}
-                className="px-4 py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl text-xs transition-colors flex items-center gap-2 shadow cursor-pointer"
+                className="btn-primary flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" /> Create Custom Role
               </button>
@@ -282,13 +282,13 @@ export default function SettingsPage() {
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+        <div className="flex items-center gap-2 border-b border-border pb-3">
           <button
             onClick={() => setActiveTab('branches')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-2 rounded-[8px] text-[12px] font-bold transition-colors flex items-center gap-2 cursor-pointer ${
               activeTab === 'branches'
-                ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-accent text-accent-text'
+                : 'text-text-secondary hover:text-text-primary'
             }`}
           >
             <Building2 className="w-4 h-4" /> Showroom Branches ({branches.length})
@@ -296,10 +296,10 @@ export default function SettingsPage() {
 
           <button
             onClick={() => setActiveTab('roles')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-2 cursor-pointer ${
+            className={`px-4 py-2 rounded-[8px] text-[12px] font-bold transition-colors flex items-center gap-2 cursor-pointer ${
               activeTab === 'roles'
-                ? 'bg-sky-500/15 text-sky-400 border border-sky-500/30'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-accent text-accent-text'
+                : 'text-text-secondary hover:text-text-primary'
             }`}
           >
             <ShieldCheck className="w-4 h-4" /> Role & Permission Matrix ({roles.length})
@@ -310,35 +310,35 @@ export default function SettingsPage() {
         {activeTab === 'branches' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {loadingBranches ? (
-              <div className="col-span-full py-16 text-center text-slate-400 text-xs">
-                <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-amber-400" />
+              <div className="col-span-full py-16 text-center text-text-secondary text-[12px]">
+                <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-accent" />
                 Loading showroom branch networks...
               </div>
             ) : (
               branches.map((b) => (
                 <div
                   key={b.branch_id}
-                  className="p-5 rounded-2xl bg-[#1e293b]/80 border border-slate-800 space-y-3.5 hover:border-slate-700 transition-colors shadow-lg"
+                  className="p-4 rounded-[8px] bg-bg-surface border border-border space-y-3"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-extrabold text-white text-sm flex items-center gap-2">
-                      <Building2 className="w-4 h-4 text-sky-400" /> {b.branch_name}
+                    <span className="font-bold text-text-primary text-[14px] flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-accent" /> {b.branch_name}
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span className="badge-success">
                       {b.status || 'Active'}
                     </span>
                   </div>
 
-                  <div className="text-xs text-slate-300 space-y-1.5 font-medium border-t border-slate-800/80 pt-3">
+                  <div className="text-[12px] text-text-secondary space-y-1.5 border-t border-border pt-3">
                     <div>
-                      <span className="text-slate-400">Branch Manager:</span>{' '}
-                      <strong className="text-slate-100">{b.manager_name || 'Unassigned'}</strong>
+                      <span>Branch Manager:</span>{' '}
+                      <strong className="text-text-primary">{b.manager_name || 'Unassigned'}</strong>
                     </div>
                     <div>
-                      <span className="text-slate-400">Location:</span> {b.address || 'Chennai Showroom'}, {b.city} - {b.pincode}
+                      <span>Location:</span> {b.address || 'Chennai Showroom'}, {b.city} - {b.pincode}
                     </div>
                     <div>
-                      <span className="text-slate-400">Direct Desk:</span> {b.phone || 'N/A'} · {b.email || 'N/A'}
+                      <span>Direct Desk:</span> {b.phone || '—'} · {b.email || '—'}
                     </div>
                   </div>
                 </div>
@@ -350,9 +350,9 @@ export default function SettingsPage() {
         {/* Tab 2: Role & Permission Matrix */}
         {activeTab === 'roles' && (
           <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-300 text-xs flex items-center justify-between">
+            <div className="p-4 rounded-[8px] bg-bg-surface-alt border border-border text-text-primary text-[12px] flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <ShieldCheck className="w-5 h-5 text-sky-400 flex-shrink-0" />
+                <ShieldCheck className="w-5 h-5 text-accent flex-shrink-0" />
                 <span>
                   <strong>Dynamic RBAC Architecture:</strong> Custom roles are not hardcoded. When you create a role and tick its visible modules, members assigned this role dynamically access only those authorized sections.
                 </span>
@@ -361,8 +361,8 @@ export default function SettingsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {loadingRoles ? (
-                <div className="col-span-full py-16 text-center text-slate-400 text-xs">
-                  <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-sky-400" />
+                <div className="col-span-full py-16 text-center text-text-secondary text-[12px]">
+                  <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-accent" />
                   Loading role matrix...
                 </div>
               ) : (
@@ -372,24 +372,24 @@ export default function SettingsPage() {
                   return (
                     <div
                       key={r.id}
-                      className="p-5 rounded-2xl bg-[#1e293b]/90 border border-slate-800 space-y-4 shadow-lg hover:border-slate-700 transition-colors"
+                      className="p-4 rounded-[8px] bg-bg-surface border border-border space-y-4"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="font-extrabold text-white text-sm">{r.name}</h3>
-                            <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
+                            <h3 className="font-bold text-text-primary text-[14px]">{r.name}</h3>
+                            <span className="text-[12px] px-2 py-0.5 rounded-[999px] bg-bg-surface-alt text-text-secondary border border-border">
                               {r.id}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-400 mt-1 leading-relaxed">{r.description}</p>
+                          <p className="text-[12px] text-text-secondary mt-1">{r.description}</p>
                         </div>
 
                         {!r.isSystemDefault && (
                           <button
                             onClick={() => handleDeleteRole(r.id, r.name)}
                             title="Delete custom role"
-                            className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-[8px] text-status-danger hover:bg-bg-surface-alt transition-colors cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -398,21 +398,21 @@ export default function SettingsPage() {
 
                       {/* Visible Functionality Badges */}
                       <div className="space-y-1.5">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                        <span className="text-[12px] font-bold uppercase tracking-wider text-text-secondary block">
                           Granted Visible Modules ({permEntries.length})
                         </span>
                         <div className="flex flex-wrap gap-1.5">
                           {permEntries.length === 0 ? (
-                            <span className="text-[11px] text-slate-500 italic">No modules granted</span>
+                            <span className="text-[12px] text-text-secondary italic">No modules granted</span>
                           ) : (
                             permEntries.map(([k]) => {
                               const match = PERMISSION_CONFIG.find((p) => p.key === k);
                               return (
                                 <span
                                   key={k}
-                                  className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-slate-800/90 text-sky-300 border border-slate-700 flex items-center gap-1"
+                                  className="px-2.5 py-1 rounded-[8px] text-[12px] font-bold bg-bg-surface-alt text-text-primary border border-border flex items-center gap-1"
                                 >
-                                  <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-status-success" />
                                   {match ? match.label : k}
                                 </span>
                               );
@@ -430,102 +430,102 @@ export default function SettingsPage() {
 
         {/* Modal 1: Add New Branch */}
         {showBranchModal && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-[#1e293b] border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 className="text-base font-extrabold text-white flex items-center gap-2">
-                  <Building2 className="w-5 h-5 text-amber-400" /> Add New Showroom Branch
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+            <div className="bg-bg-surface border border-border rounded-[8px] max-w-lg w-full p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <h3 className="text-[18px] font-bold text-text-primary flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-accent" /> Add New Showroom Branch
                 </h3>
                 <button
                   onClick={() => setShowBranchModal(false)}
-                  className="text-slate-400 hover:text-white p-1 rounded-lg"
+                  className="text-text-secondary hover:text-text-primary p-1 rounded-[8px]"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleCreateBranch} className="space-y-3 text-xs">
+              <form onSubmit={handleCreateBranch} className="space-y-3 text-[14px]">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Branch Name *</label>
+                  <label className="block text-text-secondary font-bold mb-1 text-[12px]">Branch Name *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. OMR Sholinganallur Showroom"
                     value={newBranch.branch_name}
                     onChange={(e) => setNewBranch({ ...newBranch, branch_name: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-400"
+                    className="input-base w-full"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Branch Manager</label>
+                    <label className="block text-text-secondary font-bold mb-1 text-[12px]">Branch Manager</label>
                     <input
                       type="text"
                       placeholder="e.g. Ramesh V"
                       value={newBranch.manager_name}
                       onChange={(e) => setNewBranch({ ...newBranch, manager_name: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-400"
+                      className="input-base w-full"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Contact Phone</label>
+                    <label className="block text-text-secondary font-bold mb-1 text-[12px]">Contact Phone</label>
                     <input
                       type="text"
                       placeholder="+91 98401 23456"
                       value={newBranch.phone}
                       onChange={(e) => setNewBranch({ ...newBranch, phone: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-400"
+                      className="input-base w-full"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Email Address</label>
+                    <label className="block text-text-secondary font-bold mb-1 text-[12px]">Email Address</label>
                     <input
                       type="email"
                       placeholder="omr@carrevive.in"
                       value={newBranch.email}
                       onChange={(e) => setNewBranch({ ...newBranch, email: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-400"
+                      className="input-base w-full"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Pincode</label>
+                    <label className="block text-text-secondary font-bold mb-1 text-[12px]">Pincode</label>
                     <input
                       type="text"
                       placeholder="600119"
                       value={newBranch.pincode}
                       onChange={(e) => setNewBranch({ ...newBranch, pincode: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-400"
+                      className="input-base w-full"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Street Address</label>
+                  <label className="block text-text-secondary font-bold mb-1 text-[12px]">Street Address</label>
                   <input
                     type="text"
                     placeholder="Plot 14, Rajiv Gandhi Salai, OMR"
                     value={newBranch.address}
                     onChange={(e) => setNewBranch({ ...newBranch, address: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-amber-400"
+                    className="input-base w-full"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setShowBranchModal(false)}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-semibold"
+                    className="btn-neutral"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submittingBranch}
-                    className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl font-bold flex items-center gap-1.5"
+                    className="btn-primary flex items-center gap-1.5"
                   >
                     {submittingBranch && <Loader2 className="w-3.5 h-3.5 animate-spin" />} Save Branch Location
                   </button>
@@ -535,74 +535,74 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* Modal 2: Create Custom Role (Addressing Prompt.md Requirement) */}
+        {/* Modal 2: Create Custom Role */}
         {showRoleModal && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-[#1e293b] border border-slate-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 className="text-base font-extrabold text-white flex items-center gap-2">
-                  <ShieldCheck className="w-5 h-5 text-sky-400" /> Create Custom Role & Permissions
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+            <div className="bg-bg-surface border border-border rounded-[8px] max-w-xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <h3 className="text-[18px] font-bold text-text-primary flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-accent" /> Create Custom Role & Permissions
                 </h3>
-                <button onClick={() => setShowRoleModal(false)} className="text-slate-400 hover:text-white p-1 rounded-lg">
+                <button onClick={() => setShowRoleModal(false)} className="text-text-secondary hover:text-text-primary p-1 rounded-[8px]">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleCreateRole} className="space-y-4 text-xs">
+              <form onSubmit={handleCreateRole} className="space-y-4 text-[14px]">
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Role Title *</label>
+                  <label className="block text-text-secondary font-bold mb-1 text-[12px]">Role Title *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Quality Assurance & PDI Inspector"
                     value={newRole.name}
                     onChange={(e) => setNewRole({ ...newRole, name: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-sky-400"
+                    className="input-base w-full"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Role Scope / Description</label>
+                  <label className="block text-text-secondary font-bold mb-1 text-[12px]">Role Scope / Description</label>
                   <textarea
                     rows={2}
                     placeholder="Briefly describe what this staff member is responsible for..."
                     value={newRole.description}
                     onChange={(e) => setNewRole({ ...newRole, description: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-sky-400 resize-none"
+                    className="input-base w-full resize-none"
                   />
                 </div>
 
                 {/* Visible Functionality / Modules */}
                 <div>
-                  <label className="block text-slate-200 font-bold mb-2">
+                  <label className="block text-text-primary font-bold mb-1 text-[12px]">
                     Visible Functionality & Action Permissions:
                   </label>
-                  <p className="text-[11px] text-slate-400 mb-3">
+                  <p className="text-[12px] text-text-secondary mb-3">
                     Check the modules and operational actions visible to staff members assigned this role:
                   </p>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto p-1 bg-slate-900/60 rounded-xl border border-slate-800/80">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto p-2 bg-bg-surface-alt rounded-[8px] border border-border">
                     {PERMISSION_CONFIG.map((p) => {
                       const isChecked = Boolean(newRole.permissions[p.key]);
                       return (
                         <div
                           key={p.key}
                           onClick={() => togglePermission(p.key)}
-                          className={`p-2.5 rounded-lg border text-left cursor-pointer transition-colors flex items-start gap-2.5 ${
+                          className={`p-2.5 rounded-[8px] border text-left cursor-pointer transition-colors flex items-start gap-2.5 ${
                             isChecked
-                              ? 'bg-sky-500/10 border-sky-500/30 text-white'
-                              : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'
+                              ? 'bg-bg-surface border-accent text-text-primary'
+                              : 'bg-bg-surface border-border text-text-secondary hover:border-accent'
                           }`}
                         >
                           <input
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => {}} // handled by parent onClick
-                            className="mt-0.5 rounded border-slate-700 text-sky-500 focus:ring-0 cursor-pointer"
+                            className="mt-0.5 rounded-[4px] border-border text-accent focus:ring-0 cursor-pointer"
                           />
                           <div>
-                            <div className="font-bold text-[11px] leading-tight">{p.label}</div>
-                            <div className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">{p.description}</div>
+                            <div className="font-bold text-[12px] leading-tight text-text-primary">{p.label}</div>
+                            <div className="text-[12px] text-text-secondary mt-0.5 line-clamp-1">{p.description}</div>
                           </div>
                         </div>
                       );
@@ -610,18 +610,18 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setShowRoleModal(false)}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-semibold"
+                    className="btn-neutral"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submittingRole}
-                    className="px-5 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-xl font-bold flex items-center gap-1.5"
+                    className="btn-primary flex items-center gap-1.5"
                   >
                     {submittingRole && <Loader2 className="w-3.5 h-3.5 animate-spin" />} Create Custom Role
                   </button>

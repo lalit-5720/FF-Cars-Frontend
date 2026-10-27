@@ -27,28 +27,28 @@ export function BranchComparisonChart({ data, loading }: BranchComparisonChartPr
   };
 
   return (
-    <div className="rounded-2xl bg-card border border-border p-5 shadow-sm">
+    <div className="rounded-lg bg-bg-surface border border-border p-5">
       <div className="mb-4">
-        <h3 className="text-base font-extrabold text-foreground tracking-tight">Cross-Branch Comparison</h3>
-        <p className="text-xs text-muted-foreground">Revenue & unit sales breakdown by branch location</p>
+        <h3 className="text-base font-bold text-text-primary tracking-tight">Cross-Branch Comparison</h3>
+        <p className="text-xs text-text-secondary">Revenue & unit sales breakdown by branch location</p>
       </div>
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
-            <XAxis dataKey="branchName" stroke="#94a3b8" fontSize={11} tickLine={false} />
-            <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={formatLakhs} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} />
+            <XAxis dataKey="branchName" stroke="var(--text-secondary)" fontSize={11} tickLine={false} />
+            <YAxis stroke="var(--text-secondary)" fontSize={11} tickFormatter={formatLakhs} tickLine={false} />
             <Tooltip
-              contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#f8fafc' }}
+              contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '12px' }}
               formatter={(value: any, name: any) => [
                 name === 'totalRevenue' ? formatLakhs(Number(value)) : value,
                 name === 'totalRevenue' ? 'Revenue' : 'Units Sold',
               ]}
             />
 
-            <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-            <Bar dataKey="totalRevenue" name="Total Revenue" fill="#38bdf8" radius={[6, 6, 0, 0]} />
-            <Bar dataKey="totalSalesCount" name="Units Sold" fill="#818cf8" radius={[6, 6, 0, 0]} />
+            <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+            <Bar dataKey="totalRevenue" name="Total Revenue" fill="var(--accent)" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="totalSalesCount" name="Units Sold" fill="var(--text-secondary)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

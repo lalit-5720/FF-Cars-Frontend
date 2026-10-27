@@ -137,11 +137,9 @@ export function SalesExecutiveDashboard() {
   const priorityLeads = data?.priorityLeads || [];
 
   return (
-    <div className="space-y-6 font-sans text-slate-100 pb-10">
+    <div className="space-y-6 font-sans text-text-primary pb-10">
       {/* Executive Welcome Hero Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-[#131d36] to-slate-900 border border-slate-800 p-6 sm:p-8 shadow-2xl">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-lg bg-bg-surface border border-border p-6 sm:p-8">
 
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
@@ -190,82 +188,91 @@ export function SalesExecutiveDashboard() {
       {/* Core Executive KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1: Assigned Leads & Pipeline */}
-        <div className="rounded-2xl bg-[#1e293b]/80 border border-slate-800 p-5 shadow-lg relative overflow-hidden">
+        <div className="rounded-lg bg-bg-surface border border-border p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Leads Assigned</span>
-            <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center">
+            <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Total Leads Assigned</span>
+            <div className="w-9 h-9 rounded-lg bg-bg-surface-alt border border-border text-text-primary flex items-center justify-center">
               <Target size={18} />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-white">{kpis.totalLeads ?? 0}</span>
-            <span className="text-xs text-slate-400 font-semibold">inquiries</span>
+            <span className="text-3xl font-bold text-text-primary">{kpis.totalLeads ?? 0}</span>
+            <span className="text-xs text-text-secondary font-bold">inquiries</span>
           </div>
-          <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/80 pt-2.5">
-            <span className="text-emerald-400 font-semibold">{kpis.activeLeads ?? 0} Active Inquiries</span>
-            <span className="text-slate-400">{kpis.lostLeads ?? 0} Dropped</span>
+          <div className="mt-3 flex items-center justify-between text-xs text-text-secondary border-t border-border pt-2.5">
+            <span className="text-success font-bold">{kpis.activeLeads ?? 0} Active Inquiries</span>
+            <span>{kpis.lostLeads ?? 0} Dropped</span>
           </div>
         </div>
 
         {/* KPI 2: Conversion Rate */}
-        <div className="rounded-2xl bg-[#1e293b]/80 border border-slate-800 p-5 shadow-lg relative overflow-hidden">
+        <div className="rounded-lg bg-bg-surface border border-border p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Lead Conversion Rate</span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Lead Conversion Rate</span>
+            <div className="w-9 h-9 rounded-lg bg-bg-surface-alt border border-border text-text-primary flex items-center justify-center">
               <TrendingUp size={18} />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-emerald-400">{kpis.conversionRate ?? 0}%</span>
-            <span className="text-xs text-slate-400 font-semibold">Won vs Total</span>
+            <span className="text-3xl font-bold text-success">{kpis.conversionRate ?? 0}%</span>
+            <span className="text-xs text-text-secondary font-bold">Won vs Total</span>
           </div>
-          <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/80 pt-2.5">
-            <span className="text-emerald-400 font-bold">{kpis.convertedLeads ?? 0} Deals Won</span>
-            <span className="text-slate-400">Target: 30%+</span>
+          <div className="mt-3 flex items-center justify-between text-xs text-text-secondary border-t border-border pt-2.5">
+            <span className="text-success font-bold">{kpis.convertedLeads ?? 0} Deals Won</span>
+            <span>Target: 30%+</span>
           </div>
         </div>
 
         {/* KPI 3: Closed Revenue */}
-        <div className="rounded-2xl bg-[#1e293b]/80 border border-slate-800 p-5 shadow-lg relative overflow-hidden">
+        <div className="rounded-lg bg-bg-surface border border-border p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Closed Sales Revenue</span>
-            <div className="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 text-sky-400 flex items-center justify-center">
+            <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Closed Sales Revenue</span>
+            <div className="w-9 h-9 rounded-lg bg-bg-surface-alt border border-border text-text-primary flex items-center justify-center">
               <DollarSign size={18} />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold text-white">
+            <span className="text-2xl sm:text-3xl font-bold text-text-primary">
               ₹{(kpis.totalClosedRevenue || 0).toLocaleString('en-IN')}
             </span>
+            <span className="badge-success text-xs">
+              Paid &amp; Delivered
+            </span>
           </div>
-          <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/80 pt-2.5">
-            <span className="text-sky-400 font-semibold">{kpis.totalClosedDeals ?? 0} Closed Deals</span>
-            <span className="text-slate-400">Avg ₹{((kpis.averageDealValue || 0) / 100000).toFixed(1)}L / car</span>
+          <div className="mt-3 flex items-center justify-between text-xs text-text-secondary border-t border-border pt-2.5">
+            <span className="text-accent font-bold">{kpis.totalClosedDeals ?? 0} Closed Deals</span>
+            {kpis.pipelineDealsCount > 0 ? (
+              <span className="text-warning font-bold">
+                Pipeline: ₹{((kpis.pipelineRevenue || 0) / 100000).toFixed(1)}L ({kpis.pipelineDealsCount} pending)
+              </span>
+            ) : (
+              <span>Avg ₹{((kpis.averageDealValue || 0) / 100000).toFixed(1)}L / car</span>
+            )}
           </div>
         </div>
 
         {/* KPI 4: Pending Delivery Handover Actions */}
-        <div className="rounded-2xl bg-[#1e293b]/80 border border-slate-800 p-5 shadow-lg relative overflow-hidden">
+        <div className="rounded-lg bg-bg-surface border border-border p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Vehicle Handover Actions</span>
-            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center">
+            <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Vehicle Handover Actions</span>
+            <div className="w-9 h-9 rounded-lg bg-bg-surface-alt border border-border text-text-primary flex items-center justify-center">
               <ShoppingCart size={18} />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-extrabold text-amber-400">{kpis.pendingDeliveries ?? 0}</span>
-            <span className="text-xs text-slate-400 font-semibold">Actions Pending</span>
+            <span className="text-3xl font-bold text-warning">{kpis.pendingDeliveries ?? 0}</span>
+            <span className="text-xs text-text-secondary font-bold">Actions Pending</span>
           </div>
-          <div className="mt-3 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-800/80 pt-2.5">
-            <span className="text-emerald-400 font-semibold">{kpis.completedDeliveries ?? 0} Completed</span>
-            <span className="text-slate-400">{kpis.deliveryFulfillmentRate ?? 100}% Fulfillment</span>
+          <div className="mt-3 flex items-center justify-between text-xs text-text-secondary border-t border-border pt-2.5">
+            <span className="text-success font-bold">{kpis.completedDeliveries ?? 0} Completed</span>
+            <span>{kpis.deliveryFulfillmentRate ?? 100}% Fulfillment</span>
           </div>
         </div>
       </div>
 
       {/* Actionable Deliveries Hub (High Priority Delivery Handover Actions) */}
-      <div className="rounded-3xl bg-[#1e293b]/90 border border-slate-800 p-6 shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+      <div className="rounded-lg bg-bg-surface border border-border p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
           <div>
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-extrabold uppercase tracking-wider border border-amber-500/30">
@@ -371,8 +378,8 @@ export function SalesExecutiveDashboard() {
       {/* Visual Sales Funnel & Monthly Trend Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Pipeline Funnel Breakdown */}
-        <div className="lg:col-span-2 rounded-3xl bg-[#1e293b]/90 border border-slate-800 p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="lg:col-span-2 rounded-lg bg-bg-surface border border-border p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-border pb-3">
             <div>
               <h2 className="text-base font-extrabold text-white flex items-center gap-2">
                 <Target size={18} className="text-purple-400" />
@@ -418,8 +425,8 @@ export function SalesExecutiveDashboard() {
         </div>
 
         {/* Lead Sources Distribution */}
-        <div className="rounded-3xl bg-[#1e293b]/90 border border-slate-800 p-6 shadow-xl space-y-4">
-          <div className="border-b border-slate-800 pb-3">
+        <div className="rounded-lg bg-bg-surface border border-border p-6 space-y-4">
+          <div className="border-b border-border pb-3">
             <h2 className="text-base font-extrabold text-white flex items-center gap-2">
               <Users size={18} className="text-sky-400" />
               Lead Acquisition Channels
@@ -452,14 +459,14 @@ export function SalesExecutiveDashboard() {
 
       {/* Monthly Performance Chart (if data exists) */}
       {monthlyTrend.length > 0 && (
-        <div className="rounded-3xl bg-[#1e293b]/90 border border-slate-800 p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div className="rounded-lg bg-bg-surface border border-border p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-border pb-3">
             <div>
-              <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-                <TrendingUp size={18} className="text-emerald-400" />
+              <h2 className="text-base font-bold text-text-primary flex items-center gap-2">
+                <TrendingUp size={18} className="text-accent" />
                 Monthly Revenue &amp; Deal Closures
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-text-secondary">
                 Closed automotive sales revenue trajectory for your executive performance
               </p>
             </div>
@@ -468,18 +475,18 @@ export function SalesExecutiveDashboard() {
           <div className="h-64 w-full pt-4">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={monthlyTrend} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="month" stroke="var(--text-secondary)" fontSize={11} />
                 <YAxis
-                  stroke="#94a3b8"
+                  stroke="var(--text-secondary)"
                   fontSize={11}
                   tickFormatter={(val) => `₹${(val / 100000).toFixed(0)}L`}
                 />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }}
+                  contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '12px' }}
                   formatter={(val: any) => [`₹${Number(val).toLocaleString('en-IN')}`, 'Revenue Closed']}
                 />
-                <Bar dataKey="revenue" fill="#0ea5e9" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="revenue" fill="var(--accent)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -487,8 +494,8 @@ export function SalesExecutiveDashboard() {
       )}
 
       {/* Priority Leads Queue */}
-      <div className="rounded-3xl bg-[#1e293b]/90 border border-slate-800 p-6 shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+      <div className="rounded-lg bg-bg-surface border border-border p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3">
           <div>
             <h2 className="text-base font-extrabold text-white flex items-center gap-2">
               <Target size={18} className="text-purple-400" />
@@ -595,13 +602,15 @@ export function SalesExecutiveDashboard() {
 
       {/* Interactive Delivery Handover Modal */}
       {selectedDelivery && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg rounded-3xl bg-[#1e293b] border border-slate-700 p-6 sm:p-8 shadow-2xl space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg rounded-lg bg-bg-surface border border-border p-6 sm:p-8 shadow-lg space-y-4">
             <button
+              type="button"
               onClick={closeHandoverModal}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              className="btn-neutral w-8 h-8 p-0 flex items-center justify-center rounded-lg absolute top-5 right-5"
+              aria-label="Close"
             >
-              <X size={20} />
+              <X size={16} />
             </button>
 
             <div>

@@ -147,14 +147,14 @@ export default function EmployeesPage() {
 
   return (
     <RequireRole allow={['SYSTEM_ADMIN', 'BRANCH_MANAGER']}>
-      <div className="space-y-6 max-w-7xl mx-auto font-sans">
+      <div className="space-y-6 max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#1e293b]/90 border border-slate-800 p-6 rounded-2xl shadow-xl">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-bg-surface border border-border p-6 rounded-[8px]">
           <div>
-            <h1 className="text-xl font-extrabold tracking-tight text-white flex items-center gap-2.5">
-              <Users className="w-5 h-5 text-sky-400" /> Dealership Staff & Personnel Directory
+            <h1 className="text-[24px] font-bold text-text-primary flex items-center gap-2.5">
+              <Users className="w-5 h-5 text-accent" /> Dealership Staff & Personnel Directory
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-[12px] text-text-secondary mt-1">
               {permissions.canManageEmployees
                 ? 'Manage dealership workforce across multi-branch showrooms, assign dynamic roles, and set compensation'
                 : 'View staff directory for your branch (read-only manager scope)'}
@@ -164,7 +164,7 @@ export default function EmployeesPage() {
           {permissions.canManageEmployees && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2.5 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-xl text-xs transition-colors flex items-center gap-2 shadow cursor-pointer"
+              className="btn-primary flex items-center gap-2"
             >
               <Plus className="w-4 h-4" /> Add New Staff Member
             </button>
@@ -173,78 +173,78 @@ export default function EmployeesPage() {
 
         {/* Read-only notification for Branch Managers */}
         {!permissions.canManageEmployees && (
-          <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold flex items-center gap-2">
+          <div className="p-3.5 rounded-[8px] bg-bg-surface-alt border border-border text-status-warning text-[12px] font-bold flex items-center gap-2">
             <Lock className="w-4 h-4 flex-shrink-0" />
             Branch Manager Scope: Staff addition, salary edits, and role promotions are reserved for System Admin (Founder).
           </div>
         )}
 
         {/* Table */}
-        <div className="rounded-2xl bg-[#1e293b]/90 border border-slate-800 overflow-hidden shadow-xl">
+        <div className="rounded-[8px] bg-bg-surface border border-border overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs font-sans">
+            <table className="w-full text-left text-[14px]">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/60 text-slate-400 uppercase text-[10px] tracking-wider font-bold">
-                  <th className="py-3 px-4">Staff ID</th>
-                  <th className="py-3 px-4">Staff Name</th>
-                  <th className="py-3 px-4">Role & Job Title</th>
-                  <th className="py-3 px-4">Branch Showroom</th>
-                  <th className="py-3 px-4">Direct Contact</th>
-                  {permissions.canManageEmployees && <th className="py-3 px-4">Base Compensation</th>}
-                  <th className="py-3 px-4">Status</th>
-                  {permissions.canManageEmployees && <th className="py-3 px-4 text-right">Actions</th>}
+                <tr className="border-b border-border bg-bg-surface-alt text-text-secondary uppercase text-[12px] font-bold">
+                  <th className="py-4 px-4">Staff ID</th>
+                  <th className="py-4 px-4">Staff Name</th>
+                  <th className="py-4 px-4">Role & Job Title</th>
+                  <th className="py-4 px-4">Branch Showroom</th>
+                  <th className="py-4 px-4">Direct Contact</th>
+                  {permissions.canManageEmployees && <th className="py-4 px-4">Base Compensation</th>}
+                  <th className="py-4 px-4">Status</th>
+                  {permissions.canManageEmployees && <th className="py-4 px-4 text-right">Actions</th>}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/80">
+              <tbody className="divide-y divide-border">
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="py-16 text-center text-slate-400">
-                      <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-sky-400" />
+                    <td colSpan={8} className="py-16 text-center text-text-secondary text-[12px]">
+                      <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-accent" />
                       Loading staff directory...
                     </td>
                   </tr>
                 ) : employees.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-slate-400">
+                    <td colSpan={8} className="py-12 text-center text-text-secondary text-[14px]">
                       No employee records found.
                     </td>
                   </tr>
                 ) : (
                   employees.map((e) => (
-                    <tr key={e.employee_id} className="hover:bg-slate-800/40 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-sky-400">#EMP-{e.employee_id}</td>
-                      <td className="py-3.5 px-4">
-                        <div className="font-bold text-white">
+                    <tr key={e.employee_id} className="hover:bg-bg-surface-alt transition-colors">
+                      <td className="py-4 px-4 font-bold text-accent text-[12px]">#EMP-{e.employee_id}</td>
+                      <td className="py-4 px-4">
+                        <div className="font-bold text-text-primary">
                           {e.first_name} {e.last_name || ''}
                         </div>
-                        <div className="text-[11px] text-slate-400">{e.email}</div>
+                        <div className="text-[12px] text-text-secondary">{e.email}</div>
                       </td>
-                      <td className="py-3.5 px-4">
-                        <span className="font-semibold text-slate-200 block">{e.role}</span>
-                        <span className="text-[10px] text-slate-400 block">{e.job_title || 'Showroom Executive'}</span>
+                      <td className="py-4 px-4">
+                        <span className="font-bold text-text-primary block">{e.role}</span>
+                        <span className="text-[12px] text-text-secondary block">{e.job_title || 'Showroom Executive'}</span>
                       </td>
-                      <td className="py-3.5 px-4 text-slate-300">
+                      <td className="py-4 px-4 text-text-secondary text-[14px]">
                         {e.branches?.branch_name || `Branch #${e.branch_id || '1'}`}
                       </td>
-                      <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px]">
-                        {e.phone || 'N/A'}
+                      <td className="py-4 px-4 text-text-secondary text-[12px]">
+                        {e.phone || '—'}
                       </td>
                       {permissions.canManageEmployees && (
-                        <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">
+                        <td className="py-4 px-4 font-bold text-text-primary">
                           {e.salary ? `₹${Number(e.salary).toLocaleString()}` : 'Confidential'}
                         </td>
                       )}
-                      <td className="py-3.5 px-4">
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold border bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                      <td className="py-4 px-4">
+                        <span className="badge-success">
                           {e.status || 'Active'}
                         </span>
                       </td>
                       {permissions.canManageEmployees && (
-                        <td className="py-3.5 px-4 text-right">
+                        <td className="py-4 px-4 text-right">
                           <button
                             onClick={() => handleDeleteEmployee(e.employee_id, `${e.first_name} ${e.last_name || ''}`)}
                             title="Remove staff member"
-                            className="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-[8px] text-status-danger hover:bg-bg-surface-alt transition-colors cursor-pointer"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -260,90 +260,90 @@ export default function EmployeesPage() {
 
         {/* Modal: Add New Staff Member */}
         {showAddModal && (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-[#1e293b] border border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h3 className="text-base font-extrabold text-white flex items-center gap-2">
-                  <Users className="w-5 h-5 text-sky-400" /> Onboard New Staff Member
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+            <div className="bg-bg-surface border border-border rounded-[8px] max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <h3 className="text-[18px] font-bold text-text-primary flex items-center gap-2">
+                  <Users className="w-5 h-5 text-accent" /> Onboard New Staff Member
                 </h3>
-                <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-white p-1 rounded-lg">
+                <button onClick={() => setShowAddModal(false)} className="text-text-secondary hover:text-text-primary p-1 rounded-[8px]">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleCreateEmployee} className="space-y-3 text-xs">
+              <form onSubmit={handleCreateEmployee} className="space-y-3 text-[14px]">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">First Name *</label>
+                    <label className="block text-text-secondary font-bold mb-1 text-[12px]">First Name *</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g. Ramesh"
                       value={newEmployee.first_name}
                       onChange={(e) => setNewEmployee({ ...newEmployee, first_name: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-sky-400"
+                      className="input-base w-full"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Last Name</label>
+                    <label className="block text-text-secondary font-bold mb-1 text-[12px]">Last Name</label>
                     <input
                       type="text"
                       placeholder="e.g. V"
                       value={newEmployee.last_name}
                       onChange={(e) => setNewEmployee({ ...newEmployee, last_name: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-sky-400"
+                      className="input-base w-full"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Official Email *</label>
+                    <label className="block text-text-secondary font-bold mb-1 text-[12px]">Official Email *</label>
                     <input
                       type="email"
                       required
                       placeholder="ramesh.v@carrevive.in"
                       value={newEmployee.email}
                       onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-sky-400"
+                      className="input-base w-full"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Phone Number</label>
+                    <label className="block text-text-secondary font-bold mb-1 text-[12px]">Phone Number</label>
                     <input
                       type="text"
                       placeholder="+91 98401 23456"
                       value={newEmployee.phone}
                       onChange={(e) => setNewEmployee({ ...newEmployee, phone: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-sky-400"
+                      className="input-base w-full"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Assigned Role *</label>
+                    <label className="block text-text-secondary font-bold mb-1 text-[12px]">Assigned Role *</label>
                     <select
                       value={newEmployee.role}
                       onChange={(e) => setNewEmployee({ ...newEmployee, role: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-sky-400 cursor-pointer"
+                      className="input-base w-full cursor-pointer"
                     >
                       {availableRoles.map((r) => (
-                        <option key={r.id} value={r.id}>
+                        <option key={r.id} value={r.id} className="bg-bg-surface text-text-primary">
                           {r.name} ({r.id})
                         </option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Showroom Branch *</label>
+                    <label className="block text-text-secondary font-bold mb-1 text-[12px]">Showroom Branch *</label>
                     <select
                       value={newEmployee.branch_id}
                       onChange={(e) => setNewEmployee({ ...newEmployee, branch_id: Number(e.target.value) })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-sky-400 cursor-pointer"
+                      className="input-base w-full cursor-pointer"
                     >
                       {branches.map((b) => (
-                        <option key={b.branch_id} value={b.branch_id}>
+                        <option key={b.branch_id} value={b.branch_id} className="bg-bg-surface text-text-primary">
                           {b.branch_name}
                         </option>
                       ))}
@@ -353,51 +353,51 @@ export default function EmployeesPage() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Job Title</label>
+                    <label className="block text-text-secondary font-bold mb-1 text-[12px]">Job Title</label>
                     <input
                       type="text"
                       placeholder="e.g. Senior Customer Concierge"
                       value={newEmployee.job_title}
                       onChange={(e) => setNewEmployee({ ...newEmployee, job_title: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-sky-400"
+                      className="input-base w-full"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-300 font-semibold mb-1">Monthly Salary (₹)</label>
+                    <label className="block text-text-secondary font-bold mb-1 text-[12px]">Monthly Salary (₹)</label>
                     <input
                       type="number"
                       placeholder="55000"
                       value={newEmployee.salary}
                       onChange={(e) => setNewEmployee({ ...newEmployee, salary: Number(e.target.value) })}
-                      className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-sky-400 font-mono"
+                      className="input-base w-full"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-slate-300 font-semibold mb-1">Initial Password</label>
+                  <label className="block text-text-secondary font-bold mb-1 text-[12px]">Initial Password</label>
                   <input
                     type="password"
                     placeholder="password123"
                     value={newEmployee.password}
                     onChange={(e) => setNewEmployee({ ...newEmployee, password: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white outline-none focus:border-sky-400 font-mono"
+                    className="input-base w-full"
                   />
-                  <p className="text-[10px] text-slate-500 mt-1">Staff will use this password to sign into the Operations Console.</p>
+                  <p className="text-[12px] text-text-secondary mt-1">Staff will use this password to sign into the Operations Console.</p>
                 </div>
 
-                <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+                <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
                   <button
                     type="button"
                     onClick={() => setShowAddModal(false)}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-semibold"
+                    className="btn-neutral"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="px-5 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 rounded-xl font-bold flex items-center gap-1.5 cursor-pointer"
+                    className="btn-primary flex items-center gap-1.5"
                   >
                     {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />} Complete Staff Onboarding
                   </button>

@@ -22,7 +22,7 @@ export function KpiCards({ data, loading }: KpiCardsProps) {
     if (!val) return '₹0';
     if (val >= 10000000) return `₹${(val / 10000000).toFixed(2)} Cr`;
     if (val >= 100000) return `₹${(val / 100000).toFixed(2)} L`;
-    return `₹${val.toLocaleString()}`;
+    return `₹${val.toLocaleString('en-IN')}`;
   };
 
   const cards = [
@@ -32,7 +32,7 @@ export function KpiCards({ data, loading }: KpiCardsProps) {
       change: '+14.2%',
       isPositive: true,
       icon: DollarSign,
-      color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+      color: 'text-emerald-600 bg-emerald-50 border-emerald-200',
     },
     {
       title: 'Units Sold',
@@ -40,7 +40,7 @@ export function KpiCards({ data, loading }: KpiCardsProps) {
       change: '+8.5%',
       isPositive: true,
       icon: ShoppingBag,
-      color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+      color: 'text-blue-600 bg-blue-50 border-blue-200',
     },
     {
       title: 'Avg Deal Size',
@@ -48,7 +48,7 @@ export function KpiCards({ data, loading }: KpiCardsProps) {
       change: '+3.1%',
       isPositive: true,
       icon: Award,
-      color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+      color: 'text-purple-600 bg-purple-50 border-purple-200',
     },
     {
       title: 'Lead Conversion',
@@ -56,7 +56,7 @@ export function KpiCards({ data, loading }: KpiCardsProps) {
       change: '+2.4%',
       isPositive: true,
       icon: Target,
-      color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+      color: 'text-amber-600 bg-amber-50 border-amber-200',
     },
   ];
 
@@ -64,7 +64,7 @@ export function KpiCards({ data, loading }: KpiCardsProps) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-28 rounded-2xl bg-secondary/50 animate-pulse border border-border" />
+          <div key={i} className="h-28 rounded-2xl bg-slate-100 animate-pulse border border-slate-200" />
         ))}
       </div>
     );
@@ -72,7 +72,7 @@ export function KpiCards({ data, loading }: KpiCardsProps) {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 font-sans">
         {cards.map((card) => {
           const Icon = card.icon;
           const isRevenue = card.title === 'Total Revenue';
@@ -83,32 +83,32 @@ export function KpiCards({ data, loading }: KpiCardsProps) {
               onClick={() => {
                 if (isRevenue) setIsBreakdownOpen(true);
               }}
-              className={`rounded-2xl bg-card border border-border p-5 shadow-sm transition-all ${
+              className={`rounded-2xl bg-white border border-slate-200/90 p-5 shadow-2xs hover:shadow-md transition-all ${
                 isRevenue
-                  ? 'cursor-pointer hover:border-emerald-500/50 hover:bg-secondary/40 ring-1 ring-emerald-500/20 group'
-                  : 'hover:border-slate-700'
+                  ? 'cursor-pointer hover:border-emerald-300 group'
+                  : 'hover:border-slate-300'
               }`}
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                   {card.title}
                   {isRevenue && (
-                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20 group-hover:bg-emerald-500/20">
+                    <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-extrabold border border-emerald-200">
                       Breakdown ↗
                     </span>
                   )}
                 </span>
                 <div className={`p-2 rounded-xl border ${card.color}`}>
-                  <Icon size={18} />
+                  <Icon size={16} />
                 </div>
               </div>
               <div className="flex items-baseline justify-between">
-                <span className="text-2xl font-extrabold tracking-tight text-foreground font-mono">
+                <span className="text-2xl font-black tracking-tight text-slate-900 font-mono">
                   {card.value}
                 </span>
                 <span
                   className={`text-xs font-bold flex items-center gap-0.5 ${
-                    card.isPositive ? 'text-emerald-400' : 'text-rose-400'
+                    card.isPositive ? 'text-emerald-700' : 'text-rose-600'
                   }`}
                 >
                   <TrendingUp size={12} />

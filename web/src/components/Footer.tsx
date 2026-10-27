@@ -1,90 +1,55 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { api } from '../services/api';
 
 export const Footer: React.FC = () => {
   const year = new Date().getFullYear();
+  const [branches, setBranches] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const res = await api.get('/branches');
+        const list = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+        setBranches(list);
+      } catch (_) {
+        setBranches([]);
+      }
+    };
+    fetchBranches();
+  }, []);
 
   return (
-    <footer
-      style={{
-        backgroundColor: 'var(--sidebar)',
-        borderTop: '1px solid var(--onyx-border)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Gold top accent line */}
-      <div
-        style={{
-          height: '1px',
-          background:
-            'linear-gradient(90deg, transparent 0%, rgba(201,169,110,0.4) 30%, rgba(232,201,122,0.6) 50%, rgba(201,169,110,0.4) 70%, transparent 100%)',
-        }}
-      />
-
-      {/* Ambient glow */}
-      <div
-        className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-48 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse, rgba(201,169,110,0.04) 0%, transparent 70%)',
-          filter: 'blur(60px)',
-        }}
-      />
-
-      <div className="relative max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-12">
+    <footer className="bg-bg-surface border-t border-border mt-auto">
+      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-8">
 
           {/* Brand Column */}
           <div className="md:col-span-5">
-            {/* Logotype */}
-            <div className="mb-5">
-              <span
-                className="font-black tracking-widest text-lg"
-                style={{
-                  fontFamily: "'DM Sans', sans-serif",
-                  color: 'var(--gold)',
-                  letterSpacing: '0.18em',
-                }}
-              >
+            <div className="mb-4">
+              <span className="font-bold text-lg text-text-primary tracking-wide">
                 CarRevive
               </span>
-              <span
-                className="block text-[9px] uppercase tracking-widest mt-0.5"
-                style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-              >
-                Automotive Concierge · Chennai
+              <span className="block helper-text mt-0.5">
+                Certified Pre-Owned Automotive Dealership
               </span>
             </div>
 
-            {/* Ornamental divider */}
-            <div className="my-5 h-px w-16" style={{ background: 'var(--gold-dim)' }} />
-
-            <p
-              className="text-sm max-w-xs leading-relaxed"
-              style={{ color: 'var(--silver)', fontFamily: "'DM Sans', sans-serif", fontWeight: 300 }}
-            >
-              Chennai's premier destination for certified luxury and premium pre-owned vehicles.
-              Serving discerning buyers across Anna Nagar & Velachery.
+            <p className="body-text max-w-xs mb-4">
+              Your destination for certified, quality pre-owned vehicles with transparent fixed pricing and comprehensive warranty.
             </p>
 
-            {/* Showrooms */}
-            <div className="mt-6 flex flex-col gap-2">
-              {[
-                { name: 'Anna Nagar Showroom', addr: '100 Feet Road, Chennai 600040' },
-                { name: 'Velachery Showroom', addr: '100 Feet Bypass Road, Chennai 600042' },
-              ].map(({ name, addr }) => (
-                <div key={name}>
-                  <p
-                    className="text-xs font-semibold"
-                    style={{ color: 'var(--platinum)', fontFamily: "'DM Sans', sans-serif" }}
-                  >
-                    {name}
+            {/* Dynamic Showrooms from Database */}
+            <div className="flex flex-col gap-2">
+              {branches.map((b) => (
+                <div key={b.branch_id || b.id}>
+                  <p className="body-text font-bold text-xs">
+                    {b.branch_name}
                   </p>
-                  <p
-                    className="text-[11px]"
-                    style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-                  >
-                    {addr}
+                  <p className="helper-text">
+                    {b.address ? `${b.address}, ${b.city}` : b.city}
                   </p>
                 </div>
               ))}
@@ -93,27 +58,21 @@ export const Footer: React.FC = () => {
 
           {/* Platform Links */}
           <div className="md:col-span-3">
-            <h3
-              className="text-[10px] uppercase tracking-widest font-semibold mb-5"
-              style={{ color: 'var(--gold)', fontFamily: "'DM Sans', sans-serif" }}
-            >
+            <h3 className="section-heading text-xs uppercase tracking-wider text-text-secondary mb-4">
               Inventory
             </h3>
-            <ul className="flex flex-col gap-3">
+            <ul className="flex flex-col gap-2.5">
               {[
                 { label: 'Browse All Vehicles', href: '/cars' },
                 { label: 'Electric Cars', href: '/cars?fuelType=Electric' },
                 { label: 'Diesel Cars', href: '/cars?fuelType=Diesel' },
-                { label: 'Premium Sedans', href: '/cars?search=sedan' },
-                { label: 'Budget Cars', href: '/cars?sortBy=price&sortOrder=asc' },
+                { label: 'Petrol Cars', href: '/cars?fuelType=Petrol' },
+                { label: 'Automatic Fleet', href: '/cars?transmission=Automatic' },
               ].map(({ label, href }) => (
                 <li key={label}>
                   <Link
                     href={href}
-                    className="text-sm transition-colors duration-200"
-                    style={{ color: 'var(--silver)' }}
-                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
-                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--silver)')}
+                    className="body-text text-text-secondary hover:text-text-primary transition-colors"
                   >
                     {label}
                   </Link>
@@ -124,35 +83,23 @@ export const Footer: React.FC = () => {
 
           {/* Our Promise */}
           <div className="md:col-span-4">
-            <h3
-              className="text-[10px] uppercase tracking-widest font-semibold mb-5"
-              style={{ color: 'var(--gold)', fontFamily: "'DM Sans', sans-serif" }}
-            >
+            <h3 className="section-heading text-xs uppercase tracking-wider text-text-secondary mb-4">
               Our Promise
             </h3>
-            <ul className="flex flex-col gap-3.5">
+            <ul className="flex flex-col gap-3">
               {[
-                { point: '200-Point Certified Inspection', sub: 'Every vehicle rigorously tested' },
-                { point: '5-Day Money-Back Guarantee', sub: 'Complete purchase confidence' },
-                { point: 'Transparent Pricing', sub: 'No hidden charges, ever' },
-                { point: 'White-Glove Delivery', sub: 'Handover to your doorstep' },
+                { point: '150-Point Roadworthiness Audit', sub: 'Every vehicle rigorously certified' },
+                { point: '7-Day / 500 km Money-Back Guarantee', sub: 'Complete purchase confidence' },
+                { point: 'Transparent Fixed Pricing', sub: 'No hidden charges, ever' },
+                { point: 'Pan-India 1-Year Warranty', sub: 'Engine and gearbox protection' },
               ].map(({ point, sub }) => (
-                <li key={point} className="flex items-start gap-2.5">
-                  <span
-                    className="mt-1.5 w-1 h-1 rounded-full flex-shrink-0"
-                    style={{ background: 'var(--gold)' }}
-                  />
+                <li key={point} className="flex items-start gap-2">
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0" />
                   <div>
-                    <p
-                      className="text-sm font-medium"
-                      style={{ color: 'var(--platinum)', fontFamily: "'DM Sans', sans-serif" }}
-                    >
+                    <p className="body-text font-bold text-xs">
                       {point}
                     </p>
-                    <p
-                      className="text-[11px]"
-                      style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-                    >
+                    <p className="helper-text">
                       {sub}
                     </p>
                   </div>
@@ -163,14 +110,8 @@ export const Footer: React.FC = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div
-          className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4"
-          style={{ borderTop: '1px solid var(--onyx-border)' }}
-        >
-          <p
-            className="text-xs"
-            style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-          >
+        <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="helper-text">
             &copy; {year} CarRevive Pvt. Ltd. All rights reserved. Chennai, Tamil Nadu.
           </p>
           <div className="flex gap-6">
@@ -178,10 +119,7 @@ export const Footer: React.FC = () => {
               <Link
                 key={item}
                 href="#"
-                className="text-xs transition-colors duration-200"
-                style={{ color: 'var(--silver-dim)', fontFamily: "'DM Sans', sans-serif" }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'var(--gold)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'var(--silver-dim)')}
+                className="helper-text hover:text-text-primary transition-colors"
               >
                 {item}
               </Link>
@@ -192,3 +130,5 @@ export const Footer: React.FC = () => {
     </footer>
   );
 };
+
+export default Footer;

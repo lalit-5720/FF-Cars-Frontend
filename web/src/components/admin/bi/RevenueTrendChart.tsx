@@ -22,15 +22,15 @@ export function RevenueTrendChart({ data, loading }: RevenueTrendChartProps) {
   };
 
   return (
-    <div className="rounded-2xl bg-card border border-border p-5 shadow-sm">
+    <div className="rounded-lg bg-bg-surface border border-border p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-base font-extrabold text-foreground tracking-tight">Revenue Trend</h3>
-          <p className="text-xs text-muted-foreground">Monthly sales performance &amp; total collections</p>
+          <h3 className="text-base font-bold text-text-primary tracking-tight">Revenue Trend</h3>
+          <p className="text-xs text-text-secondary">Monthly sales performance &amp; total collections</p>
         </div>
       </div>
       {chartData.length === 0 ? (
-        <div className="h-64 flex items-center justify-center text-xs text-muted-foreground">
+        <div className="h-64 flex items-center justify-center text-xs text-text-secondary">
           No monthly sales revenue recorded yet.
         </div>
       ) : (
@@ -39,18 +39,18 @@ export function RevenueTrendChart({ data, loading }: RevenueTrendChartProps) {
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#38bdf8" stopOpacity={0.0} />
+                  <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="var(--accent)" stopOpacity={0.0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
-              <XAxis dataKey="period" stroke="#94a3b8" fontSize={11} tickLine={false} />
-              <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={formatLakhs} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} />
+              <XAxis dataKey="period" stroke="var(--text-secondary)" fontSize={11} tickLine={false} />
+              <YAxis stroke="var(--text-secondary)" fontSize={11} tickFormatter={formatLakhs} tickLine={false} />
               <Tooltip
-                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#f8fafc' }}
+                contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '12px' }}
                 formatter={(value: any) => [formatLakhs(Number(value)), 'Revenue']}
               />
-              <Area type="monotone" dataKey="revenue" stroke="#38bdf8" strokeWidth={3} fillOpacity={1} fill="url(#revenueGrad)" />
+              <Area type="monotone" dataKey="revenue" stroke="var(--accent)" strokeWidth={2} fillOpacity={1} fill="url(#revenueGrad)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>

@@ -24,7 +24,6 @@ export const Toast: React.FC = () => {
 
       setToasts((prev) => [...prev, newToast]);
 
-      // Auto dismiss after 4 seconds
       setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== newToast.id));
       }, 4000);
@@ -41,34 +40,34 @@ export const Toast: React.FC = () => {
   return (
     <div className="fixed right-4 bottom-4 z-50 flex flex-col gap-2 max-w-sm w-full">
       {toasts.map((toast) => {
-        let typeStyles = "border-border bg-card text-card-foreground";
-        let iconColor = "bg-primary/10 text-primary";
+        let borderColor = "border-border";
+        let iconColor = "text-accent bg-bg-surface-alt";
         let Icon = Bell;
 
         if (toast.type === 'success') {
-          typeStyles = "border-emerald-500/20 bg-emerald-950/80 text-emerald-200 shadow-lg shadow-emerald-950/10";
-          iconColor = "bg-emerald-500/20 text-emerald-300";
+          borderColor = "border-status-success";
+          iconColor = "text-status-success bg-status-success-bg";
           Icon = CheckCircle2;
         } else if (toast.type === 'error') {
-          typeStyles = "border-rose-500/20 bg-rose-950/80 text-rose-200 shadow-lg shadow-rose-950/10";
-          iconColor = "bg-rose-500/20 text-rose-300";
+          borderColor = "border-status-danger";
+          iconColor = "text-status-danger bg-status-danger-bg";
           Icon = AlertCircle;
         }
 
         return (
           <div
             key={toast.id}
-            className={`flex items-start gap-3 p-4 rounded-xl shadow-lg border backdrop-blur-md animate-in slide-in-from-bottom-4 duration-300 ${typeStyles}`}
+            className={`flex items-start gap-3 p-4 rounded-lg border bg-bg-surface text-text-primary ${borderColor}`}
           >
             <div className={`flex-shrink-0 p-1.5 rounded-lg ${iconColor}`}>
-              <Icon className="w-5 h-5" />
+              <Icon className="w-4 h-4" />
             </div>
-            <div className="flex-1 text-sm font-medium leading-relaxed">
+            <div className="flex-1 text-sm font-bold leading-normal">
               {toast.message}
             </div>
             <button
               onClick={() => setToasts((prev) => prev.filter((t) => t.id !== toast.id))}
-              className="flex-shrink-0 opacity-70 hover:opacity-100 transition-opacity"
+              className="flex-shrink-0 text-text-secondary hover:text-text-primary transition-opacity"
             >
               <X className="w-4 h-4" />
             </button>

@@ -3,13 +3,27 @@
 import React, { useState, useEffect } from 'react';
 import { RequireRole } from '../../../components/auth/RequireRole';
 import { api } from '../../../services/api';
-import { Building2, TrendingUp, CarFront, Award, RefreshCw, MapPin, Phone, ArrowUpRight } from 'lucide-react';
+import { usePermissions } from '../../../hooks/usePermissions';
+import { showLocalToast } from '../../../components/Toast';
+import { 
+  Building2, 
+  RefreshCw, 
+  MapPin, 
+  Plus, 
+  Edit, 
+  Power, 
+  X
+} from 'lucide-react';
 
 interface BranchPerformanceItem {
   branch_id: number;
   branch_name: string;
   manager_name: string;
+  phone?: string;
+  email?: string;
   city: string;
+  state?: string;
+  status?: string;
   total_revenue: number;
   total_sales: number;
   active_inventory_count: number;
@@ -21,8 +35,25 @@ interface BranchPerformanceItem {
 }
 
 export default function AdminBranchesPage() {
+  const permissions = usePermissions();
   const [loading, setLoading] = useState(true);
   const [branchList, setBranchList] = useState<BranchPerformanceItem[]>([]);
+  
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingBranch, setEditingBranch] = useState<any | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [formData, setFormData] = useState({
+    branch_name: '',
+    manager_name: '',
+    phone: '',
+    email: '',
+    address: '',
+    city: '',
+    state: 'Tamil Nadu',
+    pincode: '',
+    status: 'Active',
+  });
 
   const fetchBranchPerformance = async () => {
     setLoading(true);
@@ -51,105 +82,352 @@ export default function AdminBranchesPage() {
     return `₹${val.toLocaleString('en-IN')}`;
   };
 
+  const handleCreateBranch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.branch_name || !formData.city) {
+      showLocalToast('Branch name and City are required.', 'error');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await api.post('/branches', formData);
+      showLocalToast(`Branch "${formData.branch_name}" created successfully!`, 'success');
+      setIsCreateModalOpen(false);
+      setFormData({
+        branch_name: '',
+        manager_name: '',
+        phone: '',
+        email: '',
+        address: '',
+        city: '',
+        state: 'Tamil Nadu',
+        pincode: '',
+        status: 'Active',
+      });
+      await fetchBranchPerformance();
+    } catch (err: any) {
+      showLocalToast(err.response?.data?.message || 'Failed to create branch', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleUpdateBranch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingBranch) return;
+    setSubmitting(true);
+    try {
+      await api.patch(`/branches/${editingBranch.branch_id}`, formData);
+      showLocalToast(`Branch updated successfully!`, 'success');
+      setEditingBranch(null);
+      await fetchBranchPerformance();
+    } catch (err: any) {
+      showLocalToast(err.response?.data?.message || 'Failed to update branch', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleToggleStatus = async (branch: BranchPerformanceItem) => {
+    const newStatus = branch.status === 'Inactive' ? 'Active' : 'Inactive';
+    if (!confirm(`Are you sure you want to set branch "${branch.branch_name}" to ${newStatus}?`)) return;
+    try {
+      await api.patch(`/branches/${branch.branch_id}`, { status: newStatus });
+      showLocalToast(`Branch status updated to ${newStatus}.`, 'success');
+      await fetchBranchPerformance();
+    } catch (err: any) {
+      showLocalToast(err.response?.data?.message || 'Failed to update branch status', 'error');
+    }
+  };
+
+  const openEditModal = (b: BranchPerformanceItem) => {
+    setEditingBranch(b);
+    setFormData({
+      branch_name: b.branch_name || '',
+      manager_name: b.manager_name || '',
+      phone: b.phone || '',
+      email: b.email || '',
+      address: '',
+      city: b.city || '',
+      state: b.state || 'Tamil Nadu',
+      pincode: '',
+      status: b.status || 'Active',
+    });
+  };
+
   return (
     <RequireRole allow={['SYSTEM_ADMIN', 'BRANCH_MANAGER']}>
-      <div className="space-y-6 text-slate-100 font-sans pb-10">
+      <div className="space-y-6 text-text-primary pb-10">
         
         {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-5">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 text-[10px] font-extrabold uppercase tracking-wider border border-indigo-500/30">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="badge badge-info">
                 Multi-Location Reporting
               </span>
-              <span className="text-xs text-slate-400 font-medium">Dealership Network Performance</span>
+              <span className="helper-text">Network Performance</span>
             </div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-white mt-1 flex items-center gap-2.5">
-              <Building2 size={24} className="text-indigo-400" />
-              Branch Performance & Inventory Efficiency
+            <h1 className="page-title flex items-center gap-2 text-text-primary">
+              <Building2 size={24} className="text-accent" />
+              Branch Operations &amp; Inventory Efficiency
             </h1>
-            <p className="text-xs text-slate-400 mt-0.5 font-medium">
-              Live branch-by-branch sales revenue, inventory turnover, lead conversion rates, and top-selling car models
+            <p className="helper-text mt-0.5">
+              Live branch sales revenue, inventory turnover, lead conversion rates, and branch controls.
             </p>
           </div>
 
-          <button
-            onClick={fetchBranchPerformance}
-            className="flex items-center gap-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 text-xs font-bold transition-all border border-slate-700 cursor-pointer shadow"
-          >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-            <span>Refresh Branch Metrics</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {permissions.isSystemAdmin && (
+              <button
+                onClick={() => {
+                  setFormData({
+                    branch_name: '',
+                    manager_name: '',
+                    phone: '',
+                    email: '',
+                    address: '',
+                    city: '',
+                    state: 'Tamil Nadu',
+                    pincode: '',
+                    status: 'Active',
+                  });
+                  setIsCreateModalOpen(true);
+                }}
+                className="btn-primary"
+              >
+                <Plus size={15} />
+                <span>Create New Branch</span>
+              </button>
+            )}
+
+            <button
+              onClick={fetchBranchPerformance}
+              className="btn-neutral"
+            >
+              <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+              <span>Refresh Metrics</span>
+            </button>
+          </div>
         </div>
 
         {/* Branch Performance Cards Grid */}
         {loading ? (
           <div className="space-y-4">
-            <div className="h-48 bg-slate-800/40 rounded-2xl animate-pulse" />
-            <div className="h-48 bg-slate-800/40 rounded-2xl animate-pulse" />
+            <div className="h-48 bg-bg-surface border border-border rounded-lg animate-pulse" />
+            <div className="h-48 bg-bg-surface border border-border rounded-lg animate-pulse" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {branchList.map((branch) => (
               <div
                 key={branch.branch_id}
-                className="rounded-2xl bg-[#1e293b]/90 border border-slate-800 p-6 shadow-xl space-y-5 hover:border-indigo-500/40 transition-all"
+                className="rounded-lg bg-bg-surface border border-border p-6 space-y-4 flex flex-col justify-between"
               >
-                {/* Branch Card Header */}
-                <div className="flex items-start justify-between border-b border-slate-800 pb-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-400 font-extrabold">
-                      <Building2 size={20} />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-extrabold text-white">{branch.branch_name}</h2>
-                      <div className="flex items-center gap-3 text-xs text-slate-400 mt-0.5">
-                        <span className="flex items-center gap-1"><MapPin size={12} /> {branch.city}</span>
-                        <span>Manager: <strong className="text-slate-200">{branch.manager_name}</strong></span>
+                <div>
+                  {/* Branch Card Header */}
+                  <div className="flex items-start justify-between border-b border-border pb-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-bg-surface-alt border border-border flex items-center justify-center text-accent shrink-0">
+                        <Building2 size={20} />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h2 className="section-heading text-text-primary">{branch.branch_name}</h2>
+                          <span className={`badge ${
+                            branch.status === 'Inactive' ? 'badge-danger' : 'badge-success'
+                          }`}>
+                            {branch.status || 'Active'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 helper-text mt-0.5">
+                          <span className="flex items-center gap-1"><MapPin size={12} /> {branch.city}</span>
+                          <span>Manager: <strong className="text-text-primary">{branch.manager_name || 'Unassigned'}</strong></span>
+                        </div>
                       </div>
                     </div>
+
+                    <span className="badge badge-info">
+                      {branch.efficiency_rating}
+                    </span>
                   </div>
 
-                  <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-extrabold uppercase border border-emerald-500/30">
-                    {branch.efficiency_rating}
-                  </span>
+                  {/* Key Metrics Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs mt-4">
+                    <div className="bg-bg-surface-alt p-3 rounded-lg border border-border">
+                      <span className="helper-text uppercase block font-bold">TOTAL REVENUE</span>
+                      <strong className="text-sm font-bold text-accent">{formatRupees(branch.total_revenue)}</strong>
+                    </div>
+                    <div className="bg-bg-surface-alt p-3 rounded-lg border border-border">
+                      <span className="helper-text uppercase block font-bold">TOTAL SALES</span>
+                      <strong className="text-sm font-bold text-status-success">{branch.total_sales} Cars</strong>
+                    </div>
+                    <div className="bg-bg-surface-alt p-3 rounded-lg border border-border">
+                      <span className="helper-text uppercase block font-bold">ACTIVE INVENTORY</span>
+                      <strong className="text-sm font-bold text-status-warning">{branch.active_inventory_count} Vehicles</strong>
+                    </div>
+                    <div className="bg-bg-surface-alt p-3 rounded-lg border border-border">
+                      <span className="helper-text uppercase block font-bold">CONVERSION RATE</span>
+                      <strong className="text-sm font-bold text-text-primary">{branch.lead_conversion_rate}%</strong>
+                    </div>
+                  </div>
+
+                  {/* Additional Details */}
+                  <div className="bg-bg-surface-alt p-3 rounded-lg border border-border flex items-center justify-between text-xs mt-3">
+                    <div>
+                      <span className="helper-text block">Top Performing Model:</span>
+                      <strong className="block text-text-primary font-bold text-sm">{branch.top_selling_model}</strong>
+                    </div>
+                    <div className="text-right">
+                      <span className="helper-text block">Avg Days on Lot:</span>
+                      <strong className="block text-accent font-bold text-sm">{branch.avg_days_to_sell} Days</strong>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Key Metrics Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                  <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 block font-semibold">TOTAL REVENUE</span>
-                    <strong className="text-sm font-black text-sky-400">{formatRupees(branch.total_revenue)}</strong>
+                {/* Admin Management Actions */}
+                {permissions.isSystemAdmin && (
+                  <div className="pt-3 border-t border-border flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => openEditModal(branch)}
+                      className="btn-neutral text-xs h-8 px-3"
+                    >
+                      <Edit size={13} />
+                      <span>Edit Details</span>
+                    </button>
+                    <button
+                      onClick={() => handleToggleStatus(branch)}
+                      className={`h-8 px-3 text-xs font-bold rounded-lg border cursor-pointer ${
+                        branch.status === 'Inactive'
+                          ? 'badge-success'
+                          : 'badge-danger'
+                      }`}
+                    >
+                      <Power size={13} />
+                      <span>{branch.status === 'Inactive' ? 'Activate' : 'Deactivate'}</span>
+                    </button>
                   </div>
-                  <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 block font-semibold">TOTAL SALES</span>
-                    <strong className="text-sm font-black text-emerald-400">{branch.total_sales} Cars</strong>
-                  </div>
-                  <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 block font-semibold">ACTIVE INVENTORY</span>
-                    <strong className="text-sm font-black text-amber-400">{branch.active_inventory_count} Vehicles</strong>
-                  </div>
-                  <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                    <span className="text-[10px] text-slate-400 block font-semibold">CONVERSION RATE</span>
-                    <strong className="text-sm font-black text-purple-400">{branch.lead_conversion_rate}%</strong>
-                  </div>
-                </div>
-
-                {/* Additional Performance Details */}
-                <div className="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
-                  <div>
-                    <span className="text-slate-400 text-[11px]">Top Performing Model:</span>
-                    <strong className="block text-white font-extrabold text-sm">{branch.top_selling_model}</strong>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-slate-400 text-[11px]">Avg Days on Lot:</span>
-                    <strong className="block text-sky-400 font-extrabold text-sm">{branch.avg_days_to_sell} Days</strong>
-                  </div>
-                </div>
+                )}
               </div>
             ))}
           </div>
         )}
+
+        {/* CREATE / EDIT BRANCH MODAL */}
+        {(isCreateModalOpen || editingBranch) && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+            <div className="w-full max-w-lg rounded-lg bg-bg-surface border border-border p-6 shadow-sm text-text-primary">
+              <div className="flex items-center justify-between pb-3 border-b border-border mb-4">
+                <h3 className="section-heading flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-accent" />
+                  <span>{editingBranch ? `Edit Branch #${editingBranch.branch_id}` : 'Create New Showroom Branch'}</span>
+                </h3>
+                <button
+                  onClick={() => {
+                    setIsCreateModalOpen(false);
+                    setEditingBranch(null);
+                  }}
+                  className="text-text-secondary hover:text-text-primary"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={editingBranch ? handleUpdateBranch : handleCreateBranch} className="space-y-4 text-xs">
+                <div>
+                  <label className="block helper-text font-bold uppercase mb-1">Branch Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.branch_name}
+                    onChange={(e) => setFormData({ ...formData, branch_name: e.target.value })}
+                    placeholder="e.g. Madurai Ring Road Showroom"
+                    className="w-full p-2.5 rounded-lg bg-bg-surface border border-border text-text-primary focus:border-accent focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block helper-text font-bold uppercase mb-1">Manager Name</label>
+                    <input
+                      type="text"
+                      value={formData.manager_name}
+                      onChange={(e) => setFormData({ ...formData, manager_name: e.target.value })}
+                      placeholder="e.g. Rajesh Kannan"
+                      className="w-full p-2.5 rounded-lg bg-bg-surface border border-border text-text-primary focus:border-accent focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block helper-text font-bold uppercase mb-1">City *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      placeholder="e.g. Madurai"
+                      className="w-full p-2.5 rounded-lg bg-bg-surface border border-border text-text-primary focus:border-accent focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block helper-text font-bold uppercase mb-1">Phone</label>
+                    <input
+                      type="text"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="+91 98765 43210"
+                      className="w-full p-2.5 rounded-lg bg-bg-surface border border-border text-text-primary focus:border-accent focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block helper-text font-bold uppercase mb-1">Email</label>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="branch@carrevive.in"
+                      className="w-full p-2.5 rounded-lg bg-bg-surface border border-border text-text-primary focus:border-accent focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block helper-text font-bold uppercase mb-1">Address</label>
+                  <input
+                    type="text"
+                    value={formData.address}
+                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    placeholder="Showroom street address"
+                    className="w-full p-2.5 rounded-lg bg-bg-surface border border-border text-text-primary focus:border-accent focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex items-center justify-end gap-2 pt-4 border-t border-border">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCreateModalOpen(false);
+                      setEditingBranch(null);
+                    }}
+                    className="btn-neutral"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="btn-primary"
+                  >
+                    {submitting ? 'Saving...' : editingBranch ? 'Save Changes' : 'Create Branch'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
       </div>
     </RequireRole>
   );

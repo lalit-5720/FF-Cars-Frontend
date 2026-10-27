@@ -23,7 +23,7 @@ export function InventoryAgingDonut({ data: propData, loading: propLoading }: In
   const [agingData, setAgingData] = useState<AgingItem[]>([]);
   const [internalLoading, setInternalLoading] = useState(false);
 
-  const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#b91c1c'];
+  const colors = ['var(--accent)', 'var(--success)', 'var(--warning)', 'var(--danger)', 'var(--text-secondary)'];
 
   const formatRupees = (val: number) => {
     if (val >= 10000000) return `₹${(val / 10000000).toFixed(2)} Cr`;
@@ -61,7 +61,7 @@ export function InventoryAgingDonut({ data: propData, loading: propLoading }: In
   const loading = propLoading || internalLoading;
 
   if (loading) {
-    return <div className="h-72 rounded-2xl bg-[#1e293b]/60 animate-pulse border border-slate-800" />;
+    return <div className="h-72 rounded-lg bg-bg-surface-alt animate-pulse border border-border" />;
   }
 
   const totalValue = agingData.reduce((sum, item) => sum + Number(item.value || 0), 0);
@@ -78,13 +78,13 @@ export function InventoryAgingDonut({ data: propData, loading: propLoading }: In
   });
 
   return (
-    <div className="rounded-2xl bg-[#1e293b]/90 border border-slate-800/90 p-5 shadow-lg flex flex-col justify-between font-sans">
-      <h3 className="text-sm font-extrabold text-white tracking-tight mb-2">
+    <div className="rounded-lg bg-bg-surface border border-border p-5 flex flex-col justify-between font-sans">
+      <h3 className="text-sm font-bold text-text-primary tracking-tight mb-2">
         Inventory Aging (By Value)
       </h3>
 
       {totalValue === 0 ? (
-        <div className="py-12 text-center text-xs text-slate-400">
+        <div className="py-12 text-center text-xs text-text-secondary">
           No active inventory aging data available.
         </div>
       ) : (
@@ -94,7 +94,7 @@ export function InventoryAgingDonut({ data: propData, loading: propLoading }: In
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#f8fafc' }}
+                  contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '12px' }}
                   formatter={(val: any, name: any, item: any) => [item.payload.valueFormatted, item.payload.label]}
                 />
                 <Pie
@@ -115,10 +115,10 @@ export function InventoryAgingDonut({ data: propData, loading: propLoading }: In
             </ResponsiveContainer>
 
             <div className="absolute flex flex-col items-center justify-center text-center pointer-events-none">
-              <span className="text-lg font-extrabold text-white font-mono leading-none">
+              <span className="text-lg font-bold text-text-primary font-mono leading-none">
                 {formatRupees(totalValue)}
               </span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase mt-1">Total Value</span>
+              <span className="text-xs font-bold text-text-secondary uppercase mt-1">Total Value</span>
             </div>
           </div>
 
@@ -128,10 +128,10 @@ export function InventoryAgingDonut({ data: propData, loading: propLoading }: In
               <div key={item.label} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-slate-300 font-semibold">{item.label}</span>
+                  <span className="text-text-primary font-bold">{item.label}</span>
                 </div>
-                <span className="font-mono text-slate-400 font-bold">
-                  {item.valueFormatted} <span className="text-[10px] text-slate-500">({item.percentage}%)</span>
+                <span className="font-mono text-text-secondary font-bold">
+                  {item.valueFormatted} <span className="text-xs text-text-secondary">({item.percentage}%)</span>
                 </span>
               </div>
             ))}

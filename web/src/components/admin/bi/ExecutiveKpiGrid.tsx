@@ -74,8 +74,8 @@ export function ExecutiveKpiGrid({ data, trendData, loading }: ExecutiveKpiGridP
       change: revenueChange?.text,
       isUp: revenueChange?.isUp ?? true,
       icon: DollarSign,
-      iconBg: 'bg-emerald-500/20 text-emerald-400',
-      sparkColor: '#10b981',
+      iconBg: 'bg-bg-surface-alt text-text-primary border border-border',
+      sparkColor: 'var(--accent)',
       sparkData: revenueSpark,
     },
     {
@@ -84,8 +84,8 @@ export function ExecutiveKpiGrid({ data, trendData, loading }: ExecutiveKpiGridP
       change: salesChange?.text,
       isUp: salesChange?.isUp ?? true,
       icon: ShoppingCart,
-      iconBg: 'bg-blue-500/20 text-blue-400',
-      sparkColor: '#3b82f6',
+      iconBg: 'bg-bg-surface-alt text-text-primary border border-border',
+      sparkColor: 'var(--accent)',
       sparkData: salesSpark,
     },
     {
@@ -97,8 +97,8 @@ export function ExecutiveKpiGrid({ data, trendData, loading }: ExecutiveKpiGridP
         : 'Net sales margin',
       isUp: true,
       icon: FileText,
-      iconBg: 'bg-purple-500/20 text-purple-400',
-      sparkColor: '#a855f7',
+      iconBg: 'bg-bg-surface-alt text-text-primary border border-border',
+      sparkColor: 'var(--accent)',
       sparkData: null,
     },
     {
@@ -108,8 +108,8 @@ export function ExecutiveKpiGrid({ data, trendData, loading }: ExecutiveKpiGridP
       subtitle: data?.currentInventory != null ? `${data.currentInventory} unsold cars on lot` : 'Active lot stock',
       isUp: false,
       icon: Box,
-      iconBg: 'bg-amber-500/20 text-amber-400',
-      sparkColor: '#f59e0b',
+      iconBg: 'bg-bg-surface-alt text-text-primary border border-border',
+      sparkColor: 'var(--accent)',
       sparkData: null,
     },
     {
@@ -119,8 +119,8 @@ export function ExecutiveKpiGrid({ data, trendData, loading }: ExecutiveKpiGridP
       subtitle: 'Acquisition to sale',
       isUp: false,
       icon: Clock,
-      iconBg: 'bg-cyan-500/20 text-cyan-400',
-      sparkColor: '#06b6d4',
+      iconBg: 'bg-bg-surface-alt text-text-primary border border-border',
+      sparkColor: 'var(--accent)',
       sparkData: null,
     },
     {
@@ -130,8 +130,8 @@ export function ExecutiveKpiGrid({ data, trendData, loading }: ExecutiveKpiGridP
       subtitle: data?.leadsCount != null ? `From ${data.leadsCount} branch leads` : 'Pipeline conversion',
       isUp: true,
       icon: Target,
-      iconBg: 'bg-emerald-500/20 text-emerald-400',
-      sparkColor: '#10b981',
+      iconBg: 'bg-bg-surface-alt text-text-primary border border-border',
+      sparkColor: 'var(--accent)',
       sparkData: null,
     },
   ];
@@ -140,7 +140,7 @@ export function ExecutiveKpiGrid({ data, trendData, loading }: ExecutiveKpiGridP
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 mb-6">
         {[1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="h-28 rounded-2xl bg-[#1e293b]/60 animate-pulse border border-slate-800" />
+          <div key={i} className="h-28 rounded-lg bg-bg-surface-alt animate-pulse border border-border" />
         ))}
       </div>
     );
@@ -161,53 +161,51 @@ export function ExecutiveKpiGrid({ data, trendData, loading }: ExecutiveKpiGridP
                 if (isRevenueCard) setIsBreakdownOpen(true);
                 if (isGrossProfitCard) setIsGrossProfitOpen(true);
               }}
-              className={`rounded-2xl bg-[#1e293b]/90 border border-slate-800/90 p-4 shadow-lg transition-all flex flex-col justify-between ${
-                isRevenueCard 
-                  ? 'cursor-pointer hover:border-emerald-500/50 hover:bg-slate-800/80 hover:shadow-emerald-950/20 group ring-1 ring-emerald-500/20' 
-                  : isGrossProfitCard
-                  ? 'cursor-pointer hover:border-purple-500/50 hover:bg-slate-800/80 hover:shadow-purple-950/20 group ring-1 ring-purple-500/20'
-                  : 'hover:border-slate-700'
+              className={`rounded-lg bg-bg-surface border border-border p-4 transition-all flex flex-col justify-between ${
+                isRevenueCard || isGrossProfitCard
+                  ? 'cursor-pointer hover:border-accent group'
+                  : ''
               }`}
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-bold text-slate-400 flex items-center gap-1">
+                  <span className="text-xs font-bold text-text-secondary flex items-center gap-1">
                     {card.title}
                     {isRevenueCard && (
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20 group-hover:bg-emerald-500/20">
-                        View Split ↗
+                      <span className="badge-neutral text-xs">
+                        Split ↗
                       </span>
                     )}
                     {isGrossProfitCard && (
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-400 font-bold border border-purple-500/20 group-hover:bg-purple-500/20">
-                        Difference ↗
+                      <span className="badge-neutral text-xs">
+                        Diff ↗
                       </span>
                     )}
                   </span>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${card.iconBg}`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${card.iconBg}`}>
                     <Icon size={16} />
                   </div>
                 </div>
-                <strong className="text-xl font-extrabold text-white tracking-tight font-mono block">
+                <strong className="text-xl font-bold text-text-primary tracking-tight font-mono block">
                   {card.value}
                 </strong>
               </div>
 
               <div className="mt-3">
                 {card.change ? (
-                  <div className="flex items-center gap-1 text-[10px] font-bold mb-1">
+                  <div className="flex items-center gap-1 text-xs font-bold mb-1">
                     {card.isUp ? (
-                      <span className="text-emerald-400 flex items-center gap-0.5">
+                      <span className="text-success flex items-center gap-0.5">
                         <TrendingUp size={11} /> ↑ {card.change}
                       </span>
                     ) : (
-                      <span className="text-amber-400 flex items-center gap-0.5">
+                      <span className="text-warning flex items-center gap-0.5">
                         <TrendingDown size={11} /> ↓ {card.change}
                       </span>
                     )}
                   </div>
                 ) : (
-                  <div className="text-[10px] text-slate-400 font-medium mb-1 truncate">{card.subtitle || 'Current period'}</div>
+                  <div className="text-xs text-text-secondary mb-1 truncate">{card.subtitle || 'Current period'}</div>
                 )}
                 {card.sparkData && card.sparkData.length > 0 ? (
                   <div className="h-8 w-full">

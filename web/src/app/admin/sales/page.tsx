@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '../../../services/api';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { RequireRole } from '../../../components/auth/RequireRole';
@@ -25,22 +26,34 @@ import {
   ChevronDown,
   ChevronUp,
   X,
-  DollarSign
+  DollarSign,
+  IndianRupee,
+  Lock,
 } from 'lucide-react';
 import { RevenueBreakdownModal } from '../../../components/admin/bi/RevenueBreakdownModal';
 import { SaleLifecycleModal } from '../../../components/admin/sales/SaleLifecycleModal';
+import { TokenAdvancePaymentModal } from '../../../components/admin/sales/TokenAdvancePaymentModal';
+import { PaymentVerificationModal } from '../../../components/admin/sales/PaymentVerificationModal';
 
 export default function SalesPage() {
+  const router = useRouter();
   const permissions = usePermissions();
   const [sales, setSales] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [stageFilter, setStageFilter] = useState<'ALL' | 'WAITING_BANK' | 'READY_DELIVERY' | 'DELIVERED' | 'CANCELLED'>('ALL');
+  const [stageFilter, setStageFilter] = useState<'ALL' | 'WAITING_BANK' | 'PENDING_BALANCE' | 'READY_DELIVERY' | 'DELIVERED' | 'CANCELLED'>('ALL');
   const [showHowItWorks, setShowHowItWorks] = useState(true);
 
   // Modals state
   const [isBreakdownOpen, setIsBreakdownOpen] = useState(false);
   const [selectedSaleForLifecycle, setSelectedSaleForLifecycle] = useState<any | null>(null);
+  const [saleForTokenAdvance, setSaleForTokenAdvance] = useState<any | null>(null);
+  const [saleForPaymentVerification, setSaleForPaymentVerification] = useState<any | null>(null);
+
+  // Open Payment Verification Screen (Store official UTR & instrument details)
+  const handleDirectCollectBalance = (s: any) => {
+    setSaleForPaymentVerification(s);
+  };
 
   // Quick Action Dialogs state
   const [saleToApprove, setSaleToApprove] = useState<any | null>(null);
@@ -59,9 +72,11 @@ export default function SalesPage() {
     customerId: '',
     vehicleId: '',
     sellingPrice: 0,
-    paymentType: 'LOAN', // 'FULL' or 'LOAN'
-    downPayment: 0,
+    paymentType: 'LOAN' as 'FULL' | 'LOAN',
+    tokenAdvance: 50000,
+    requiredDownPayment: 0,
     loanAmount: 0,
+    fullUpfront: false, // For cash purchases: true if paying 100% upfront, false if paying token advance
   });
 
   const fetchSales = async () => {
@@ -103,12 +118,14 @@ export default function SalesPage() {
   const handleSelectCar = (carId: string) => {
     const selected = availableCars.find(c => String(c.vehicle_id || c.id) === carId);
     const price = selected ? Number(selected.price || 0) : 0;
+    const defaultToken = Math.min(50000, price);
     const defaultDown = Math.round(price * 0.2); // Default 20% down payment
     setCreateForm(prev => ({
       ...prev,
       vehicleId: carId,
       sellingPrice: price,
-      downPayment: defaultDown,
+      tokenAdvance: defaultToken,
+      requiredDownPayment: defaultDown,
       loanAmount: Math.max(0, price - defaultDown),
     }));
   };
@@ -123,20 +140,32 @@ export default function SalesPage() {
     setCreatingSale(true);
     try {
       const isLoan = createForm.paymentType === 'LOAN';
+      const price = Number(createForm.sellingPrice);
+      const isFullCash = !isLoan && createForm.fullUpfront;
+      const token = isFullCash ? price : Number(createForm.tokenAdvance);
+      const downPayment = isLoan ? Number(createForm.requiredDownPayment) : 0;
+      const loanAmt = isLoan ? Math.max(0, price - downPayment) : 0;
+
       const payload = {
         customer_id: createForm.customerId ? Number(createForm.customerId) : 1,
         vehicle_id: Number(createForm.vehicleId),
-        selling_price: createForm.sellingPrice,
-        final_amount: createForm.sellingPrice,
-        deposit_amount: isLoan ? createForm.downPayment : createForm.sellingPrice,
-        loan_amount: isLoan ? createForm.loanAmount : 0,
-        payment_status: isLoan ? 'Partially Paid' : 'Paid',
+        selling_price: price,
+        final_amount: price,
+        token_advance: token,
+        deposit_amount: token,
+        down_payment: downPayment,
+        loan_amount: loanAmt,
+        payment_status: isFullCash ? 'Paid' : 'Token Received',
         delivery_status: 'Pending',
-        remarks: isLoan ? 'Loan Deal - Waiting for Bank [loan_status:Pending]' : 'Full Cash Upfront Sale',
+        remarks: isLoan
+          ? `Loan Deal: Token Advance ₹${token.toLocaleString('en-IN')} credited toward Down Payment of ₹${downPayment.toLocaleString('en-IN')}. [loan_status:Pending]`
+          : isFullCash
+            ? 'Full Cash Upfront Sale'
+            : `Cash Deal: Token Advance ₹${token.toLocaleString('en-IN')} received. Remaining balance ₹${(price - token).toLocaleString('en-IN')} pending.`,
       };
 
       await api.post('/sales', payload);
-      showLocalToast('Car sale created & vehicle reserved in showroom!', 'success');
+      showLocalToast('Car sale contract created & vehicle reserved!', 'success');
       setIsCreateModalOpen(false);
       await fetchSales();
     } catch (err: any) {
@@ -184,9 +213,10 @@ export default function SalesPage() {
     setActionLoading(true);
     try {
       await api.post(`/sales/${saleToDeliver.sale_id}/move-to-delivery`, { delivery_date: deliveryDate });
-      showLocalToast(`Delivery scheduled! Vehicle marked Sold.`, 'success');
+      showLocalToast(`Delivery scheduled! Navigating to Deliveries handover hub...`, 'success');
       setSaleToDeliver(null);
       await fetchSales();
+      router.push('/admin/deliveries');
     } catch (err: any) {
       showLocalToast(err.response?.data?.message || 'Failed to schedule delivery', 'error');
     } finally {
@@ -205,15 +235,31 @@ export default function SalesPage() {
   const waitingBankSales = sales.filter(s => {
     const isLoan = Number(s.loan_amount || 0) > 0;
     const isCancelled = (s.payment_status || '').toLowerCase().includes('cancel');
-    const isApproved = s.loan_status === 'Approved' || (s.payment_status || '').toLowerCase() === 'paid';
-    return isLoan && !isCancelled && !isApproved;
+    const isDisbursed = s.is_loan_disbursed || (s.loan_status === 'Approved' && (s.payment_status || '').toLowerCase() === 'paid');
+    return isLoan && !isCancelled && !isDisbursed;
+  });
+
+  const pendingBalanceSales = sales.filter(s => {
+    const isLoan = Number(s.loan_amount || 0) > 0;
+    const isCancelled = (s.payment_status || '').toLowerCase().includes('cancel');
+    const isPaid = (s.payment_status || '').toLowerCase() === 'paid';
+    const finalAmt = Number(s.final_amount || s.selling_price || 0);
+    const totalPaid = Number(s.total_amount_paid ?? s.total_paid ?? s.deposit_amount ?? 0);
+    const bal = typeof s.outstanding_balance === 'number' ? s.outstanding_balance : (finalAmt - totalPaid);
+    return !isLoan && !isCancelled && !isPaid && bal > 0;
   });
 
   const readyDeliverySales = sales.filter(s => {
+    const isLoan = Number(s.loan_amount || 0) > 0;
     const isCancelled = (s.payment_status || '').toLowerCase().includes('cancel');
     const isDelivered = (s.delivery_status || '').toLowerCase().includes('deliver') || (s.delivery_status || '').toLowerCase().includes('schedule');
-    const isApproved = s.loan_status === 'Approved' || (s.payment_status || '').toLowerCase() === 'paid';
-    return !isCancelled && isApproved && !isDelivered;
+    const isPaid = (s.payment_status || '').toLowerCase() === 'paid';
+    const finalAmt = Number(s.final_amount || s.selling_price || 0);
+    const totalPaid = Number(s.total_amount_paid ?? s.total_paid ?? s.deposit_amount ?? 0);
+    const isLoanCleared = s.is_loan_disbursed || (s.loan_status === 'Approved' && isPaid);
+    const isCashCleared = isPaid || totalPaid >= finalAmt;
+    const isFinanciallyCleared = isLoan ? isLoanCleared : isCashCleared;
+    return !isCancelled && isFinanciallyCleared && !isDelivered;
   });
 
   const deliveredSales = sales.filter(s => {
@@ -227,12 +273,17 @@ export default function SalesPage() {
   // Filtered sales
   const filteredSales = sales.filter(s => {
     const isLoan = Number(s.loan_amount || 0) > 0;
+    const finalAmt = Number(s.final_amount || s.selling_price || 0);
+    const totalPaid = Number(s.total_amount_paid ?? s.total_paid ?? s.deposit_amount ?? 0);
     const isCancelled = (s.payment_status || '').toLowerCase().includes('cancel');
-    const isApproved = s.loan_status === 'Approved' || (s.payment_status || '').toLowerCase() === 'paid';
+    const isPaid = (s.payment_status || '').toLowerCase() === 'paid' || (!isLoan && totalPaid >= finalAmt);
+    const isLoanCleared = s.is_loan_disbursed || (s.loan_status === 'Approved' && isPaid);
     const isDelivered = (s.delivery_status || '').toLowerCase().includes('deliver') || (s.delivery_status || '').toLowerCase().includes('schedule');
+    const isFinanciallyCleared = isLoan ? isLoanCleared : isPaid;
 
-    if (stageFilter === 'WAITING_BANK' && (!isLoan || isCancelled || isApproved)) return false;
-    if (stageFilter === 'READY_DELIVERY' && (isCancelled || !isApproved || isDelivered)) return false;
+    if (stageFilter === 'WAITING_BANK' && (!isLoan || isCancelled || isLoanCleared)) return false;
+    if (stageFilter === 'PENDING_BALANCE' && (isLoan || isCancelled || isPaid || totalPaid >= finalAmt)) return false;
+    if (stageFilter === 'READY_DELIVERY' && (isCancelled || !isFinanciallyCleared || isDelivered)) return false;
     if (stageFilter === 'DELIVERED' && (isCancelled || !isDelivered)) return false;
     if (stageFilter === 'CANCELLED' && !isCancelled) return false;
 
@@ -428,6 +479,21 @@ export default function SalesPage() {
             </button>
 
             <button
+              onClick={() => setStageFilter('PENDING_BALANCE')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
+                stageFilter === 'PENDING_BALANCE'
+                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 shadow-sm'
+                  : 'text-muted-foreground hover:text-amber-400'
+              }`}
+            >
+              <IndianRupee className="w-3.5 h-3.5" />
+              <span>Step 2: Pending Balance ({pendingBalanceSales.length})</span>
+              {pendingBalanceSales.length > 0 && (
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+              )}
+            </button>
+
+            <button
               onClick={() => setStageFilter('READY_DELIVERY')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all cursor-pointer flex items-center gap-1.5 ${
                 stageFilter === 'READY_DELIVERY'
@@ -507,14 +573,23 @@ export default function SalesPage() {
                   filteredSales.map((s) => {
                     const isLoan = Number(s.loan_amount || 0) > 0;
                     const finalAmt = Number(s.final_amount || s.selling_price || 0);
-                    const depositAmt = Number(s.deposit_amount || 0);
+                    const tokenAmt = Number(s.token_advance ?? s.token_advance_amount ?? s.deposit_amount ?? 0);
+                    const totalPaid = Number(s.total_amount_paid ?? s.total_paid ?? tokenAmt);
                     const loanAmt = Number(s.loan_amount || 0);
+                    const reqDown = Number(s.required_down_payment ?? (isLoan ? Math.max(0, finalAmt - loanAmt) : 0));
+                    const remDown = Number(s.remaining_down_payment ?? Math.max(0, reqDown - tokenAmt));
+                    const balanceDue = typeof s.outstanding_balance === 'number'
+                      ? s.outstanding_balance
+                      : Math.max(0, finalAmt - totalPaid);
                     const commission = s.bank_commission_amount || (isLoan ? Math.round(loanAmt * 0.02) : 0);
                     const isCancelled = (s.payment_status || '').toLowerCase().includes('cancel');
-                    const isPaid = (s.payment_status || '').toLowerCase() === 'paid';
-                    const isLoanApproved = s.loan_status === 'Approved' || (isLoan && isPaid);
-                    const isDelivered = (s.delivery_status || '').toLowerCase().includes('deliver') || (s.delivery_status || '').toLowerCase().includes('schedule');
-                    const canCancel = s.can_cancel && !isCancelled;
+                    const isPaid = (s.payment_status || '').toLowerCase() === 'paid' || (!isLoan && balanceDue === 0 && totalPaid >= finalAmt);
+                    const isLoanApproved = s.loan_status === 'Approved';
+                    const isLoanDisbursed = s.is_loan_disbursed || (isLoanApproved && isPaid);
+                    const isDelivered = (s.delivery_status || '').toLowerCase().includes('deliver');
+                    const isScheduled = (s.delivery_status || '').toLowerCase().includes('schedule');
+                    const isStage2Complete = isLoan ? isLoanDisbursed : (isPaid || balanceDue === 0);
+                    const canCancel = s.can_cancel && !isCancelled && !isStage2Complete;
 
                     return (
                       <tr key={s.sale_id} className="hover:bg-secondary/30 transition-colors">
@@ -553,11 +628,53 @@ export default function SalesPage() {
                           </div>
                           <div className="text-[10px] text-muted-foreground mt-0.5">
                             {isLoan ? (
-                              <span>
-                                Down: <strong className="text-emerald-400">{formatCurrency(depositAmt)}</strong> &bull; Loan: <strong className="text-amber-400">{formatCurrency(loanAmt)}</strong>
-                              </span>
+                              <div className="flex flex-col gap-0.5">
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">Token:</span>
+                                  <strong className="text-emerald-400 font-mono">{formatCurrency(tokenAmt)}</strong>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">Down Req:</span>
+                                  <span className="font-mono font-bold text-foreground">{formatCurrency(reqDown)}</span>
+                                  {remDown > 0 ? (
+                                    <span className="text-amber-400 font-mono text-[9px] font-bold">
+                                      (Due: {formatCurrency(remDown)})
+                                    </span>
+                                  ) : (
+                                    <span className="text-emerald-400 text-[9px] font-bold">✓ Met</span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-muted-foreground">Loan:</span>
+                                  <strong className="text-sky-400 font-mono">{formatCurrency(loanAmt)}</strong>
+                                  {isLoanDisbursed && <span className="text-emerald-400 text-[9px] font-bold">✓ Disbursed</span>}
+                                </div>
+                                <div className="text-[9px] text-slate-400 border-t border-border/50 pt-0.5 mt-0.5">
+                                  Total Paid: <strong className="text-emerald-400 font-mono">{formatCurrency(totalPaid)}</strong>
+                                  {balanceDue > 0 && <span className="text-rose-400 font-mono ml-1 font-bold">Due: {formatCurrency(balanceDue)}</span>}
+                                </div>
+                              </div>
+                            ) : isPaid || balanceDue === 0 ? (
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-emerald-400 font-bold flex items-center gap-1">
+                                  <CheckCircle2 size={11} /> 100% Cash Paid ({formatCurrency(totalPaid)})
+                                </span>
+                                <span className="text-[9px] text-muted-foreground">
+                                  Token: {formatCurrency(tokenAmt)} &bull; Balance: {formatCurrency(Math.max(0, finalAmt - tokenAmt))}
+                                </span>
+                              </div>
                             ) : (
-                              <span className="text-emerald-400 font-bold">100% Cash Paid Upfront</span>
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-emerald-400 font-bold">
+                                  Token Advance: {formatCurrency(tokenAmt)}
+                                </span>
+                                <span className="text-rose-400 font-mono font-bold">
+                                  Remaining Balance: {formatCurrency(balanceDue)}
+                                </span>
+                                <span className="text-[9px] text-muted-foreground">
+                                  Total Paid: {formatCurrency(totalPaid)}
+                                </span>
+                              </div>
                             )}
                           </div>
                         </td>
@@ -586,18 +703,47 @@ export default function SalesPage() {
                             <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-sky-500/10 text-sky-400 border-sky-500/20 flex items-center gap-1 w-fit">
                               <Truck size={11} /> Step 4: Delivered (Sold)
                             </span>
-                          ) : isLoanApproved ? (
-                            <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 flex items-center gap-1 w-fit">
-                              <CheckCircle2 size={11} /> Step 3: Bank Approved
+                          ) : isScheduled ? (
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-sky-500/10 text-sky-400 border-sky-500/20 flex items-center gap-1 w-fit">
+                              <Truck size={11} /> Step 4: Delivery Scheduled
                             </span>
                           ) : isLoan ? (
-                            <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
-                              <Clock size={11} /> Step 2: Waiting for Bank
-                            </span>
+                            isLoanDisbursed ? (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 flex items-center gap-1 w-fit">
+                                <CheckCircle2 size={11} /> Step 3: Loan Disbursed (Paid)
+                              </span>
+                            ) : isLoanApproved ? (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit">
+                                <Clock size={11} /> Step 2: Approved (Disbursal Pending)
+                              </span>
+                            ) : tokenAmt === 0 && totalPaid === 0 ? (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
+                                <Clock size={11} /> Step 1: Collect Token Advance
+                              </span>
+                            ) : remDown > 0 ? (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
+                                <Clock size={11} /> Step 2: Down Payment Pending
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
+                                <Clock size={11} /> Step 2: Waiting for Bank
+                              </span>
+                            )
                           ) : (
-                            <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 flex items-center gap-1 w-fit">
-                              <CheckCircle2 size={11} /> Full Cash Paid
-                            </span>
+                            // Cash Deal
+                            isPaid || balanceDue === 0 ? (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 flex items-center gap-1 w-fit">
+                                <CheckCircle2 size={11} /> Step 3: 100% Paid (Ready)
+                              </span>
+                            ) : tokenAmt === 0 && totalPaid === 0 ? (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
+                                <Clock size={11} /> Step 1: Collect Token Advance
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
+                                <Clock size={11} /> Step 2: Collect Balance
+                              </span>
+                            )
                           )}
                         </td>
 
@@ -605,8 +751,20 @@ export default function SalesPage() {
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5 flex-wrap">
                             
-                            {/* ACTION 1: APPROVE BANK LOAN */}
-                            {isLoan && !isCancelled && !isLoanApproved && (
+                            {/* ACTION 0: COLLECT TOKEN ADVANCE (When advance is 0) */}
+                            {(permissions.isSystemAdmin || permissions.isBranchManager || permissions.isSalesExecutive) && !isCancelled && !isPaid && tokenAmt === 0 && totalPaid === 0 && (
+                              <button
+                                onClick={() => setSaleForTokenAdvance(s)}
+                                className="px-2.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-[11px] rounded-lg transition-all shadow flex items-center gap-1 cursor-pointer animate-pulse"
+                                title="Open Token Advance Payment Screen to reserve vehicle"
+                              >
+                                <Lock className="w-3.5 h-3.5 text-slate-950" />
+                                <span>Collect Token Advance</span>
+                              </button>
+                            )}
+
+                            {/* ACTION 1A: APPROVE BANK LOAN (Admin & Branch Manager Only) */}
+                            {(permissions.isSystemAdmin || permissions.isBranchManager) && isLoan && !isCancelled && !isLoanApproved && tokenAmt > 0 && (
                               <button
                                 onClick={() => setSaleToApprove(s)}
                                 className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-[11px] rounded-lg transition-colors cursor-pointer shadow flex items-center gap-1"
@@ -617,23 +775,62 @@ export default function SalesPage() {
                               </button>
                             )}
 
-                            {/* ACTION 2: SCHEDULE DELIVERY */}
-                            {!isCancelled && isLoanApproved && !isDelivered && (
+                            {/* ACTION 1B: COLLECT REMAINING CASH BALANCE (Admin & Branch Manager Only) */}
+                            {(permissions.isSystemAdmin || permissions.isBranchManager) && !isLoan && !isCancelled && !isPaid && balanceDue > 0 && (
                               <button
-                                onClick={() => setSaleToDeliver(s)}
-                                className="px-2.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-[11px] rounded-lg transition-colors cursor-pointer shadow flex items-center gap-1"
-                                title="Click to hand over vehicle"
+                                onClick={() => handleDirectCollectBalance(s)}
+                                className={`px-2.5 py-1.5 font-extrabold text-[11px] rounded-lg transition-colors cursor-pointer shadow flex items-center gap-1 ${
+                                  tokenAmt === 0
+                                    ? 'bg-secondary hover:bg-secondary/80 text-foreground border border-border'
+                                    : 'bg-emerald-600 hover:bg-emerald-500 text-white animate-pulse'
+                                }`}
+                                title={`Collect remaining balance of ${formatCurrency(balanceDue)}`}
                               >
-                                <Truck className="w-3.5 h-3.5" />
-                                <span>Deliver Car</span>
+                                <IndianRupee className="w-3.5 h-3.5" />
+                                <span>{tokenAmt === 0 ? `Full Settlement (${formatCurrency(balanceDue)})` : `Collect ${formatCurrency(balanceDue)}`}</span>
                               </button>
                             )}
 
-                            {/* ACTION 3: CANCEL PURCHASE (Available before loan approval) */}
+                            {/* QUICK ADVANCE SCREEN (For any active unfinalized deal) */}
+                            {(permissions.isSystemAdmin || permissions.isBranchManager || permissions.isSalesExecutive) && !isCancelled && !isPaid && tokenAmt > 0 && (
+                              <button
+                                onClick={() => setSaleForTokenAdvance(s)}
+                                className="px-2 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[11px] font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1"
+                                title="Manage or adjust token advance breakdown"
+                              >
+                                <Lock className="w-3 h-3" />
+                                <span>Advance</span>
+                              </button>
+                            )}
+
+                            {/* ACTION 2: SCHEDULE DELIVERY (Strictly unlocked after Stage 2 completion) */}
+                            {!isCancelled && !isDelivered && isStage2Complete && (
+                              isScheduled ? (
+                                <button
+                                  onClick={() => router.push('/admin/deliveries')}
+                                  className="px-2.5 py-1.5 bg-sky-500/15 hover:bg-sky-500/25 text-sky-400 border border-sky-500/30 font-bold text-[11px] rounded-lg transition-colors cursor-pointer flex items-center gap-1 shadow-sm"
+                                  title="Delivery already scheduled. Click to open Deliveries & Handover hub"
+                                >
+                                  <Truck className="w-3.5 h-3.5 text-sky-400" />
+                                  <span>Go to Delivery &rarr;</span>
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => setSaleToDeliver(s)}
+                                  className="px-2.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-[11px] rounded-lg transition-colors cursor-pointer shadow flex items-center gap-1"
+                                  title="Click to schedule vehicle delivery"
+                                >
+                                  <Truck className="w-3.5 h-3.5" />
+                                  <span>Move to Delivery</span>
+                                </button>
+                              )
+                            )}
+
+                            {/* ACTION 3: CANCEL PURCHASE */}
                             {canCancel && (
                               <button
                                 onClick={() => {
-                                  setCancelReason('Customer changed mind prior to loan approval');
+                                  setCancelReason('Customer changed mind prior to financial settlement');
                                   setSaleToCancel(s);
                                 }}
                                 className="px-2 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-[11px] rounded-lg transition-colors cursor-pointer"
@@ -843,7 +1040,7 @@ export default function SalesPage() {
                 onClick={confirmMoveToDelivery}
                 className="px-5 py-2 bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs rounded-xl shadow cursor-pointer"
               >
-                {actionLoading ? 'Scheduling...' : 'Confirm Delivery & Mark Sold'}
+                {actionLoading ? 'Scheduling...' : 'Confirm & Move to Delivery (Sales Exec)'}
               </button>
             </div>
           </div>
@@ -944,28 +1141,34 @@ export default function SalesPage() {
                 </div>
               </div>
 
-              {/* Simple Financial Breakdown */}
+              {/* Segregated Financial Breakdown */}
               {createForm.paymentType === 'LOAN' ? (
                 <div className="p-4 rounded-xl bg-secondary/50 border border-border space-y-3">
                   <div className="flex justify-between items-center text-xs">
-                    <span className="text-muted-foreground">Car Total Price:</span>
+                    <span className="text-muted-foreground">Vehicle Final Contract Price:</span>
                     <strong className="text-foreground font-mono font-bold text-sm">
                       {formatCurrency(createForm.sellingPrice)}
                     </strong>
                   </div>
 
+                  {/* Required Down Payment */}
                   <div>
-                    <label className="block font-bold text-emerald-400 mb-1">
-                      Customer Down Payment (Token Paid Now)
-                    </label>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="font-bold text-foreground">
+                        Required Down Payment (Total upfront required)
+                      </label>
+                      <span className="text-[10px] text-muted-foreground font-mono">
+                        ~{createForm.sellingPrice > 0 ? Math.round((createForm.requiredDownPayment / createForm.sellingPrice) * 100) : 0}% of price
+                      </span>
+                    </div>
                     <input
                       type="number"
-                      value={createForm.downPayment}
+                      value={createForm.requiredDownPayment}
                       onChange={(e) => {
-                        const down = Number(e.target.value);
+                        const down = Math.max(0, Number(e.target.value));
                         setCreateForm(prev => ({
                           ...prev,
-                          downPayment: down,
+                          requiredDownPayment: down,
                           loanAmount: Math.max(0, prev.sellingPrice - down),
                         }));
                       }}
@@ -973,11 +1176,46 @@ export default function SalesPage() {
                     />
                   </div>
 
-                  <div className="flex justify-between items-center text-xs">
-                    <span className="text-muted-foreground">Remaining Bank Loan:</span>
-                    <strong className="text-amber-400 font-mono font-bold">
-                      {formatCurrency(createForm.loanAmount)}
-                    </strong>
+                  {/* Token Advance */}
+                  <div>
+                    <label className="block font-bold text-emerald-400 mb-1">
+                      Token Advance Received (Credited toward Down Payment)
+                    </label>
+                    <input
+                      type="number"
+                      value={createForm.tokenAdvance}
+                      onChange={(e) => {
+                        const token = Math.max(0, Number(e.target.value));
+                        setCreateForm(prev => ({
+                          ...prev,
+                          tokenAdvance: token,
+                        }));
+                      }}
+                      className="w-full p-2.5 bg-secondary border border-border rounded-xl text-foreground font-mono font-bold focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  {/* Remaining Down Payment calculation */}
+                  <div className="p-2.5 rounded-xl bg-secondary/80 border border-border space-y-1.5 text-xs">
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Remaining Down Payment Due:</span>
+                      <strong className={`font-mono font-bold ${createForm.tokenAdvance > createForm.requiredDownPayment ? 'text-blue-400' : 'text-amber-400'}`}>
+                        {formatCurrency(Math.max(0, createForm.requiredDownPayment - createForm.tokenAdvance))}
+                      </strong>
+                    </div>
+
+                    {createForm.tokenAdvance > createForm.requiredDownPayment && (
+                      <div className="text-[11px] text-blue-300 bg-blue-500/10 p-2 rounded-lg border border-blue-500/20">
+                        ℹ️ Token advance exceeds required down payment by <strong>{formatCurrency(createForm.tokenAdvance - createForm.requiredDownPayment)}</strong>. Excess will be credited to outstanding vehicle balance or refunded.
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center pt-1 border-t border-border/50">
+                      <span className="text-muted-foreground">Bank Loan Principal:</span>
+                      <strong className="text-sky-400 font-mono font-bold">
+                        {formatCurrency(createForm.loanAmount)}
+                      </strong>
+                    </div>
                   </div>
 
                   <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-xs">
@@ -990,9 +1228,66 @@ export default function SalesPage() {
                   </div>
                 </div>
               ) : (
-                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 font-bold flex items-center justify-between">
-                  <span>Customer pays 100% upfront:</span>
-                  <span className="font-mono text-sm">{formatCurrency(createForm.sellingPrice)}</span>
+                <div className="p-4 rounded-xl bg-secondary/50 border border-border space-y-3">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-muted-foreground">Vehicle Final Contract Price:</span>
+                    <strong className="text-foreground font-mono font-bold text-sm">
+                      {formatCurrency(createForm.sellingPrice)}
+                    </strong>
+                  </div>
+
+                  <div className="flex items-center gap-3 py-1">
+                    <label className="flex items-center gap-2 cursor-pointer text-xs">
+                      <input
+                        type="radio"
+                        name="cashOption"
+                        checked={!createForm.fullUpfront}
+                        onChange={() => setCreateForm(prev => ({ ...prev, fullUpfront: false }))}
+                        className="accent-emerald-500"
+                      />
+                      <span className="font-semibold text-foreground">Token Advance Booking</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer text-xs">
+                      <input
+                        type="radio"
+                        name="cashOption"
+                        checked={createForm.fullUpfront}
+                        onChange={() => setCreateForm(prev => ({ ...prev, fullUpfront: true }))}
+                        className="accent-emerald-500"
+                      />
+                      <span className="font-semibold text-foreground">100% Paid Upfront</span>
+                    </label>
+                  </div>
+
+                  {!createForm.fullUpfront ? (
+                    <div className="space-y-2">
+                      <div>
+                        <label className="block font-bold text-emerald-400 mb-1">
+                          Token Advance Amount Received
+                        </label>
+                        <input
+                          type="number"
+                          value={createForm.tokenAdvance}
+                          onChange={(e) => {
+                            const val = Math.max(0, Number(e.target.value));
+                            setCreateForm(prev => ({ ...prev, tokenAdvance: val }));
+                          }}
+                          className="w-full p-2.5 bg-secondary border border-border rounded-xl text-foreground font-mono font-bold focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                      <div className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300">
+                        <span>Remaining Cash Balance Due:</span>
+                        <strong className="font-mono text-sm font-bold">
+                          {formatCurrency(Math.max(0, createForm.sellingPrice - createForm.tokenAdvance))}
+                        </strong>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 font-bold flex items-center justify-between">
+                      <span>Full contract settled upfront:</span>
+                      <span className="font-mono text-sm">{formatCurrency(createForm.sellingPrice)}</span>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1030,6 +1325,32 @@ export default function SalesPage() {
         isOpen={!!selectedSaleForLifecycle}
         onClose={() => setSelectedSaleForLifecycle(null)}
         onSaleUpdated={fetchSales}
+        onOpenPaymentVerification={(s) => {
+          setSelectedSaleForLifecycle(null);
+          setSaleForPaymentVerification(s);
+        }}
+      />
+
+      {/* TOKEN ADVANCE PAYMENT SCREEN MODAL */}
+      <TokenAdvancePaymentModal
+        sale={saleForTokenAdvance}
+        isOpen={!!saleForTokenAdvance}
+        onClose={() => setSaleForTokenAdvance(null)}
+        onSuccess={() => {
+          setSaleForTokenAdvance(null);
+          fetchSales();
+        }}
+      />
+
+      {/* PAYMENT VERIFICATION & SETTLEMENT MODAL */}
+      <PaymentVerificationModal
+        sale={saleForPaymentVerification}
+        isOpen={!!saleForPaymentVerification}
+        onClose={() => setSaleForPaymentVerification(null)}
+        onSuccess={() => {
+          setSaleForPaymentVerification(null);
+          fetchSales();
+        }}
       />
 
     </RequireRole>

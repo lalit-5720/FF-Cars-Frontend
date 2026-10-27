@@ -138,8 +138,8 @@ export function SalesRevenueChart({ dataPoints: propDataPoints, timeframe: initi
         <svg className="w-full h-full overflow-visible" viewBox="0 0 440 200">
           <defs>
             <linearGradient id="indigoSuperGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#0F172A" stopOpacity="0.15" />
-              <stop offset="100%" stopColor="#0F172A" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.0" />
             </linearGradient>
           </defs>
 
@@ -161,7 +161,7 @@ export function SalesRevenueChart({ dataPoints: propDataPoints, timeframe: initi
           <path d={areaPath} fill="url(#indigoSuperGradient)" />
 
           {/* Smooth Curve */}
-          <path d={svgPath} fill="none" stroke="#0F172A" strokeWidth="3" strokeLinecap="round" />
+          <path d={svgPath} fill="none" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" />
 
           {/* Interactive Data Nodes */}
           {coords.map((pt, idx) => (
@@ -213,10 +213,10 @@ interface DonutChartProps {
 
 export function TopBrandsDonutChart({ brandData: propBrandData, totalSold: propTotalSold }: DonutChartProps) {
   const defaultBrands: BrandShare[] = [
-    { name: 'Hyundai', pct: 40, color: '#0F172A', count: 6 },
-    { name: 'Honda', pct: 26, color: '#10B981', count: 4 },
-    { name: 'BMW', pct: 20, color: '#3B82F6', count: 3 },
-    { name: 'Maruti', pct: 14, color: '#F59E0B', count: 2 },
+    { name: 'Hyundai', pct: 40, color: 'var(--accent)', count: 6 },
+    { name: 'Honda', pct: 26, color: 'var(--success)', count: 4 },
+    { name: 'BMW', pct: 20, color: 'var(--text-secondary)', count: 3 },
+    { name: 'Maruti', pct: 14, color: 'var(--warning)', count: 2 },
   ];
 
   const brandData = propBrandData && propBrandData.length > 0 ? propBrandData : defaultBrands;

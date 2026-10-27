@@ -78,10 +78,10 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
   if (loading && !internalData && !data) {
     return (
       <div className="space-y-4">
-        <div className="h-48 rounded-2xl bg-slate-800/40 animate-pulse border border-slate-700/50" />
+        <div className="h-48 rounded-2xl bg-slate-100 animate-pulse border border-slate-200" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <div className="h-72 rounded-2xl bg-slate-800/40 animate-pulse border border-slate-700/50" />
-          <div className="h-72 rounded-2xl bg-slate-800/40 animate-pulse border border-slate-700/50" />
+          <div className="h-72 rounded-2xl bg-slate-100 animate-pulse border border-slate-200" />
+          <div className="h-72 rounded-2xl bg-slate-100 animate-pulse border border-slate-200" />
         </div>
       </div>
     );
@@ -140,27 +140,27 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
       case 'STRONG_BUY':
         return {
           label: 'STRONG BUY 🔥',
-          bg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 ring-1 ring-emerald-500/30',
-          dot: 'bg-emerald-400',
+          bg: 'bg-emerald-50 text-emerald-700 border-emerald-200 ring-1 ring-emerald-200',
+          dot: 'bg-emerald-500',
         };
       case 'BUY':
         return {
           label: 'BUY 🟢',
-          bg: 'bg-sky-500/20 text-sky-300 border-sky-500/40 ring-1 ring-sky-500/30',
-          dot: 'bg-sky-400',
+          bg: 'bg-blue-50 text-blue-700 border-blue-200 ring-1 ring-blue-200',
+          dot: 'bg-blue-500',
         };
       case 'CAUTION':
         return {
           label: 'CAUTION 🟡',
-          bg: 'bg-amber-500/20 text-amber-300 border-amber-500/40 ring-1 ring-amber-500/30',
-          dot: 'bg-amber-400',
+          bg: 'bg-amber-50 text-amber-700 border-amber-200 ring-1 ring-amber-200',
+          dot: 'bg-amber-500',
         };
       case 'AVOID':
       default:
         return {
           label: 'DO NOT BUY ⛔',
-          bg: 'bg-rose-500/20 text-rose-300 border-rose-500/40 ring-1 ring-rose-500/30',
-          dot: 'bg-rose-400',
+          bg: 'bg-rose-50 text-rose-700 border-rose-200 ring-1 ring-rose-200',
+          dot: 'bg-rose-500',
         };
     }
   };
@@ -183,48 +183,48 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
   return (
     <div className="space-y-6">
       {/* Top Header Card */}
-      <div className="rounded-2xl bg-gradient-to-r from-slate-900 via-sky-950/40 to-slate-900 border border-sky-500/20 p-5 shadow-xl">
+      <div className="rounded-2xl bg-white border border-slate-200/90 p-5 shadow-2xs">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-sky-500/20 border border-sky-400/30 flex items-center justify-center text-sky-400 shrink-0 shadow-lg">
+            <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shrink-0 shadow-2xs">
               <ShoppingBag size={24} />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 text-[10px] font-extrabold uppercase tracking-wider border border-sky-400/30">
-                  Car Buying & Procurement Advisor
+                <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-extrabold uppercase tracking-wider border border-blue-200">
+                  Car Buying &amp; Procurement Advisor
                 </span>
-                <span className="flex items-center gap-1 text-[11px] text-emerald-400 font-semibold">
+                <span className="flex items-center gap-1 text-[11px] text-emerald-700 font-semibold">
                   <Sparkles size={12} />
                   Live PostgreSQL Inventory Driven
                 </span>
               </div>
-              <h2 className="text-xl font-extrabold text-white tracking-tight mt-1">
-                Vehicle Procurement & Stock Advisor
+              <h2 className="text-xl font-black text-slate-900 tracking-tight mt-1">
+                Vehicle Procurement &amp; Stock Advisor
               </h2>
-              <p className="text-xs text-slate-300 mt-0.5">
-                Dynamic buying recommendations & maximum acquisition price ceilings calculated automatically from live inventory, sales velocity, and customer demand.
+              <p className="text-xs text-slate-500 mt-0.5 font-medium">
+                Dynamic buying recommendations &amp; maximum acquisition price ceilings calculated automatically from live inventory, sales velocity, and customer demand.
               </p>
             </div>
           </div>
 
           {/* Quick Summary Pill Bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
-            <div className="rounded-xl bg-slate-900/80 p-2.5 border border-slate-800">
-              <span className="text-[10px] text-slate-400 block font-semibold">TOP BUY BRAND</span>
-              <strong className="text-xs font-extrabold text-sky-400">{summary?.topRecommendedBrand || 'Porsche'}</strong>
+            <div className="rounded-xl bg-slate-50 p-2.5 border border-slate-200/90">
+              <span className="text-[10px] text-slate-400 block font-bold">TOP BUY BRAND</span>
+              <strong className="text-xs font-black text-blue-700">{summary?.topRecommendedBrand || 'Porsche'}</strong>
             </div>
-            <div className="rounded-xl bg-slate-900/80 p-2.5 border border-slate-800">
-              <span className="text-[10px] text-slate-400 block font-semibold">TOP BUY MODEL</span>
-              <strong className="text-xs font-extrabold text-indigo-400">{summary?.topRecommendedModel || 'Porsche 911 Carrera S'}</strong>
+            <div className="rounded-xl bg-slate-50 p-2.5 border border-slate-200/90">
+              <span className="text-[10px] text-slate-400 block font-bold">TOP BUY MODEL</span>
+              <strong className="text-xs font-black text-blue-700">{summary?.topRecommendedModel || 'Porsche 911 Carrera S'}</strong>
             </div>
-            <div className="rounded-xl bg-slate-900/80 p-2.5 border border-slate-800">
-              <span className="text-[10px] text-slate-400 block font-semibold">ACTIVE LOT STOCK</span>
-              <strong className="text-xs font-extrabold text-emerald-400">{summary?.activeStockCount || 0} Vehicles</strong>
+            <div className="rounded-xl bg-slate-50 p-2.5 border border-slate-200/90">
+              <span className="text-[10px] text-slate-400 block font-bold">ACTIVE LOT STOCK</span>
+              <strong className="text-xs font-black text-emerald-700">{summary?.activeStockCount || 0} Vehicles</strong>
             </div>
-            <div className="rounded-xl bg-slate-900/80 p-2.5 border border-slate-800">
-              <span className="text-[10px] text-slate-400 block font-semibold">SIGNALS ANALYZED</span>
-              <strong className="text-xs font-extrabold text-amber-400">
+            <div className="rounded-xl bg-slate-50 p-2.5 border border-slate-200/90">
+              <span className="text-[10px] text-slate-400 block font-bold">SIGNALS ANALYZED</span>
+              <strong className="text-xs font-black text-amber-800">
                 {(summary?.totalLeadsAnalyzed || 0) + (summary?.totalTestDrivesAnalyzed || 0)} Signals
               </strong>
             </div>
@@ -235,11 +235,11 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
       {/* Actionable Car Buying Alert Cards */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-extrabold text-white tracking-wide uppercase flex items-center gap-2">
-            <ShieldAlert size={16} className="text-sky-400" />
+          <h3 className="text-sm font-black text-slate-900 tracking-wide uppercase flex items-center gap-2">
+            <ShieldAlert size={16} className="text-blue-600" />
             <span>High-Priority Buying Action Signals</span>
           </h3>
-          <span className="text-[11px] text-slate-400">
+          <span className="text-[11px] text-slate-400 font-medium">
             Click any alert to inspect model analytics below
           </span>
         </div>
@@ -253,12 +253,12 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
               <div
                 key={alert.id}
                 onClick={() => handleAlertClick(alert)}
-                className={`rounded-2xl border p-4 shadow-md transition-all flex flex-col justify-between cursor-pointer group ${
+                className={`rounded-2xl border p-4 shadow-2xs transition-all flex flex-col justify-between cursor-pointer group ${
                   isBuy
-                    ? 'bg-emerald-950/30 border-emerald-500/30 hover:border-emerald-500/60 hover:bg-emerald-950/40'
+                    ? 'bg-emerald-50/60 border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50'
                     : isHold
-                    ? 'bg-rose-950/30 border-rose-500/30 hover:border-rose-500/60 hover:bg-rose-950/40'
-                    : 'bg-amber-950/30 border-amber-500/30 hover:border-amber-500/60 hover:bg-amber-950/40'
+                    ? 'bg-rose-50/60 border-rose-200 hover:border-rose-300 hover:bg-rose-50'
+                    : 'bg-amber-50/60 border-amber-200 hover:border-amber-300 hover:bg-amber-50'
                 }`}
               >
                 <div>
@@ -266,10 +266,10 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                     <span
                       className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${
                         isBuy
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                           : isHold
-                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                          : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                          ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                          : 'bg-amber-100 text-amber-800 border border-amber-200'
                       }`}
                     >
                       {isBuy ? '🟢 BUY ADVISORY' : isHold ? '🔴 HOLD PROCUREMENT' : '🟡 REALLOCATE'}
@@ -279,25 +279,25 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                     </span>
                   </div>
 
-                  <h4 className="text-sm font-extrabold text-white mb-1 group-hover:text-sky-300 transition-colors">
+                  <h4 className="text-sm font-black text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">
                     {alert.title}
                   </h4>
-                  <p className="text-xs text-slate-300 leading-relaxed mb-3">
+                  <p className="text-xs text-slate-600 leading-relaxed mb-3 font-medium">
                     {alert.evidence}
                   </p>
                 </div>
 
-                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+                <div className="pt-3 border-t border-slate-200/80 flex items-center justify-between text-[11px]">
                   {alert.recommendedBuyCeiling ? (
-                    <span className="text-emerald-400 font-extrabold">
-                      Max Buy: <strong className="text-white">{formatCurrency(alert.recommendedBuyCeiling)}</strong>
+                    <span className="text-emerald-700 font-extrabold">
+                      Max Buy: <strong className="text-slate-900">{formatCurrency(alert.recommendedBuyCeiling)}</strong>
                     </span>
                   ) : (
-                    <span className="text-slate-400">
-                      Tier: <strong className="text-slate-200">{alert.priceBand}</strong>
+                    <span className="text-slate-500 font-medium">
+                      Tier: <strong className="text-slate-700">{alert.priceBand}</strong>
                     </span>
                   )}
-                  <span className="flex items-center gap-1 font-bold text-sky-400 group-hover:text-sky-300 transition-colors">
+                  <span className="flex items-center gap-1 font-bold text-blue-600 group-hover:text-blue-700 transition-colors">
                     <span>Inspect</span>
                     <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
                   </span>
@@ -309,20 +309,20 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
       </div>
 
       {/* CORE FEATURE: OWNER'S CHOICE — SEGREGATE BY MODEL VS BRAND (WITH EXPANSION & MINIMISATION) */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/90 p-5 shadow-2xl space-y-5 transition-all">
+      <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-2xs space-y-5 transition-all">
         {/* Segregation Switcher Header with Minimize/Expand Toggle */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-200">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-400 text-[10px] font-extrabold uppercase tracking-wider border border-blue-500/20">
+              <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[10px] font-extrabold uppercase tracking-wider border border-blue-200">
                 Dealer Buying Intelligence
               </span>
-              <span className="text-xs text-slate-400 font-medium">Owner Decision Matrix</span>
+              <span className="text-xs text-slate-500 font-medium">Owner Decision Matrix</span>
             </div>
-            <h3 className="text-lg font-extrabold text-white mt-0.5">
-              Procurement Decision Score & Price Ceilings
+            <h3 className="text-lg font-black text-slate-900 mt-0.5">
+              Procurement Decision Score &amp; Price Ceilings
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-500 font-medium">
               Select whether to analyze procurement opportunities segregated by vehicle model or by manufacturer brand.
             </p>
           </div>
@@ -330,7 +330,7 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
           {/* Header Action Controls: Segregation Switcher + Minimize/Expand Button */}
           <div className="flex flex-wrap items-center gap-3">
             {/* Interactive Toggle Switcher: Model vs Brand */}
-            <div className="flex items-center bg-slate-950 p-1.5 rounded-xl border border-slate-700/80 shadow-inner">
+            <div className="flex items-center bg-slate-100 p-1.5 rounded-xl border border-slate-200">
               <button
                 onClick={() => {
                   setSegregationMode('model');
@@ -339,13 +339,13 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                 }}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
                   segregationMode === 'model'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <CarFront size={14} />
                 <span>Segregate by Model</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/30 font-mono">
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/10 font-mono">
                   {vehicle_decision_scores.length}
                 </span>
               </button>
@@ -358,13 +358,13 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                 }}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
                   segregationMode === 'brand'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <Building2 size={14} />
                 <span>Segregate by Brand</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/30 font-mono">
+                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/10 font-mono">
                   {brand_decision_scores.length}
                 </span>
               </button>
@@ -373,18 +373,18 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
             {/* Minimize / Expand Master Toggle Button */}
             <button
               onClick={() => setIsMatrixMinimized(!isMatrixMinimized)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all border border-slate-700 cursor-pointer shadow-sm"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all border border-slate-200 cursor-pointer shadow-2xs"
               title={isMatrixMinimized ? 'Expand Dealer Buying Intelligence Matrix' : 'Minimize Dealer Buying Intelligence Matrix'}
             >
               {isMatrixMinimized ? (
                 <>
-                  <Maximize2 size={13} className="text-sky-400" />
+                  <Maximize2 size={13} className="text-blue-600" />
                   <span>Expand Matrix</span>
                   <ChevronDown size={14} />
                 </>
               ) : (
                 <>
-                  <Minimize2 size={13} className="text-slate-400" />
+                  <Minimize2 size={13} className="text-slate-500" />
                   <span>Minimize</span>
                   <ChevronUp size={14} />
                 </>
@@ -397,25 +397,25 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
         {isMatrixMinimized ? (
           <div
             onClick={() => setIsMatrixMinimized(false)}
-            className="rounded-xl bg-slate-950/80 border border-slate-800 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:border-slate-700 hover:bg-slate-950 transition-all group"
+            className="rounded-xl bg-slate-50 border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer hover:border-slate-300 hover:bg-slate-100 transition-all group"
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shrink-0">
                 {segregationMode === 'model' ? <CarFront size={20} /> : <Building2 size={20} />}
               </div>
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-extrabold text-white group-hover:text-sky-300 transition-colors">
+                  <span className="text-xs font-black text-slate-900 group-hover:text-blue-600 transition-colors">
                     {segregationMode === 'model' ? `${vehicle_decision_scores.length} Vehicle Models Analyzed` : `${brand_decision_scores.length} Brands Analyzed`}
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-extrabold border border-emerald-500/20">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-extrabold border border-emerald-200">
                     Top Buy: {summary?.topRecommendedModel || 'Porsche 911'}
                   </span>
-                  <span className="text-[11px] text-slate-400 hidden md:inline">
-                    • Active Stock: <strong className="text-slate-200">{summary?.activeStockCount || 0} units</strong>
+                  <span className="text-[11px] text-slate-500 hidden md:inline font-medium">
+                    • Active Stock: <strong className="text-slate-800">{summary?.activeStockCount || 0} units</strong>
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-400 mt-0.5 truncate">
+                <p className="text-[11px] text-slate-500 mt-0.5 truncate font-medium">
                   Matrix minimized to save vertical space • Click anywhere to expand full buying decision matrix and price ceilings
                 </p>
               </div>
@@ -426,7 +426,7 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                 e.stopPropagation();
                 setIsMatrixMinimized(false);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow shrink-0 cursor-pointer self-start sm:self-auto"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-xs shrink-0 cursor-pointer self-start sm:self-auto"
             >
               <span>Expand Matrix</span>
               <ChevronDown size={14} />
@@ -445,40 +445,40 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                   placeholder={segregationMode === 'model' ? 'Search vehicle models (e.g. Swift, EcoSport, Creta)...' : 'Search brands (e.g. Maruti, Ford, Porsche)...'}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950 border border-slate-700/80 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 text-xs placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-colors"
                 />
               </div>
 
               {/* Recommendation Filter */}
-              <div className="flex items-center gap-2 rounded-xl bg-slate-950 border border-slate-700/80 px-3 py-2 text-xs">
-                <Filter size={13} className="text-sky-400 shrink-0" />
-                <span className="text-slate-400 text-[11px] shrink-0">Recommendation:</span>
+              <div className="flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-xs">
+                <Filter size={13} className="text-blue-600 shrink-0" />
+                <span className="text-slate-500 text-[11px] shrink-0 font-medium">Recommendation:</span>
                 <select
                   value={recommendationFilter}
                   onChange={(e) => setRecommendationFilter(e.target.value)}
-                  className="bg-transparent text-white font-bold focus:outline-none cursor-pointer w-full text-xs"
+                  className="bg-transparent text-slate-800 font-bold focus:outline-none cursor-pointer w-full text-xs"
                 >
-                  <option value="ALL" className="bg-slate-900">All Recommendations ({rawList.length})</option>
-                  <option value="STRONG_BUY" className="bg-slate-900">Strong Buy (Score 75+)</option>
-                  <option value="BUY" className="bg-slate-900">Buy (Score 65–74)</option>
-                  <option value="CAUTION" className="bg-slate-900">Caution (Score 50–64)</option>
-                  <option value="AVOID" className="bg-slate-900">Do Not Buy (&lt; 50)</option>
+                  <option value="ALL">All Recommendations ({rawList.length})</option>
+                  <option value="STRONG_BUY">Strong Buy (Score 75+)</option>
+                  <option value="BUY">Buy (Score 65–74)</option>
+                  <option value="CAUTION">Caution (Score 50–64)</option>
+                  <option value="AVOID">Do Not Buy (&lt; 50)</option>
                 </select>
               </div>
 
               {/* Sort By Dropdown */}
-              <div className="flex items-center gap-2 rounded-xl bg-slate-950 border border-slate-700/80 px-3 py-2 text-xs">
-                <SlidersHorizontal size={13} className="text-indigo-400 shrink-0" />
-                <span className="text-slate-400 text-[11px] shrink-0">Sort By:</span>
+              <div className="flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-xs">
+                <SlidersHorizontal size={13} className="text-blue-600 shrink-0" />
+                <span className="text-slate-500 text-[11px] shrink-0 font-medium">Sort By:</span>
                 <select
                   value={sortBy}
                   onChange={(e: any) => setSortBy(e.target.value)}
-                  className="bg-transparent text-white font-bold focus:outline-none cursor-pointer w-full text-xs"
+                  className="bg-transparent text-slate-800 font-bold focus:outline-none cursor-pointer w-full text-xs"
                 >
-                  <option value="score" className="bg-slate-900">Highest Buy Decision Score</option>
-                  <option value="margin" className="bg-slate-900">Highest Gross Profit Margin %</option>
-                  <option value="days" className="bg-slate-900">Fastest Turnover (Days to Sell)</option>
-                  <option value="stock" className="bg-slate-900">Lowest Lot Stock (Buy Urgency)</option>
+                  <option value="score">Highest Buy Decision Score</option>
+                  <option value="margin">Highest Gross Profit Margin %</option>
+                  <option value="days">Fastest Turnover (Days to Sell)</option>
+                  <option value="stock">Lowest Lot Stock (Buy Urgency)</option>
                 </select>
               </div>
             </div>
@@ -487,14 +487,14 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
             <div className="flex flex-wrap items-center justify-between gap-3 pt-1 text-xs">
               {/* Density Mode: Detailed Cards vs Compact Rows */}
               <div className="flex items-center gap-2">
-                <span className="text-[11px] text-slate-400 font-semibold">View Density:</span>
-                <div className="flex items-center bg-slate-950 p-1 rounded-lg border border-slate-800 text-[10px]">
+                <span className="text-[11px] text-slate-500 font-semibold">View Density:</span>
+                <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-[10px]">
                   <button
                     onClick={() => setViewDensity('detailed')}
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded font-bold transition-all cursor-pointer ${
                       viewDensity === 'detailed'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-blue-600 text-white shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     <LayoutGrid size={12} />
@@ -504,8 +504,8 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                     onClick={() => setViewDensity('compact')}
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded font-bold transition-all cursor-pointer ${
                       viewDensity === 'compact'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-blue-600 text-white shadow-2xs'
+                        : 'text-slate-600 hover:text-slate-900'
                     }`}
                   >
                     <List size={12} />
@@ -518,7 +518,7 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setIsAllExpanded(!isAllExpanded)}
-                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-[11px] font-bold border border-slate-700 transition-colors cursor-pointer"
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold border border-slate-200 transition-colors cursor-pointer shadow-2xs"
                 >
                   {isAllExpanded ? (
                     <>
@@ -537,7 +537,7 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
 
             {/* Filter Indicator / Status Bar */}
             {(recommendationFilter !== 'ALL' || searchTerm.trim() !== '') && (
-              <div className="flex items-center justify-between text-xs px-3 py-2 rounded-xl bg-blue-950/20 border border-blue-500/20 text-blue-300">
+              <div className="flex items-center justify-between text-xs px-3 py-2 rounded-xl bg-blue-50 border border-blue-200 text-blue-800 font-medium">
                 <span>
                   Showing <strong>{sortedList.length}</strong> of <strong>{rawList.length}</strong> {segregationMode === 'model' ? 'models' : 'brands'}
                   {recommendationFilter !== 'ALL' && ` matching "${recommendationFilter}"`}
@@ -548,7 +548,7 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                     setRecommendationFilter('ALL');
                     setSearchTerm('');
                   }}
-                  className="flex items-center gap-1 font-bold text-sky-400 hover:text-sky-300 cursor-pointer"
+                  className="flex items-center gap-1 font-bold text-blue-600 hover:text-blue-800 cursor-pointer"
                 >
                   <RotateCcw size={12} />
                   <span>Reset Filters</span>
@@ -558,8 +558,8 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
 
             {/* Segregated Items List */}
             {sortedList.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-800 p-8 text-center text-slate-400 text-xs space-y-3">
-                <p className="text-slate-300 font-semibold">
+              <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500 text-xs space-y-3">
+                <p className="text-slate-700 font-semibold">
                   {rawList.length === 0
                     ? `Loading live ${segregationMode === 'model' ? 'vehicle models' : 'brands'} from database...`
                     : `No ${segregationMode === 'model' ? 'models' : 'brands'} matched "${recommendationFilter !== 'ALL' ? recommendationFilter : ''} ${searchTerm}".`}
@@ -570,7 +570,7 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                       setRecommendationFilter('ALL');
                       setSearchTerm('');
                     }}
-                    className="px-3.5 py-1.5 rounded-lg bg-blue-600/30 hover:bg-blue-600 text-blue-200 text-xs font-bold border border-blue-500/40 transition-all cursor-pointer inline-flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold border border-blue-200 transition-all cursor-pointer inline-flex items-center gap-1.5"
                   >
                     <RotateCcw size={12} />
                     <span>Show All {rawList.length} {segregationMode === 'model' ? 'Models' : 'Brands'}</span>
@@ -579,7 +579,7 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
               </div>
             ) : viewDensity === 'compact' ? (
               /* COMPACT ROWS VIEW (Minimised per-item layout) */
-              <div className="rounded-xl border border-slate-800 bg-slate-950/40 divide-y divide-slate-800/80 overflow-hidden">
+              <div className="rounded-xl border border-slate-200 bg-white divide-y divide-slate-100 overflow-hidden shadow-2xs">
                 {sortedList.map((item: any, idx: number) => {
                   const itemKey = segregationMode === 'model' ? item.displayName : item.brand;
                   const isExpanded = isAllExpanded || expandedItemKey === itemKey;
@@ -587,27 +587,27 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                   const score = item.decision_score || 0;
 
                   return (
-                    <div key={itemKey} className="transition-colors hover:bg-slate-900/40">
+                    <div key={itemKey} className="transition-colors hover:bg-slate-50/60">
                       {/* Compact Row Header */}
                       <div
                         onClick={() => setExpandedItemKey(isExpanded ? null : itemKey)}
                         className="p-3 sm:px-4 flex flex-col md:flex-row md:items-center justify-between gap-3 cursor-pointer"
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <span className="text-[11px] font-mono text-slate-500 font-bold w-5 shrink-0">
+                          <span className="text-[11px] font-mono text-slate-400 font-bold w-5 shrink-0">
                             #{idx + 1}
                           </span>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
-                              <span className="font-extrabold text-white text-xs truncate">
+                              <span className="font-black text-slate-900 text-xs truncate">
                                 {itemKey}
                               </span>
                               <span className={`px-2 py-0.2 rounded-full text-[9px] font-extrabold border ${recBadge.bg}`}>
                                 {recBadge.label}
                               </span>
                             </div>
-                            <span className="text-[10px] text-slate-400 block">
-                              {item.inStock === 0 ? '0 on lot (Stockout Urgency)' : `${item.inStock} on lot`} • {item.avgDaysToSell}d turnover
+                            <span className="text-[10px] text-slate-500 block font-medium">
+                              {item.inStock === 0 ? '0 on lot (Stockout Urgency)' : `${item.inStock} on lot`} &bull; {item.avgDaysToSell}d turnover
                             </span>
                           </div>
                         </div>
@@ -615,22 +615,22 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                         {/* Right Quick Stats */}
                         <div className="flex items-center gap-4 shrink-0 self-end md:self-auto text-xs">
                           <div className="text-right">
-                            <span className="text-[9px] text-emerald-400 block font-bold">MAX BUY CEILING</span>
-                            <strong className="text-white font-mono font-black text-xs">
+                            <span className="text-[9px] text-emerald-700 block font-bold">MAX BUY CEILING</span>
+                            <strong className="text-slate-900 font-mono font-black text-xs">
                               {formatCurrency(item.recommendedBuyCeiling)}
                             </strong>
                           </div>
 
                           <div className="text-right">
                             <span className="text-[9px] text-slate-400 block font-semibold">MARGIN</span>
-                            <strong className="text-emerald-400 font-mono font-bold text-xs">
+                            <strong className="text-emerald-700 font-mono font-bold text-xs">
                               +{item.grossMarginPct}%
                             </strong>
                           </div>
 
-                          <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 flex flex-col items-center justify-center">
-                            <span className="text-[8px] text-slate-400 uppercase">Score</span>
-                            <strong className="text-xs font-black text-white font-mono">{score}</strong>
+                          <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex flex-col items-center justify-center">
+                            <span className="text-[8px] text-slate-400 uppercase font-bold">Score</span>
+                            <strong className="text-xs font-black text-slate-900 font-mono">{score}</strong>
                           </div>
 
                           <button
@@ -638,7 +638,7 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                               e.stopPropagation();
                               setExpandedItemKey(isExpanded ? null : itemKey);
                             }}
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
                           >
                             {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                           </button>
@@ -647,33 +647,33 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
 
                       {/* 4-Pillar Drawer in Compact Mode */}
                       {isExpanded && (
-                        <div className="border-t border-slate-800/80 bg-slate-950 p-4 rounded-b-xl space-y-3">
+                        <div className="border-t border-slate-200 bg-slate-50 p-4 rounded-b-xl space-y-3">
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px]">
-                            <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
-                              <span className="text-slate-400 block">Turnover (30%)</span>
-                              <strong className="text-white font-mono text-xs">{item.components?.turnoverScore ?? 70}/100</strong>
-                              <span className="text-[9px] text-slate-400 block mt-0.5">{item.avgDaysToSell} days to sell</span>
+                            <div className="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-2xs">
+                              <span className="text-slate-400 block font-bold">Turnover (30%)</span>
+                              <strong className="text-slate-900 font-mono text-xs">{item.components?.turnoverScore ?? 70}/100</strong>
+                              <span className="text-[9px] text-slate-500 block mt-0.5">{item.avgDaysToSell} days to sell</span>
                             </div>
-                            <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
-                              <span className="text-slate-400 block">Margin (30%)</span>
-                              <strong className="text-emerald-400 font-mono text-xs">{item.components?.marginScore ?? 65}/100</strong>
-                              <span className="text-[9px] text-slate-400 block mt-0.5">+{item.grossMarginPct}% profit</span>
+                            <div className="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-2xs">
+                              <span className="text-slate-400 block font-bold">Margin (30%)</span>
+                              <strong className="text-emerald-700 font-mono text-xs">{item.components?.marginScore ?? 65}/100</strong>
+                              <span className="text-[9px] text-slate-500 block mt-0.5">+{item.grossMarginPct}% profit</span>
                             </div>
-                            <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
-                              <span className="text-slate-400 block">Demand (25%)</span>
-                              <strong className="text-indigo-400 font-mono text-xs">{item.components?.demandScore ?? 60}/100</strong>
-                              <span className="text-[9px] text-slate-400 block mt-0.5">{item.leadsCount} leads</span>
+                            <div className="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-2xs">
+                              <span className="text-slate-400 block font-bold">Demand (25%)</span>
+                              <strong className="text-blue-700 font-mono text-xs">{item.components?.demandScore ?? 60}/100</strong>
+                              <span className="text-[9px] text-slate-500 block mt-0.5">{item.leadsCount} leads</span>
                             </div>
-                            <div className="bg-slate-900/80 p-2 rounded-lg border border-slate-800">
-                              <span className="text-slate-400 block">Stock Risk (15%)</span>
-                              <strong className="text-amber-400 font-mono text-xs">{item.components?.riskScore ?? 75}/100</strong>
-                              <span className="text-[9px] text-slate-400 block mt-0.5">{item.inStock} on lot</span>
+                            <div className="bg-white p-2.5 rounded-xl border border-slate-200/90 shadow-2xs">
+                              <span className="text-slate-400 block font-bold">Stock Risk (15%)</span>
+                              <strong className="text-amber-800 font-mono text-xs">{item.components?.riskScore ?? 75}/100</strong>
+                              <span className="text-[9px] text-slate-500 block mt-0.5">{item.inStock} on lot</span>
                             </div>
                           </div>
-                          <p className="text-[11px] text-slate-300">
-                            <strong>Owner Buying Rule:</strong> Do not acquire {itemKey} above{' '}
-                            <strong className="text-emerald-400 font-mono">{formatCurrency(item.recommendedBuyCeiling)}</strong> to lock in a 15% dealer gross margin on resale at{' '}
-                            <strong className="text-white font-mono">{formatCurrency(item.avgSellingPrice)}</strong>.
+                          <p className="text-[11px] text-slate-600 font-medium">
+                            <strong className="text-slate-900">Owner Buying Rule:</strong> Do not acquire {itemKey} above{' '}
+                            <strong className="text-emerald-700 font-mono">{formatCurrency(item.recommendedBuyCeiling)}</strong> to lock in a 15% dealer gross margin on resale at{' '}
+                            <strong className="text-slate-900 font-mono">{formatCurrency(item.avgSellingPrice)}</strong>.
                           </p>
                         </div>
                       )}
@@ -695,8 +695,8 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                       key={itemKey}
                       className={`rounded-2xl border transition-all ${
                         isExpanded
-                          ? 'border-blue-500/60 bg-slate-950/90 shadow-xl'
-                          : 'border-slate-800 bg-slate-950/40 hover:border-slate-700 hover:bg-slate-950/60'
+                          ? 'border-blue-400 bg-white shadow-md'
+                          : 'border-slate-200/90 bg-white shadow-2xs hover:border-slate-300 hover:shadow-md'
                       }`}
                     >
                       {/* Item Main Row */}
@@ -704,7 +704,7 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                           {/* Left: Identity, Badges & Urgency */}
                           <div className="flex items-start gap-3.5">
-                            <div className="w-11 h-11 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-blue-400 shrink-0 shadow">
+                            <div className="w-11 h-11 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 shrink-0 shadow-2xs">
                               {segregationMode === 'model' ? <CarFront size={22} /> : <Building2 size={22} />}
                             </div>
                             <div>
@@ -714,26 +714,26 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                                 </span>
 
                                 {segregationMode === 'model' && (
-                                  <span className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 text-[10px] font-bold border border-slate-700">
+                                  <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold border border-slate-200">
                                     {item.make}
                                   </span>
                                 )}
 
                                 {item.inStock === 0 ? (
-                                  <span className="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 text-[10px] font-extrabold border border-rose-500/30">
-                                    0 on lot • High Urgency to Procure
+                                  <span className="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 text-[10px] font-extrabold border border-rose-200">
+                                    0 on lot &bull; High Urgency to Procure
                                   </span>
                                 ) : (
-                                  <span className="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 text-[10px] font-bold border border-emerald-500/20">
+                                  <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
                                     {item.inStock} on lot
                                   </span>
                                 )}
                               </div>
 
-                              <h4 className="text-base font-extrabold text-white tracking-tight">
+                              <h4 className="text-base font-black text-slate-900 tracking-tight">
                                 {itemKey}
                               </h4>
-                              <p className="text-xs text-slate-400 mt-0.5">
+                              <p className="text-xs text-slate-500 mt-0.5 font-medium">
                                 {item.rationale || `Analyzed from direct dealership acquisitions and sales.`}
                               </p>
                             </div>
@@ -742,29 +742,29 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                           {/* Right: Score + Max Buy Ceiling */}
                           <div className="flex items-center gap-4 shrink-0">
                             {/* Max Buy Ceiling Card */}
-                            <div className="text-right px-3.5 py-2 rounded-xl bg-emerald-950/30 border border-emerald-500/30">
-                              <span className="text-[10px] text-emerald-400 font-extrabold uppercase block tracking-wider">
+                            <div className="text-right px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200">
+                              <span className="text-[10px] text-emerald-800 font-extrabold uppercase block tracking-wider">
                                 Max Buy Ceiling
                               </span>
-                              <strong className="text-base font-black text-white font-mono">
+                              <strong className="text-base font-black text-slate-900 font-mono">
                                 {formatCurrency(item.recommendedBuyCeiling)}
                               </strong>
-                              <span className="text-[9px] text-slate-400 block">
+                              <span className="text-[9px] text-slate-500 block font-medium">
                                 Protects 15% dealer gross margin
                               </span>
                             </div>
 
                             {/* Decision Score Badge */}
-                            <div className="flex flex-col items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 shadow-md">
+                            <div className="flex flex-col items-center justify-center w-16 h-16 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs">
                               <span className="text-[9px] text-slate-400 font-extrabold uppercase">Score</span>
-                              <strong className="text-xl font-black text-white font-mono">{score}</strong>
+                              <strong className="text-xl font-black text-slate-900 font-mono">{score}</strong>
                               <span className="text-[8px] text-slate-400">/ 100</span>
                             </div>
 
                             {/* Expand Details Button */}
                             <button
                               onClick={() => setExpandedItemKey(isExpanded ? null : itemKey)}
-                              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer border border-slate-700"
+                              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer border border-slate-200"
                               title="View 4-Pillar Calculation Breakdown"
                             >
                               {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -773,42 +773,42 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                         </div>
 
                         {/* Operational KPI Metric Strip */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mt-4 pt-3.5 border-t border-slate-800/80 text-xs">
-                          <div className="bg-slate-900/60 rounded-xl p-2 border border-slate-800">
-                            <span className="text-[10px] text-slate-400 block font-semibold">AVG BUY PRICE</span>
-                            <strong className="text-xs font-bold text-slate-200 font-mono">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 mt-4 pt-3.5 border-t border-slate-100 text-xs">
+                          <div className="bg-slate-50 rounded-xl p-2 border border-slate-200/80">
+                            <span className="text-[10px] text-slate-400 block font-bold">AVG BUY PRICE</span>
+                            <strong className="text-xs font-bold text-slate-800 font-mono">
                               {formatCurrency(item.avgAcquisitionCost)}
                             </strong>
                           </div>
-                          <div className="bg-slate-900/60 rounded-xl p-2 border border-slate-800">
-                            <span className="text-[10px] text-slate-400 block font-semibold">AVG SELLING PRICE</span>
-                            <strong className="text-xs font-bold text-slate-200 font-mono">
+                          <div className="bg-slate-50 rounded-xl p-2 border border-slate-200/80">
+                            <span className="text-[10px] text-slate-400 block font-bold">AVG SELLING PRICE</span>
+                            <strong className="text-xs font-bold text-slate-800 font-mono">
                               {formatCurrency(item.avgSellingPrice)}
                             </strong>
                           </div>
-                          <div className="bg-slate-900/60 rounded-xl p-2 border border-slate-800">
-                            <span className="text-[10px] text-slate-400 block font-semibold">GROSS MARGIN %</span>
-                            <strong className={`text-xs font-extrabold font-mono ${item.grossMarginPct >= 15 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                          <div className="bg-slate-50 rounded-xl p-2 border border-slate-200/80">
+                            <span className="text-[10px] text-slate-400 block font-bold">GROSS MARGIN %</span>
+                            <strong className={`text-xs font-extrabold font-mono ${item.grossMarginPct >= 15 ? 'text-emerald-700' : 'text-amber-800'}`}>
                               +{item.grossMarginPct}%
                             </strong>
                           </div>
-                          <div className="bg-slate-900/60 rounded-xl p-2 border border-slate-800">
-                            <span className="text-[10px] text-slate-400 block font-semibold">DAYS TO SELL</span>
-                            <strong className="text-xs font-bold text-sky-400 font-mono flex items-center gap-1">
+                          <div className="bg-slate-50 rounded-xl p-2 border border-slate-200/80">
+                            <span className="text-[10px] text-slate-400 block font-bold">DAYS TO SELL</span>
+                            <strong className="text-xs font-bold text-blue-700 font-mono flex items-center gap-1">
                               <Clock size={11} />
                               {item.avgDaysToSell} Days
                             </strong>
                           </div>
-                          <div className="bg-slate-900/60 rounded-xl p-2 border border-slate-800">
-                            <span className="text-[10px] text-slate-400 block font-semibold">PROCURRED / SOLD</span>
-                            <strong className="text-xs font-bold text-slate-200 font-mono">
+                          <div className="bg-slate-50 rounded-xl p-2 border border-slate-200/80">
+                            <span className="text-[10px] text-slate-400 block font-bold">PROCURRED / SOLD</span>
+                            <strong className="text-xs font-bold text-slate-800 font-mono">
                               {item.totalProcured} in / {item.totalSold} sold
                             </strong>
                           </div>
-                          <div className="bg-slate-900/60 rounded-xl p-2 border border-slate-800">
-                            <span className="text-[10px] text-slate-400 block font-semibold">BUYER INQUIRIES</span>
-                            <strong className="text-xs font-bold text-indigo-400 font-mono">
-                              {item.leadsCount || 0} Leads • {item.testDrivesCount || 0} Drives
+                          <div className="bg-slate-50 rounded-xl p-2 border border-slate-200/80">
+                            <span className="text-[10px] text-slate-400 block font-bold">BUYER INQUIRIES</span>
+                            <strong className="text-xs font-bold text-purple-700 font-mono">
+                              {item.leadsCount || 0} Leads &bull; {item.testDrivesCount || 0} Drives
                             </strong>
                           </div>
                         </div>
@@ -816,15 +816,15 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
 
                       {/* Expandable 4-Pillar Calculation Breakdown Drawer */}
                       {isExpanded && (
-                        <div className="border-t border-slate-800 bg-slate-950 p-4 sm:p-5 rounded-b-2xl space-y-4">
+                        <div className="border-t border-slate-200 bg-slate-50/70 p-4 sm:p-5 rounded-b-2xl space-y-4">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <Target size={15} className="text-blue-400" />
-                              <h5 className="text-xs font-extrabold uppercase text-white tracking-wider">
+                              <Target size={15} className="text-blue-600" />
+                              <h5 className="text-xs font-black uppercase text-slate-900 tracking-wider">
                                 Empirical 4-Pillar Scoring Calculation for {itemKey}
                               </h5>
                             </div>
-                            <span className="text-[10px] text-slate-400 font-mono">
+                            <span className="text-[10px] text-slate-500 font-mono font-medium">
                               Weight: Turnover (30%) + Margin (30%) + Demand (25%) + Stock Risk (15%)
                             </span>
                           </div>
@@ -832,93 +832,93 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                           {/* 4 Pillar Cards */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             {/* Pillar 1: Turnover Velocity */}
-                            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+                            <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-2xs">
                               <div className="flex items-center justify-between text-[11px] mb-1">
-                                <span className="font-bold text-slate-300">Turnover Velocity</span>
-                                <span className="text-blue-400 font-extrabold font-mono">30% Weight</span>
+                                <span className="font-bold text-slate-700">Turnover Velocity</span>
+                                <span className="text-blue-600 font-extrabold font-mono">30% Weight</span>
                               </div>
                               <div className="flex items-baseline gap-2 mb-1">
-                                <strong className="text-lg font-black text-white font-mono">
+                                <strong className="text-lg font-black text-slate-900 font-mono">
                                   {item.components?.turnoverScore ?? 70}
                                 </strong>
                                 <span className="text-[10px] text-slate-400">/ 100</span>
                               </div>
-                              <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-2">
+                              <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-2">
                                 <div
-                                  className="bg-blue-500 h-full rounded-full"
+                                  className="bg-blue-600 h-full rounded-full"
                                   style={{ width: `${item.components?.turnoverScore ?? 70}%` }}
                                 />
                               </div>
-                              <p className="text-[10px] text-slate-400 leading-tight">
-                                Averages <strong className="text-slate-200">{item.avgDaysToSell} days</strong> on lot before customer sale.
+                              <p className="text-[10px] text-slate-500 leading-tight font-medium">
+                                Averages <strong className="text-slate-800">{item.avgDaysToSell} days</strong> on lot before customer sale.
                               </p>
                             </div>
 
                             {/* Pillar 2: Realized Profit Margin */}
-                            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+                            <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-2xs">
                               <div className="flex items-center justify-between text-[11px] mb-1">
-                                <span className="font-bold text-slate-300">Gross Profit Margin</span>
-                                <span className="text-emerald-400 font-extrabold font-mono">30% Weight</span>
+                                <span className="font-bold text-slate-700">Gross Profit Margin</span>
+                                <span className="text-emerald-700 font-extrabold font-mono">30% Weight</span>
                               </div>
                               <div className="flex items-baseline gap-2 mb-1">
-                                <strong className="text-lg font-black text-white font-mono">
+                                <strong className="text-lg font-black text-slate-900 font-mono">
                                   {item.components?.marginScore ?? 65}
                                 </strong>
                                 <span className="text-[10px] text-slate-400">/ 100</span>
                               </div>
-                              <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-2">
+                              <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-2">
                                 <div
-                                  className="bg-emerald-500 h-full rounded-full"
+                                  className="bg-emerald-600 h-full rounded-full"
                                   style={{ width: `${item.components?.marginScore ?? 65}%` }}
                                 />
                               </div>
-                              <p className="text-[10px] text-slate-400 leading-tight">
-                                Generates <strong className="text-slate-200">+{item.grossMarginPct}% gross profit</strong> on closed transactions.
+                              <p className="text-[10px] text-slate-500 leading-tight font-medium">
+                                Generates <strong className="text-slate-800">+{item.grossMarginPct}% gross profit</strong> on closed transactions.
                               </p>
                             </div>
 
                             {/* Pillar 3: Customer Demand */}
-                            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+                            <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-2xs">
                               <div className="flex items-center justify-between text-[11px] mb-1">
-                                <span className="font-bold text-slate-300">Customer Demand</span>
-                                <span className="text-indigo-400 font-extrabold font-mono">25% Weight</span>
+                                <span className="font-bold text-slate-700">Customer Demand</span>
+                                <span className="text-purple-700 font-extrabold font-mono">25% Weight</span>
                               </div>
                               <div className="flex items-baseline gap-2 mb-1">
-                                <strong className="text-lg font-black text-white font-mono">
+                                <strong className="text-lg font-black text-slate-900 font-mono">
                                   {item.components?.demandScore ?? 60}
                                 </strong>
                                 <span className="text-[10px] text-slate-400">/ 100</span>
                               </div>
-                              <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-2">
+                              <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-2">
                                 <div
-                                  className="bg-indigo-500 h-full rounded-full"
+                                  className="bg-purple-600 h-full rounded-full"
                                   style={{ width: `${item.components?.demandScore ?? 60}%` }}
                                 />
                               </div>
-                              <p className="text-[10px] text-slate-400 leading-tight">
-                                Driven by <strong className="text-slate-200">{item.leadsCount} leads</strong> and <strong className="text-slate-200">{item.testDrivesCount} test drives</strong>.
+                              <p className="text-[10px] text-slate-500 leading-tight font-medium">
+                                Driven by <strong className="text-slate-800">{item.leadsCount} leads</strong> and <strong className="text-slate-800">{item.testDrivesCount} test drives</strong>.
                               </p>
                             </div>
 
                             {/* Pillar 4: Stock Risk & Urgency */}
-                            <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+                            <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-2xs">
                               <div className="flex items-center justify-between text-[11px] mb-1">
-                                <span className="font-bold text-slate-300">Stock Risk & Urgency</span>
-                                <span className="text-amber-400 font-extrabold font-mono">15% Weight</span>
+                                <span className="font-bold text-slate-700">Stock Risk &amp; Urgency</span>
+                                <span className="text-amber-700 font-extrabold font-mono">15% Weight</span>
                               </div>
                               <div className="flex items-baseline gap-2 mb-1">
-                                <strong className="text-lg font-black text-white font-mono">
+                                <strong className="text-lg font-black text-slate-900 font-mono">
                                   {item.components?.riskScore ?? 75}
                                 </strong>
                                 <span className="text-[10px] text-slate-400">/ 100</span>
                               </div>
-                              <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden mb-2">
+                              <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-2">
                                 <div
                                   className="bg-amber-500 h-full rounded-full"
                                   style={{ width: `${item.components?.riskScore ?? 75}%` }}
                                 />
                               </div>
-                              <p className="text-[10px] text-slate-400 leading-tight">
+                              <p className="text-[10px] text-slate-500 leading-tight font-medium">
                                 {item.inStock === 0
                                   ? 'Zero stock in inventory! High procurement urgency.'
                                   : `${item.inStock} vehicle(s) currently held in stockyard.`}
@@ -927,14 +927,14 @@ export function ProcurementIntelligenceHub({ data, loading, onRefresh }: Procure
                           </div>
 
                           {/* Owner Buying Rule Guidance */}
-                          <div className="rounded-xl bg-blue-950/20 border border-blue-500/30 p-3 text-xs flex items-start gap-2.5 text-slate-300">
-                            <Info size={16} className="text-blue-400 shrink-0 mt-0.5" />
+                          <div className="rounded-xl bg-blue-50 border border-blue-200 p-3 text-xs flex items-start gap-2.5 text-slate-700">
+                            <Info size={16} className="text-blue-600 shrink-0 mt-0.5" />
                             <div>
-                              <strong className="text-white block">Dealership Owner Buying Rule:</strong>
+                              <strong className="text-slate-900 block font-bold">Dealership Owner Buying Rule:</strong>
                               <span>
                                 If buying this {segregationMode === 'model' ? 'model' : 'brand'} from a customer or auction, do NOT pay more than{' '}
-                                <strong className="text-emerald-400 font-mono">{formatCurrency(item.recommendedBuyCeiling)}</strong>. This ensures at least a 15% gross profit margin upon retail sale at the average price of{' '}
-                                <strong className="text-slate-200 font-mono">{formatCurrency(item.avgSellingPrice)}</strong>.
+                                <strong className="text-emerald-700 font-mono">{formatCurrency(item.recommendedBuyCeiling)}</strong>. This ensures at least a 15% gross profit margin upon retail sale at the average price of{' '}
+                                <strong className="text-slate-800 font-mono">{formatCurrency(item.avgSellingPrice)}</strong>.
                               </span>
                             </div>
                           </div>

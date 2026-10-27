@@ -76,25 +76,25 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
   });
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-fadeIn">
-      <div className="bg-card border border-border rounded-3xl w-full max-w-5xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in font-sans">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-5xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden text-slate-800">
         
         {/* Modal Header */}
-        <div className="p-6 border-b border-border flex items-center justify-between bg-secondary/30">
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <div className="p-2.5 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-200">
               <DollarSign className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-xl font-extrabold text-foreground font-display">
-                  Revenue & Payment Segregation Analysis
+                <h2 className="text-xl font-extrabold text-slate-900">
+                  Revenue &amp; Payment Segregation Analysis
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
                   Audited Cash vs Loan
                 </span>
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5 font-medium">
                 Exact distinction between liquid cash received upfront vs bank-financed loan balances
               </p>
             </div>
@@ -102,7 +102,7 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors cursor-pointer"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -114,135 +114,131 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
             <div className="space-y-4 py-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-32 rounded-2xl bg-secondary/40 animate-pulse border border-border" />
+                  <div key={i} className="h-32 rounded-2xl bg-slate-100 animate-pulse border border-slate-200" />
                 ))}
               </div>
-              <div className="h-48 rounded-2xl bg-secondary/40 animate-pulse border border-border" />
+              <div className="h-48 rounded-2xl bg-slate-100 animate-pulse border border-slate-200" />
             </div>
           ) : (
             <>
               {/* TOP 4 SEGREGATED REVENUE CARDS */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 
-                {/* Card 1: Full Payment */}
-                <div className="p-5 rounded-2xl bg-card border border-emerald-500/30 shadow-sm relative overflow-hidden flex flex-col justify-between">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl pointer-events-none" />
+                {/* Card 1: Token Advance Amount */}
+                <div className="p-5 rounded-2xl bg-emerald-50/40 border border-emerald-200 shadow-2xs relative overflow-hidden flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center justify-between text-xs font-bold text-muted-foreground mb-1">
-                      <span className="uppercase tracking-wider">Full Payments</span>
-                      <CreditCard className="w-4 h-4 text-emerald-400" />
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-1">
+                      <span className="uppercase tracking-wider">Token Advance</span>
+                      <DollarSign className="w-4 h-4 text-emerald-600" />
                     </div>
-                    <div className="text-2xl font-black text-emerald-400 font-mono">
-                      {formatCurrency(fullPaymentTotal)}
+                    <div className="text-2xl font-black text-emerald-700 font-mono">
+                      {formatCurrency(data?.totalTokenAdvanceAmount || totalCollected)}
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-1">
-                      {data?.fullPayment?.count || 0} vehicle{(data?.fullPayment?.count || 0) === 1 ? '' : 's'} 100% upfront
+                    <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                      Upfront reservation deposits across active bookings
                     </p>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[11px]">
-                    <span className="text-emerald-500 font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" /> 100% In Hand
-                    </span>
-                    <span className="text-muted-foreground">Settled</span>
-                  </div>
-                </div>
-
-                {/* Card 2: Down Payment */}
-                <div className="p-5 rounded-2xl bg-card border border-blue-500/30 shadow-sm relative overflow-hidden flex flex-col justify-between">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-xl pointer-events-none" />
-                  <div>
-                    <div className="flex items-center justify-between text-xs font-bold text-muted-foreground mb-1">
-                      <span className="uppercase tracking-wider">Down Payments</span>
-                      <DollarSign className="w-4 h-4 text-blue-400" />
-                    </div>
-                    <div className="text-2xl font-black text-blue-400 font-mono">
-                      {formatCurrency(downPaymentTotal)}
-                    </div>
-                    <p className="text-[11px] text-muted-foreground mt-1">
-                      Collected on {data?.loanPayment?.count || 0} financed deal{(data?.loanPayment?.count || 0) === 1 ? '' : 's'}
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[11px]">
-                    <span className="text-blue-400 font-bold flex items-center gap-1">
+                  <div className="mt-4 pt-3 border-t border-emerald-200/60 flex items-center justify-between text-[11px]">
+                    <span className="text-emerald-700 font-bold flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Upfront Deposit
                     </span>
-                    <span className="text-muted-foreground">Received</span>
+                    <span className="text-slate-500 font-medium">Received</span>
                   </div>
                 </div>
 
-                {/* Card 3: Loan Payment Financed */}
-                <div className="p-5 rounded-2xl bg-card border border-amber-500/30 shadow-sm relative overflow-hidden flex flex-col justify-between">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-xl pointer-events-none" />
+                {/* Card 2: Down Payment Amount */}
+                <div className="p-5 rounded-2xl bg-blue-50/40 border border-blue-200 shadow-2xs relative overflow-hidden flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center justify-between text-xs font-bold text-muted-foreground mb-1">
-                      <span className="uppercase tracking-wider">Bank Disbursals</span>
-                      <Landmark className="w-4 h-4 text-amber-400" />
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-1">
+                      <span className="uppercase tracking-wider">Down Payment</span>
+                      <CreditCard className="w-4 h-4 text-blue-600" />
                     </div>
-                    <div className="text-2xl font-black text-amber-400 font-mono">
-                      {formatCurrency(loanFinancedTotal)}
+                    <div className="text-2xl font-black text-blue-700 font-mono">
+                      {formatCurrency(downPaymentTotal)}
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-1">
-                      Financed across {data?.loanPayment?.count || 0} loan agreement{(data?.loanPayment?.count || 0) === 1 ? '' : 's'}
+                    <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                      Customer equity across {data?.loanPayment?.count || 0} financed deal{(data?.loanPayment?.count || 0) === 1 ? '' : 's'}
                     </p>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[11px]">
-                    <span className="text-amber-400 font-bold flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Bank Disbursal
+                  <div className="mt-4 pt-3 border-t border-blue-200/60 flex items-center justify-between text-[11px]">
+                    <span className="text-blue-700 font-bold flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> Buyer Equity
                     </span>
-                    <span className="text-muted-foreground">Pending / EMI</span>
+                    <span className="text-slate-500 font-medium">Financed Deals</span>
+                  </div>
+                </div>
+
+                {/* Card 3: Bank Redressal Amount */}
+                <div className="p-5 rounded-2xl bg-amber-50/40 border border-amber-200 shadow-2xs relative overflow-hidden flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-1">
+                      <span className="uppercase tracking-wider">Bank Financed</span>
+                      <Landmark className="w-4 h-4 text-amber-600" />
+                    </div>
+                    <div className="text-2xl font-black text-amber-700 font-mono">
+                      {formatCurrency(loanFinancedTotal)}
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                      Sanctioned loan principal from partner banks
+                    </p>
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-amber-200/60 flex items-center justify-between text-[11px]">
+                    <span className="text-amber-700 font-bold flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> Partner Disbursal
+                    </span>
+                    <span className="text-slate-500 font-medium">Bank Credit</span>
                   </div>
                 </div>
 
                 {/* Card 4: 2% Bank Excess Commission */}
-                <div className="p-5 rounded-2xl bg-card border border-indigo-500/30 shadow-sm relative overflow-hidden flex flex-col justify-between">
-                  <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl pointer-events-none" />
+                <div className="p-5 rounded-2xl bg-purple-50/40 border border-purple-200 shadow-2xs relative overflow-hidden flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center justify-between text-xs font-bold text-muted-foreground mb-1">
-                      <span className="uppercase tracking-wider">2% Bank Payout</span>
-                      <Percent className="w-4 h-4 text-indigo-400" />
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-1">
+                      <span className="uppercase tracking-wider">Bank 2% Redressal</span>
+                      <Percent className="w-4 h-4 text-purple-600" />
                     </div>
-                    <div className="text-2xl font-black text-indigo-400 font-mono">
+                    <div className="text-2xl font-black text-purple-700 font-mono">
                       {formatCurrency(data?.totalBankCommission)}
                     </div>
-                    <p className="text-[11px] text-muted-foreground mt-1">
-                      Dealer excess on {data?.loanPayment?.count || 0} financed deal{(data?.loanPayment?.count || 0) === 1 ? '' : 's'}
+                    <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                      Dealer redressal bonus on partner loan disbursals
                     </p>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[11px]">
-                    <span className="text-indigo-400 font-bold flex items-center gap-1">
+                  <div className="mt-4 pt-3 border-t border-purple-200/60 flex items-center justify-between text-[11px]">
+                    <span className="text-purple-700 font-bold flex items-center gap-1">
                       <TrendingUp className="w-3 h-3" /> Extra Revenue
                     </span>
-                    <span className="text-muted-foreground">Dealer Profit</span>
+                    <span className="text-slate-500 font-medium">Dealer Profit</span>
                   </div>
                 </div>
 
               </div>
 
               {/* CASH FLOW PROGRESS RATIO BAR */}
-              <div className="p-5 rounded-2xl bg-secondary/40 border border-border flex flex-col gap-3">
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col gap-3">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                   <div>
-                    <span className="text-xs font-extrabold text-foreground uppercase tracking-wider block">
+                    <span className="text-xs font-black text-slate-900 uppercase tracking-wider block">
                       Total Liquid Cash Collected vs Financed Balance
                     </span>
-                    <span className="text-[11px] text-muted-foreground">
-                      Gross Contract Value: <strong className="text-foreground font-mono">{formatCurrency(totalContract)}</strong>
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      Gross Contract Value: <strong className="text-slate-900 font-mono">{formatCurrency(totalContract)}</strong>
                     </span>
                   </div>
                   <div className="flex items-center gap-4 text-xs font-bold">
-                    <div className="flex items-center gap-1.5 text-emerald-400">
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                    <div className="flex items-center gap-1.5 text-emerald-700">
+                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                       <span>Liquid Cash: {formatCurrency(totalCollected)} ({collectedPct}%)</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-amber-400">
-                      <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                    <div className="flex items-center gap-1.5 text-amber-700">
+                      <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                       <span>Financed Loan: {formatCurrency(loanFinancedTotal)} ({loanPct}%)</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Split Bar */}
-                <div className="w-full h-3.5 bg-slate-800 rounded-full overflow-hidden flex border border-border">
+                <div className="w-full h-3.5 bg-slate-200 rounded-full overflow-hidden flex border border-slate-300">
                   <div 
                     style={{ width: `${collectedPct}%` }} 
                     className="bg-emerald-500 h-full transition-all duration-500 rounded-l-full" 
@@ -264,8 +260,8 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
                       onClick={() => setFilterType('ALL')}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         filterType === 'ALL'
-                          ? 'bg-secondary text-foreground border border-border shadow-sm'
-                          : 'text-muted-foreground hover:text-foreground'
+                          ? 'bg-slate-900 text-white shadow-sm'
+                          : 'bg-slate-100 text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       All Deals ({data?.deals?.length || 0})
@@ -274,8 +270,8 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
                       onClick={() => setFilterType('FULL_PAYMENT')}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         filterType === 'FULL_PAYMENT'
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                          : 'text-muted-foreground hover:text-foreground'
+                          ? 'bg-emerald-600 text-white shadow-sm'
+                          : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                       }`}
                     >
                       Full Payments ({data?.fullPayment?.count || 0})
@@ -284,8 +280,8 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
                       onClick={() => setFilterType('LOAN_FINANCED')}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         filterType === 'LOAN_FINANCED'
-                          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                          : 'text-muted-foreground hover:text-foreground'
+                          ? 'bg-amber-600 text-white shadow-sm'
+                          : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
                       }`}
                     >
                       Loan Deals ({data?.loanPayment?.count || 0})
@@ -293,87 +289,96 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
                   </div>
 
                   <div className="relative w-full sm:w-64">
-                    <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
                       type="text"
                       placeholder="Search customer, car..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-9 pr-3 py-1.5 bg-secondary/40 border border-border rounded-xl text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-emerald-500/50"
+                      className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition"
                     />
                   </div>
                 </div>
 
-                <div className="rounded-2xl bg-card border border-border overflow-hidden">
+                <div className="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-2xs">
                   <div className="overflow-x-auto max-h-72">
                     <table className="w-full text-left text-xs font-sans">
-                      <thead className="sticky top-0 bg-secondary border-b border-border z-10 text-[10px] uppercase font-bold text-muted-foreground">
+                      <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10 text-[10px] uppercase font-bold text-slate-500">
                         <tr>
                           <th className="py-2.5 px-3.5">Contract</th>
-                          <th className="py-2.5 px-3.5">Customer & Vehicle</th>
+                          <th className="py-2.5 px-3.5">Customer &amp; Vehicle</th>
+                          <th className="py-2.5 px-3.5">Delivery Status</th>
                           <th className="py-2.5 px-3.5">Payment Type</th>
-                          <th className="py-2.5 px-3.5">Down Payment (Received)</th>
-                          <th className="py-2.5 px-3.5">Loan Financed</th>
-                          <th className="py-2.5 px-3.5">2% Bank Payout</th>
+                          <th className="py-2.5 px-3.5">Token Advance</th>
+                          <th className="py-2.5 px-3.5">Down Payment</th>
+                          <th className="py-2.5 px-3.5">Bank Redressal</th>
                           <th className="py-2.5 px-3.5">Final Total</th>
                           <th className="py-2.5 px-3.5">Settlement Status</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-border/60">
+                      <tbody className="divide-y divide-slate-100">
                         {filteredDeals.length === 0 ? (
                           <tr>
-                            <td colSpan={8} className="py-8 text-center text-muted-foreground">
+                            <td colSpan={9} className="py-8 text-center text-slate-400 font-medium">
                               No contracts matching this filter.
                             </td>
                           </tr>
                         ) : (
                           filteredDeals.map((deal: any) => {
                             const isLoan = deal.type === 'LOAN_FINANCED';
+                            const isDelivered = deal.is_delivered || (deal.delivery_status || '').toLowerCase() === 'delivered';
+                            const tokenAdvance = deal.token_advance_amount ?? deal.deposit_amount ?? 0;
+                            const totalDownPayment = deal.down_payment_amount ?? (isLoan ? Math.max(0, deal.final_amount - deal.loan_amount) : deal.final_amount);
+                            const bankRedressal = deal.bank_redressal_amount ?? deal.loan_amount ?? 0;
 
                             return (
-                              <tr key={deal.sale_id} className="hover:bg-secondary/40 transition-colors">
-                                <td className="py-3 px-3.5 font-mono font-bold text-sky-400">
+                              <tr key={deal.sale_id} className="hover:bg-slate-50 transition-colors">
+                                <td className="py-3 px-3.5 font-mono font-bold text-blue-600">
                                   #CR-{deal.sale_id}
                                 </td>
                                 <td className="py-3 px-3.5">
-                                  <div className="font-bold text-foreground">{deal.customer_name}</div>
-                                  <div className="text-[11px] text-muted-foreground">{deal.vehicle_name}</div>
+                                  <div className="font-bold text-slate-900">{deal.customer_name}</div>
+                                  <div className="text-[11px] text-slate-500">{deal.vehicle_name}</div>
+                                </td>
+                                <td className="py-3 px-3.5">
+                                  {isDelivered ? (
+                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+                                      ✓ Sale Completed (Delivered)
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 whitespace-nowrap">
+                                      ⏳ Reserved (Token Paid)
+                                    </span>
+                                  )}
                                 </td>
                                 <td className="py-3 px-3.5">
                                   {isLoan ? (
-                                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
                                       Loan Deal
                                     </span>
                                   ) : (
-                                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                    <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                       Full Upfront
                                     </span>
                                   )}
                                 </td>
-                                <td className="py-3 px-3.5 font-mono font-bold text-emerald-400">
-                                  {isLoan ? formatCurrency(deal.deposit_amount) : formatCurrency(deal.final_amount)}
+                                <td className="py-3 px-3.5 font-mono font-bold text-emerald-700">
+                                  {formatCurrency(tokenAdvance)}
                                 </td>
-                                <td className="py-3 px-3.5 font-mono font-bold text-amber-400">
-                                  {isLoan ? formatCurrency(deal.loan_amount) : '₹0 (None)'}
+                                <td className="py-3 px-3.5 font-mono font-bold text-blue-700">
+                                  {formatCurrency(totalDownPayment)}
                                 </td>
-                                <td className="py-3 px-3.5 font-mono font-bold text-indigo-400">
-                                  {isLoan ? (
-                                    <div className="flex flex-col">
-                                      <span>{formatCurrency(deal.bank_commission_amount)}</span>
-                                      <span className="text-[9px] text-muted-foreground font-sans font-normal">2% Dealer Payout</span>
-                                    </div>
-                                  ) : (
-                                    <span className="text-muted-foreground/50 font-normal">—</span>
-                                  )}
+                                <td className="py-3 px-3.5 font-mono font-bold text-amber-700">
+                                  {isLoan ? formatCurrency(bankRedressal) : '₹0 (None)'}
                                 </td>
-                                <td className="py-3 px-3.5 font-mono font-bold text-foreground">
+                                <td className="py-3 px-3.5 font-mono font-bold text-slate-900">
                                   {formatCurrency(deal.final_amount)}
                                 </td>
                                 <td className="py-3 px-3.5">
                                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
                                     (deal.payment_status || '').toLowerCase().includes('paid')
-                                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                      : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                      : 'bg-amber-50 text-amber-700 border-amber-200'
                                   }`}>
                                     {deal.payment_status || 'Pending'}
                                   </span>
@@ -392,10 +397,10 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 border-t border-border bg-secondary/20 flex justify-end">
+        <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground font-bold text-xs transition-colors cursor-pointer"
+            className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs transition-colors cursor-pointer"
           >
             Close Breakdown
           </button>

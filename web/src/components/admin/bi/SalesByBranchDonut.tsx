@@ -53,10 +53,10 @@ export function SalesByBranchDonut({ data: propData, loading: propLoading }: Sal
   const loading = propLoading || internalLoading;
 
   if (loading) {
-    return <div className="h-72 rounded-2xl bg-[#1e293b]/60 animate-pulse border border-slate-800" />;
+    return <div className="h-72 rounded-lg bg-bg-surface-alt animate-pulse border border-border" />;
   }
 
-  const colors = ['#38bdf8', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+  const colors = ['var(--accent)', 'var(--success)', 'var(--warning)', 'var(--danger)', 'var(--text-secondary)'];
   const totalSales = branchesData.reduce((sum, item) => sum + item.salesCount, 0);
 
   const chartData = branchesData.map((item, idx) => ({
@@ -66,13 +66,13 @@ export function SalesByBranchDonut({ data: propData, loading: propLoading }: Sal
   }));
 
   return (
-    <div className="rounded-2xl bg-[#1e293b]/90 border border-slate-800/90 p-5 shadow-lg flex flex-col justify-between font-sans">
-      <h3 className="text-sm font-extrabold text-white tracking-tight mb-2">
+    <div className="rounded-lg bg-bg-surface border border-border p-5 flex flex-col justify-between font-sans">
+      <h3 className="text-sm font-bold text-text-primary tracking-tight mb-2">
         Sales by Branch
       </h3>
 
       {branchesData.length === 0 ? (
-        <div className="py-12 text-center text-xs text-slate-400">
+        <div className="py-12 text-center text-xs text-text-secondary">
           No branch sales recorded yet.
         </div>
       ) : (
@@ -82,7 +82,7 @@ export function SalesByBranchDonut({ data: propData, loading: propLoading }: Sal
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#f8fafc' }}
+                  contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '12px' }}
                   formatter={(val: any) => [`${val} Sales`, 'Volume']}
                 />
                 <Pie
@@ -103,8 +103,8 @@ export function SalesByBranchDonut({ data: propData, loading: propLoading }: Sal
             </ResponsiveContainer>
 
             <div className="absolute flex flex-col items-center justify-center text-center pointer-events-none">
-              <span className="text-2xl font-extrabold text-white font-mono leading-none">{totalSales}</span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase mt-1">Total Sales</span>
+              <span className="text-2xl font-bold text-text-primary font-mono leading-none">{totalSales}</span>
+              <span className="text-xs font-bold text-text-secondary uppercase mt-1">Total Sales</span>
             </div>
           </div>
 
@@ -114,10 +114,10 @@ export function SalesByBranchDonut({ data: propData, loading: propLoading }: Sal
               <div key={item.branchName} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-slate-300 font-semibold">{item.branchName}</span>
+                  <span className="text-text-primary font-bold">{item.branchName}</span>
                 </div>
-                <span className="font-mono text-slate-400 font-bold">
-                  {item.salesCount} <span className="text-[10px] text-slate-500">({item.percentage}%)</span>
+                <span className="font-mono text-text-secondary font-bold">
+                  {item.salesCount} <span className="text-xs text-text-secondary">({item.percentage}%)</span>
                 </span>
               </div>
             ))}

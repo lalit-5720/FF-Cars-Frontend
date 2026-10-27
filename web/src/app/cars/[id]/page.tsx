@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api } from '../../../services/api';
 import { useAuthStore } from '../../../store/useAuthStore';
@@ -16,13 +17,14 @@ import {
   Clock, 
   Fuel, 
   Gauge, 
-  Briefcase, 
-  UserCheck, 
   Wrench,
-  HelpCircle,
-  TrendingUp,
+  Award,
+  Edit,
+  MessageSquare,
+  X,
   CircleDollarSign,
-  Award
+  Building2,
+  MapPin
 } from 'lucide-react';
 import { VehicleInspectionReportModal } from '../../../components/VehicleInspectionReportModal';
 
@@ -33,7 +35,6 @@ interface CarDetailProps {
 export default function CarDetailPage({ params }: CarDetailProps) {
   const router = useRouter();
   
-  // Unwrap params using React.use
   const { id: carId } = React.use(params);
 
   const [car, setCar] = useState<any>(null);
@@ -41,11 +42,14 @@ export default function CarDetailPage({ params }: CarDetailProps) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [isBooking, setIsBooking] = useState(false);
   const [isInspectionOpen, setIsInspectionOpen] = useState(false);
+  const [isEnquiryModalOpen, setIsEnquiryModalOpen] = useState(false);
+  const [enquiryRemarks, setEnquiryRemarks] = useState('');
+  const [isSubmittingEnquiry, setIsSubmittingEnquiry] = useState(false);
 
   // EMI Calculator States
-  const [downPaymentPct, setDownPaymentPct] = useState(20); // 20% default
-  const [tenureMonths, setTenureMonths] = useState(60);     // 5 years default
-  const annualInterestRate = 8.5; // 8.5% fixed
+  const [downPaymentPct, setDownPaymentPct] = useState(20);
+  const [tenureMonths, setTenureMonths] = useState(60);
+  const annualInterestRate = 8.5;
 
   const { user, isAuthenticated } = useAuthStore();
   const { toggleWishlist, isWishlisted } = useWishlistStore();
@@ -55,6 +59,12 @@ export default function CarDetailPage({ params }: CarDetailProps) {
       try {
         const response = await api.get(`/vehicles/${carId}`);
         setCar(response.data);
+
+        api.post('/bi/activities', {
+          event_type: 'VEHICLE_VIEW',
+          vehicle_id: Number(carId),
+          branch_id: response.data?.branch_id,
+        }).catch(() => null);
       } catch (error: any) {
         console.error('Failed to load car details', error);
         showLocalToast('Error: Car not found');
@@ -67,7 +77,6 @@ export default function CarDetailPage({ params }: CarDetailProps) {
     fetchCarDetails();
   }, [carId, router]);
 
-  // Real-time Availability Sync
   useEffect(() => {
     const handleAvailabilityChange = (e: Event) => {
       const customEvent = e as CustomEvent;
@@ -88,14 +97,14 @@ export default function CarDetailPage({ params }: CarDetailProps) {
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1 flex flex-col justify-center">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          <div className="h-[400px] rounded-3xl border border-border bg-card skeleton-shimmer" />
-          <div className="flex flex-col gap-6">
-            <div className="h-8 w-1/3 rounded bg-secondary skeleton-shimmer" />
-            <div className="h-12 w-2/3 rounded bg-secondary skeleton-shimmer" />
-            <div className="h-32 rounded bg-secondary skeleton-shimmer" />
-            <div className="h-16 rounded bg-secondary skeleton-shimmer mt-auto" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1 flex flex-col justify-center bg-bg-page text-text-primary">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="h-96 rounded-lg border border-border bg-bg-surface animate-pulse" />
+          <div className="flex flex-col gap-4">
+            <div className="h-8 w-1/3 rounded-lg bg-bg-surface-alt animate-pulse" />
+            <div className="h-10 w-2/3 rounded-lg bg-bg-surface-alt animate-pulse" />
+            <div className="h-32 rounded-lg bg-bg-surface-alt animate-pulse" />
+            <div className="h-12 rounded-lg bg-bg-surface-alt animate-pulse mt-auto" />
           </div>
         </div>
       </div>
@@ -111,7 +120,6 @@ export default function CarDetailPage({ params }: CarDetailProps) {
   const owner = car.owner_type || car.ownership || '1st Owner';
   const price = car.price ? Number(car.price) : 0;
 
-  // Process Images Json array
   let imagesList: string[] = [];
   try {
     if (typeof car.images === 'string') {
@@ -123,12 +131,33 @@ export default function CarDetailPage({ params }: CarDetailProps) {
     imagesList = [];
   }
 
-  // Include thumbnail/image_url as primary option if empty
   if (imagesList.length === 0) {
     imagesList = [car.image_url || car.thumbnail || 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800'];
   }
 
   const isAvailable = car.status === 'Available' || car.status === 'AVAILABLE';
+
+  let cleanDescription = '';
+  let embeddedInspection: any = null;
+
+  if (car.description) {
+    if (car.description.includes('<!--INSPECTION_REPORT-->')) {
+      const parts = car.description.split('<!--INSPECTION_REPORT-->');
+      cleanDescription = parts[0].trim();
+      try {
+        embeddedInspection = JSON.parse(parts[1].trim());
+      } catch (e) {
+        // ignore
+      }
+    } else {
+      cleanDescription = car.description.trim();
+    }
+  }
+
+  const inspectionReport = car.inspectionReport || embeddedInspection;
+
+  const displayDescription = cleanDescription || 
+    `This certified ${year} ${make} ${car.model} is presented in immaculate condition, finished in ${car.color || 'original factory finish'} with ${km.toLocaleString()} verified kilometers on the odometer. Powered by an efficient ${fuel} engine paired with a ${car.transmission || 'Manual'} transmission, this ${owner} vehicle delivers an exceptional driving experience. Thoroughly audited across 150 mechanical and electrical checkpoints for optimal performance and safety.`;
 
   // EMI Calculator logic
   const downPayment = Math.round((price * downPaymentPct) / 100);
@@ -164,6 +193,30 @@ export default function CarDetailPage({ params }: CarDetailProps) {
     }
   };
 
+  const handleEnquirySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      showLocalToast('Please login to send an enquiry');
+      router.push('/login?redirect=' + encodeURIComponent(`/cars/${carId}`));
+      return;
+    }
+    setIsSubmittingEnquiry(true);
+    try {
+      await api.post('/leads', {
+        vehicle_id: Number(carId),
+        remarks: enquiryRemarks || 'Customer interested in this vehicle',
+      });
+      showLocalToast('Enquiry submitted successfully! A Sales Executive will contact you shortly.', 'success');
+      setIsEnquiryModalOpen(false);
+      setEnquiryRemarks('');
+      router.push('/dashboard?tab=enquiries');
+    } catch (err: any) {
+      showLocalToast(err.response?.data?.message || 'Failed to submit enquiry', 'error');
+    } finally {
+      setIsSubmittingEnquiry(false);
+    }
+  };
+
   const handleWishlist = async () => {
     if (!isAuthenticated) {
       showLocalToast('Please log in to add to wishlist');
@@ -175,44 +228,66 @@ export default function CarDetailPage({ params }: CarDetailProps) {
   };
 
   return (
-    <div className="bg-background text-foreground min-h-screen pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col gap-8">
+    <div className="bg-bg-page text-text-primary min-h-screen pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
         
-        {/* Back button and title info */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        {/* Back button and title bar */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-border">
           <div>
             <button 
               onClick={() => router.push('/cars')}
-              className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground mb-2 group transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 helper-text font-bold text-accent hover:underline mb-1 cursor-pointer"
             >
-              <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+              <ChevronLeft className="w-4 h-4" />
               Back to Inventory
             </button>
             <div className="flex items-baseline gap-3 flex-wrap">
-              <h1 className="text-3xl font-display font-extrabold tracking-tight text-foreground">
+              <h1 className="page-title text-text-primary">
                 {make} {car.model}
               </h1>
-              <span className="text-muted-foreground text-sm font-semibold">{car.color || car.variant || 'Standard'}</span>
+              <span className="helper-text font-bold">{car.color || car.variant || 'Standard'}</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-1 font-sans">
+            <p className="helper-text mt-0.5">
               Registration: {car.registration_number || 'TN Registration'} &bull; Fully Inspected &amp; Certified
             </p>
+            {car.branches && (
+              <div className="flex items-center gap-1.5 text-xs text-text-secondary mt-2">
+                <Building2 className="w-3.5 h-3.5 text-accent shrink-0" />
+                <span className="font-bold text-text-primary">
+                  {car.branches.branch_name}
+                </span>
+                <span className="helper-text">
+                  &bull; {car.branches.address ? `${car.branches.address}, ${car.branches.city}` : car.branches.city}
+                </span>
+              </div>
+            )}
+            {(user?.role === 'SYSTEM_ADMIN' || user?.role === 'BRANCH_MANAGER') && (
+              <div className="mt-2">
+                <Link
+                  href={`/admin/inventory?editVehicleId=${car.vehicle_id || car.id}`}
+                  className="btn-neutral text-xs h-8 px-3"
+                >
+                  <Edit className="w-3.5 h-3.5" />
+                  <span>Edit in Admin</span>
+                </Link>
+              </div>
+            )}
           </div>
 
-          {/* Wishlist Button and Pricing */}
-          <div className="flex items-center gap-6 self-stretch sm:self-auto justify-between sm:justify-end border-t sm:border-t-0 pt-4 sm:pt-0 border-border">
+          {/* Pricing & Wishlist */}
+          <div className="flex items-center gap-4">
             <div>
-              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Total Price (GST Incl.)</span>
-              <div className="text-3xl font-black text-foreground font-mono mt-0.5">
+              <span className="helper-text uppercase font-bold block">Total Price (GST Incl.)</span>
+              <div className="text-2xl font-bold text-text-primary">
                 ₹{price.toLocaleString()}
               </div>
             </div>
             <button
               onClick={handleWishlist}
-              className={`p-3 rounded-full border transition-all cursor-pointer ${
+              className={`p-2.5 rounded-lg border transition-colors cursor-pointer ${
                 isWishlisted(String(car.vehicle_id || car.id))
-                  ? 'bg-rose-500 border-rose-500 text-foreground shadow-sm'
-                  : 'border-border bg-card text-foreground hover:bg-secondary'
+                  ? 'bg-status-danger text-white border-status-danger'
+                  : 'border-border bg-bg-surface text-text-secondary hover:text-text-primary'
               }`}
             >
               <Heart className="w-5 h-5" fill={isWishlisted(String(car.vehicle_id || car.id)) ? 'currentColor' : 'none'} />
@@ -220,275 +295,358 @@ export default function CarDetailPage({ params }: CarDetailProps) {
           </div>
         </div>
 
-      {/* Main Grid: Images & Booking Form */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        {/* Left Side: Images Slideshow & Specs (8 Cols) */}
-        <div className="lg:col-span-8 flex flex-col gap-8">
+        {/* Main Grid: Images & Booking Form */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Slideshow Display */}
-          <div className="relative aspect-video w-full rounded-2xl overflow-hidden border border-border bg-background/40 group">
-            <img
-              src={imagesList[activeImageIndex]}
-              alt={`${make} ${car.model} image`}
-              className="w-full h-full object-cover select-none"
-            />
+          {/* Left Side: Images & Specs (8 Cols) */}
+          <div className="lg:col-span-8 flex flex-col gap-6">
+            
+            {/* Slideshow Display */}
+            <div className="relative aspect-video w-full rounded-lg overflow-hidden border border-border bg-bg-surface">
+              <img
+                src={imagesList[activeImageIndex]}
+                alt={`${make} ${car.model}`}
+                className="w-full h-full object-cover"
+              />
 
-            {/* Availability overlay */}
-            {!isAvailable && (
-              <div className="absolute inset-0 bg-background/60 flex items-center justify-center backdrop-blur-xs select-none">
-                <span className="px-6 py-3 border border-red-500 rounded-xl bg-red-950/70 text-red-400 font-display font-extrabold tracking-widest text-lg uppercase shadow-xl">
-                  {car.status}
-                </span>
-              </div>
-            )}
-
-            {/* Left and Right navigation buttons */}
-            {imagesList.length > 1 && (
-              <>
-                <button
-                  onClick={() => setActiveImageIndex((prev) => (prev === 0 ? imagesList.length - 1 : prev - 1))}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full backdrop-blur-md bg-background/40 text-foreground hover:bg-background/60 border border-white/10 transition-all opacity-0 group-hover:opacity-100"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setActiveImageIndex((prev) => (prev === imagesList.length - 1 ? 0 : prev + 1))}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full backdrop-blur-md bg-background/40 text-foreground hover:bg-background/60 border border-white/10 transition-all opacity-0 group-hover:opacity-100"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </>
-            )}
-
-            {/* Position indicator */}
-            <div className="absolute bottom-4 right-4 px-3 py-1 rounded bg-background/50 text-[10px] font-bold text-foreground border border-white/10 select-none">
-              {activeImageIndex + 1} / {imagesList.length}
-            </div>
-          </div>
-
-          {/* Miniature List */}
-          {imagesList.length > 1 && (
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
-              {imagesList.map((url, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveImageIndex(index)}
-                  className={`relative flex-shrink-0 w-24 aspect-video rounded-lg overflow-hidden border-2 transition-all bg-secondary ${
-                    activeImageIndex === index ? 'border-primary' : 'border-border hover:border-muted-foreground'
-                  }`}
-                >
-                  <img src={url} alt="thumbnail" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Highlights & Features Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="p-4 rounded-2xl border border-border/90 bg-card flex flex-col gap-1.5 shadow-sm">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-amber-600" />
-                Year
-              </span>
-              <span className="font-extrabold text-foreground">{year}</span>
-            </div>
-            <div className="p-4 rounded-2xl border border-border/90 bg-card flex flex-col gap-1.5 shadow-sm">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                <Gauge className="w-3.5 h-3.5 text-amber-600" />
-                Driven
-              </span>
-              <span className="font-extrabold text-foreground">{km.toLocaleString()} km</span>
-            </div>
-            <div className="p-4 rounded-2xl border border-border/90 bg-card flex flex-col gap-1.5 shadow-sm">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                <Fuel className="w-3.5 h-3.5 text-amber-600" />
-                Fuel Type
-              </span>
-              <span className="font-extrabold text-foreground">{fuel}</span>
-            </div>
-            <div className="p-4 rounded-2xl border border-border/90 bg-card flex flex-col gap-1.5 shadow-sm">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase flex items-center gap-1">
-                <Wrench className="w-3.5 h-3.5 text-amber-600" />
-                Gearbox
-              </span>
-              <span className="font-extrabold text-foreground">{car.transmission || 'Manual'}</span>
-            </div>
-          </div>
-
-          {/* Description Card */}
-          <div className="p-6 rounded-2xl border border-border/90 bg-card shadow-sm flex flex-col gap-3">
-            <h2 className="text-base font-bold text-foreground flex items-center gap-2 font-display">
-              <Sparkles className="w-5 h-5 text-amber-600" />
-              Dealer Description
-            </h2>
-            <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line font-sans">
-              {car.description || "No description provided for this vehicle."}
-            </p>
-          </div>
-
-          {/* Specs Details Sheet */}
-          <div className="p-6 rounded-2xl border border-border/90 bg-card shadow-sm">
-            <h2 className="text-base font-bold text-foreground mb-4 font-display">Complete Specifications Sheet</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-8 text-xs font-sans">
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Make</span>
-                <span className="font-bold text-foreground">{make}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Model</span>
-                <span className="font-bold text-foreground">{car.model}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Color</span>
-                <span className="font-bold text-foreground">{car.color || 'Standard'}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Ownership History</span>
-                <span className="font-bold text-foreground">{owner}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Transmission Type</span>
-                <span className="font-bold text-foreground">{car.transmission || 'Manual'}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Fuel Type</span>
-                <span className="font-bold text-foreground">{fuel}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Manufacture Year</span>
-                <span className="font-bold text-foreground">{year}</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-border">
-                <span className="text-muted-foreground">Odometer reading</span>
-                <span className="font-bold text-foreground">{km.toLocaleString()} km</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side: Booking Panel & EMI Calculator (4 Cols) */}
-        <div className="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-24">
-          
-          {/* REFERENCE MATCH HERO BOOKING CARD (DARK OBSIDIAN) */}
-          <div className="p-7 rounded-3xl bg-[#0F172A] text-foreground shadow-xl flex flex-col gap-4">
-            <h2 className="text-lg font-extrabold font-display">Request a Test Ride</h2>
-            <p className="text-xs text-muted-foreground leading-relaxed font-sans">
-              Experience this luxury vehicle firsthand. Schedule your personalized test ride concierge appointment.
-            </p>
-
-            {/* 150-Point Certified Inspection Button */}
-            <button
-              onClick={() => setIsInspectionOpen(true)}
-              className="flex items-center justify-between p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 text-amber-400 transition-all cursor-pointer group"
-            >
-              <div className="flex items-center gap-2.5">
-                <Award className="w-5 h-5 flex-shrink-0 text-amber-400" />
-                <div className="text-left">
-                  <div className="text-xs font-bold text-white">150-Point Certified Inspection</div>
-                  <div className={`text-[10px] font-semibold ${car.inspectionReport?.isGoodToUse !== false ? 'text-emerald-400' : 'text-amber-400'}`}>
-                    {car.inspectionReport?.isGoodToUse !== false ? '✓ Certified Good to Use' : 'Attention Needed'} &bull; ({car.inspectionReport?.overallScore ?? 98}/100) &bull; {car.inspectionReport?.certificationTier || 'Gold Certified'}
-                  </div>
+              {/* Availability overlay */}
+              {!isAvailable && (
+                <div className="absolute inset-0 bg-bg-page/70 flex items-center justify-center">
+                  <span className="badge badge-danger text-sm px-4 py-1.5">
+                    {car.status}
+                  </span>
                 </div>
-              </div>
-              <span className="text-xs font-bold text-amber-400 group-hover:translate-x-0.5 transition-transform">&rarr;</span>
-            </button>
-
-            <button
-              onClick={handleBooking}
-              disabled={!isAvailable || isBooking}
-              className={`w-full py-3.5 px-4 rounded-xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                isAvailable
-                  ? 'bg-card text-foreground hover:bg-secondary shadow-md'
-                  : 'bg-secondary text-muted-foreground cursor-not-allowed'
-              }`}
-            >
-              {isBooking ? (
-                <>
-                  <Clock className="w-4 h-4 animate-spin" />
-                  Submitting Request...
-                </>
-              ) : isAvailable ? (
-                'Request Test Ride'
-              ) : (
-                'Currently Sold Out'
               )}
-            </button>
 
-            {isAvailable && (
-              <span className="text-[10px] text-center text-emerald-400 font-bold uppercase tracking-wider flex items-center justify-center gap-1">
-                &bull; Live availability verified
-              </span>
+              {/* Navigation buttons */}
+              {imagesList.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setActiveImageIndex((prev) => (prev === 0 ? imagesList.length - 1 : prev - 1))}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-bg-surface border border-border text-text-primary"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setActiveImageIndex((prev) => (prev === imagesList.length - 1 ? 0 : prev + 1))}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-bg-surface border border-border text-text-primary"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </>
+              )}
+
+              {/* Position indicator */}
+              <div className="absolute bottom-3 right-3 badge badge-info">
+                {activeImageIndex + 1} / {imagesList.length}
+              </div>
+            </div>
+
+            {/* Miniature List */}
+            {imagesList.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {imagesList.map((url, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setActiveImageIndex(index)}
+                    className={`relative flex-shrink-0 w-20 aspect-video rounded-lg overflow-hidden border-2 cursor-pointer ${
+                      activeImageIndex === index ? 'border-accent' : 'border-border'
+                    }`}
+                  >
+                    <img src={url} alt="thumbnail" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
             )}
-          </div>
 
-          {/* Live Finance EMI Estimator Card */}
-          <div className="p-6 rounded-2xl border border-border/90 bg-card shadow-sm flex flex-col gap-5 text-foreground">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <h3 className="font-bold text-sm flex items-center gap-2 text-foreground font-display">
-                <CircleDollarSign className="w-4.5 h-4.5 text-amber-600" />
-                EMI Loan Estimator
-              </h3>
-              <span className="text-[10px] font-bold text-foreground bg-secondary border border-border px-2.5 py-0.5 rounded-full">
-                8.5% fixed PA
-              </span>
-            </div>
-
-            {/* Slider 1: Down Payment Percentage */}
-            <div className="flex flex-col gap-2 font-sans">
-              <div className="flex justify-between text-xs font-semibold">
-                <span className="text-muted-foreground">Down Payment ({downPaymentPct}%)</span>
-                <span className="text-foreground font-mono font-bold">₹{downPayment.toLocaleString()}</span>
+            {/* Highlights Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-4 rounded-lg border border-border bg-bg-surface flex flex-col gap-1">
+                <span className="helper-text font-bold uppercase flex items-center gap-1">
+                  <Calendar className="w-3.5 h-3.5 text-accent" />
+                  Year
+                </span>
+                <span className="body-text font-bold">{year}</span>
               </div>
-              <input
-                type="range"
-                min="10"
-                max="90"
-                step="5"
-                value={downPaymentPct}
-                onChange={(e) => setDownPaymentPct(parseInt(e.target.value, 10))}
-                className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-slate-900 focus:outline-none"
-              />
-              <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
-                <span>10% (₹{(car.price * 0.1).toLocaleString()})</span>
-                <span>90% (₹{(car.price * 0.9).toLocaleString()})</span>
+              <div className="p-4 rounded-lg border border-border bg-bg-surface flex flex-col gap-1">
+                <span className="helper-text font-bold uppercase flex items-center gap-1">
+                  <Gauge className="w-3.5 h-3.5 text-accent" />
+                  Driven
+                </span>
+                <span className="body-text font-bold">{km.toLocaleString()} km</span>
               </div>
-            </div>
-
-            {/* Slider 2: Tenure Months */}
-            <div className="flex flex-col gap-2 font-sans">
-              <div className="flex justify-between text-xs font-semibold">
-                <span className="text-muted-foreground">Loan Tenure</span>
-                <span className="text-foreground font-bold">{tenureMonths} Months ({tenureMonths / 12} Yrs)</span>
+              <div className="p-4 rounded-lg border border-border bg-bg-surface flex flex-col gap-1">
+                <span className="helper-text font-bold uppercase flex items-center gap-1">
+                  <Fuel className="w-3.5 h-3.5 text-accent" />
+                  Fuel Type
+                </span>
+                <span className="body-text font-bold">{fuel}</span>
               </div>
-              <input
-                type="range"
-                min="12"
-                max="84"
-                step="12"
-                value={tenureMonths}
-                onChange={(e) => setTenureMonths(parseInt(e.target.value, 10))}
-                className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-slate-900 focus:outline-none"
-              />
-              <div className="flex justify-between text-[9px] text-muted-foreground font-medium">
-                <span>12 Months</span>
-                <span>84 Months</span>
+              <div className="p-4 rounded-lg border border-border bg-bg-surface flex flex-col gap-1">
+                <span className="helper-text font-bold uppercase flex items-center gap-1">
+                  <Wrench className="w-3.5 h-3.5 text-accent" />
+                  Transmission
+                </span>
+                <span className="body-text font-bold">{car.transmission || 'Manual'}</span>
               </div>
             </div>
 
-            {/* Calculation output */}
-            <div className="p-4 rounded-xl bg-secondary border border-border flex flex-col items-center justify-center text-center gap-1">
-              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Estimated Monthly Payment</span>
-              <div className="text-2xl font-black text-foreground font-mono">
-                ₹{emi.toLocaleString()} <span className="text-xs text-muted-foreground font-normal">/mo</span>
-              </div>
-              <p className="text-[10px] text-muted-foreground mt-1 max-w-[200px] leading-tight">
-                Calculated on loan principal of ₹{loanPrincipal.toLocaleString()} for {tenureMonths} months.
+            {/* Description Card */}
+            <div className="p-6 rounded-lg border border-border bg-bg-surface flex flex-col gap-2">
+              <h2 className="section-heading flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-accent" />
+                Vehicle Highlights &amp; Condition
+              </h2>
+              <p className="body-text leading-relaxed whitespace-pre-line text-text-secondary">
+                {displayDescription}
               </p>
             </div>
+
+            {/* Inspection Overview */}
+            {inspectionReport && (
+              <div className="p-6 rounded-lg border border-border bg-bg-surface flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-bg-surface-alt border border-border flex items-center justify-center text-accent shrink-0">
+                      <Award className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h2 className="section-heading">
+                          150-Point Certified Inspection
+                        </h2>
+                        <span className={`badge ${
+                          inspectionReport.isGoodToUse !== false ? 'badge-success' : 'badge-warning'
+                        }`}>
+                          {inspectionReport.isGoodToUse !== false ? '✓ Good to Use' : 'Needs Review'}
+                        </span>
+                      </div>
+                      <p className="helper-text mt-0.5">
+                        Certificate #{inspectionReport.certificateId || 'CR-CERT-2026'} &bull; {inspectionReport.inspectorName || 'Certified Lead Inspector'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <span className="helper-text uppercase block">Score</span>
+                      <span className="body-text font-bold">
+                        {inspectionReport.overallScore !== undefined ? `${inspectionReport.overallScore}/100` : 'Pending'}
+                      </span>
+                    </div>
+                    <span className="badge badge-info">
+                      {inspectionReport.certificationTier || 'Gold Certified'}
+                    </span>
+                  </div>
+                </div>
+
+                {inspectionReport.remarks && (
+                  <div className="p-3 rounded-lg bg-bg-surface-alt border border-border helper-text text-text-primary flex items-start gap-2">
+                    <ShieldCheck className="w-4 h-4 text-status-success shrink-0 mt-0.5" />
+                    <p className="leading-relaxed">
+                      &ldquo;{inspectionReport.remarks}&rdquo;
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsInspectionOpen(true)}
+                    className="btn-secondary"
+                  >
+                    <Award className="w-4 h-4" />
+                    <span>View Inspection Checklist</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Specifications Sheet */}
+            <div className="p-6 rounded-lg border border-border bg-bg-surface">
+              <h2 className="section-heading mb-4">Complete Specifications</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 text-xs">
+                <div className="flex justify-between py-2.5 border-b border-border">
+                  <span className="helper-text">Make</span>
+                  <span className="body-text font-bold">{make}</span>
+                </div>
+                <div className="flex justify-between py-2.5 border-b border-border">
+                  <span className="helper-text">Model</span>
+                  <span className="body-text font-bold">{car.model}</span>
+                </div>
+                <div className="flex justify-between py-2.5 border-b border-border">
+                  <span className="helper-text">Color</span>
+                  <span className="body-text font-bold">{car.color || 'Standard'}</span>
+                </div>
+                <div className="flex justify-between py-2.5 border-b border-border">
+                  <span className="helper-text">Ownership History</span>
+                  <span className="body-text font-bold">{owner}</span>
+                </div>
+                <div className="flex justify-between py-2.5 border-b border-border">
+                  <span className="helper-text">Transmission</span>
+                  <span className="body-text font-bold">{car.transmission || 'Manual'}</span>
+                </div>
+                <div className="flex justify-between py-2.5 border-b border-border">
+                  <span className="helper-text">Fuel Type</span>
+                  <span className="body-text font-bold">{fuel}</span>
+                </div>
+                <div className="flex justify-between py-2.5 border-b border-border">
+                  <span className="helper-text">Manufacture Year</span>
+                  <span className="body-text font-bold">{year}</span>
+                </div>
+                <div className="flex justify-between py-2.5 border-b border-border">
+                  <span className="helper-text">Odometer reading</span>
+                  <span className="body-text font-bold">{km.toLocaleString()} km</span>
+                </div>
+                <div className="flex justify-between py-2.5 border-b border-border sm:col-span-2">
+                  <span className="helper-text">Showroom Location</span>
+                  <span className="body-text font-bold text-accent">
+                    {car.branches ? `${car.branches.branch_name} (${car.branches.city})` : 'CarRevive Showroom'}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
-        </div>
+          {/* Right Side: Booking Panel & EMI Calculator (4 Cols) */}
+          <div className="lg:col-span-4 flex flex-col gap-6 lg:sticky lg:top-20">
+            
+            {/* Booking Card */}
+            <div className="p-6 rounded-lg bg-bg-surface border border-border flex flex-col gap-4">
+              <h2 className="section-heading">Request a Test Drive</h2>
+              <p className="helper-text">
+                Experience this vehicle in person. Schedule your showroom appointment with our dealership team.
+              </p>
+
+              {/* Inspection Quick Button */}
+              <button
+                onClick={() => setIsInspectionOpen(true)}
+                className="flex items-center justify-between p-3 rounded-lg border border-border bg-bg-surface-alt hover:border-accent transition-colors cursor-pointer text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <Award className="w-4 h-4 text-accent shrink-0" />
+                  <div>
+                    <div className="body-text font-bold text-xs">150-Point Inspection Report</div>
+                    <div className="helper-text">
+                      {car.inspectionReport?.certificationTier || 'Certified Quality'} &bull; {car.inspectionReport?.overallScore || 92}/100
+                    </div>
+                  </div>
+                </div>
+                <span className="helper-text font-bold text-accent">&rarr;</span>
+              </button>
+
+              {/* Submit Enquiry */}
+              {isAvailable && (
+                <button
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      showLocalToast('Please login to send an enquiry');
+                      router.push('/login?redirect=' + encodeURIComponent(`/cars/${carId}`));
+                      return;
+                    }
+                    setIsEnquiryModalOpen(true);
+                  }}
+                  className="btn-neutral w-full"
+                >
+                  <MessageSquare className="w-4 h-4 text-accent" />
+                  <span>Submit Vehicle Enquiry</span>
+                </button>
+              )}
+
+              {/* Book Test Drive */}
+              <button
+                onClick={handleBooking}
+                disabled={!isAvailable || isBooking}
+                className="btn-primary w-full"
+              >
+                {isBooking ? (
+                  <>
+                    <Clock className="w-4 h-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : isAvailable ? (
+                  'Request Test Drive'
+                ) : car.status === 'Reserved' ? (
+                  'Currently Reserved'
+                ) : (
+                  'Currently Sold Out'
+                )}
+              </button>
+
+              {isAvailable && (
+                <span className="helper-text text-status-success font-bold text-center block">
+                  &bull; Live availability verified
+                </span>
+              )}
+            </div>
+
+            {/* EMI Estimator Card */}
+            <div className="p-6 rounded-lg border border-border bg-bg-surface flex flex-col gap-4">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <h3 className="section-heading text-sm flex items-center gap-1.5">
+                  <CircleDollarSign className="w-4 h-4 text-accent" />
+                  EMI Loan Estimator
+                </h3>
+                <span className="badge badge-info text-[10px]">
+                  8.5% PA
+                </span>
+              </div>
+
+              {/* Slider 1: Down Payment */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between helper-text">
+                  <span>Down Payment ({downPaymentPct}%)</span>
+                  <span className="body-text font-bold">₹{downPayment.toLocaleString()}</span>
+                </div>
+                <input
+                  type="range"
+                  min="10"
+                  max="90"
+                  step="5"
+                  value={downPaymentPct}
+                  onChange={(e) => setDownPaymentPct(parseInt(e.target.value, 10))}
+                  className="w-full h-1.5 bg-bg-surface-alt rounded-lg cursor-pointer"
+                />
+                <div className="flex justify-between helper-text text-[10px]">
+                  <span>10% (₹{(car.price * 0.1).toLocaleString()})</span>
+                  <span>90% (₹{(car.price * 0.9).toLocaleString()})</span>
+                </div>
+              </div>
+
+              {/* Slider 2: Tenure */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between helper-text">
+                  <span>Loan Tenure</span>
+                  <span className="body-text font-bold">{tenureMonths} Months ({tenureMonths / 12} Yrs)</span>
+                </div>
+                <input
+                  type="range"
+                  min="12"
+                  max="84"
+                  step="12"
+                  value={tenureMonths}
+                  onChange={(e) => setTenureMonths(parseInt(e.target.value, 10))}
+                  className="w-full h-1.5 bg-bg-surface-alt rounded-lg cursor-pointer"
+                />
+                <div className="flex justify-between helper-text text-[10px]">
+                  <span>12 Months</span>
+                  <span>84 Months</span>
+                </div>
+              </div>
+
+              {/* EMI Output */}
+              <div className="p-4 rounded-lg bg-bg-surface-alt border border-border flex flex-col items-center justify-center text-center">
+                <span className="helper-text uppercase font-bold">Estimated Monthly Payment</span>
+                <div className="page-title text-text-primary mt-1">
+                  ₹{emi.toLocaleString()} <span className="helper-text font-normal">/mo</span>
+                </div>
+                <p className="helper-text mt-1">
+                  On loan principal of ₹{loanPrincipal.toLocaleString()} for {tenureMonths} months.
+                </p>
+              </div>
+            </div>
+
+          </div>
 
         </div>
       </div>
@@ -500,6 +658,60 @@ export default function CarDetailPage({ params }: CarDetailProps) {
         onClose={() => setIsInspectionOpen(false)}
         onUpdated={(updatedCar) => setCar(updatedCar)}
       />
+
+      {/* Vehicle Enquiry Modal */}
+      {isEnquiryModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+          <div className="w-full max-w-md rounded-lg bg-bg-surface border border-border p-6 shadow-sm text-text-primary">
+            <div className="flex items-center justify-between pb-3 border-b border-border mb-4">
+              <h3 className="section-heading text-sm flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-accent" />
+                <span>Enquire: {make} {car?.model}</span>
+              </h3>
+              <button
+                onClick={() => setIsEnquiryModalOpen(false)}
+                className="text-text-secondary hover:text-text-primary"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleEnquirySubmit} className="flex flex-col gap-4 text-xs">
+              <div>
+                <p className="helper-text mb-2">
+                  Have questions about pricing, vehicle condition, loan eligibility, or visiting <strong>{car?.branches?.branch_name || 'Showroom'}</strong>? Submit your enquiry below:
+                </p>
+
+                <textarea
+                  rows={4}
+                  required
+                  value={enquiryRemarks}
+                  onChange={(e) => setEnquiryRemarks(e.target.value)}
+                  placeholder="e.g. I am interested in viewing this vehicle in person, negotiating terms, and exploring finance options..."
+                  className="w-full p-3 rounded-lg bg-bg-surface border border-border text-text-primary focus:border-accent focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
+                <button
+                  type="button"
+                  onClick={() => setIsEnquiryModalOpen(false)}
+                  className="btn-neutral"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingEnquiry}
+                  className="btn-primary"
+                >
+                  {isSubmittingEnquiry ? 'Submitting...' : 'Submit Enquiry'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

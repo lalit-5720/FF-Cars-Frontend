@@ -52,7 +52,6 @@ export default function ComparePage() {
     );
   };
 
-  // Compute lowest KM, lowest Price, newest Year for winner badges
   const lowestKmCar = compareList.length > 1
     ? [...compareList].sort((a, b) => Number(a.kilometers_driven || a.kmDriven || 0) - Number(b.kilometers_driven || b.kmDriven || 0))[0]
     : null;
@@ -66,38 +65,39 @@ export default function ComparePage() {
     : null;
 
   return (
-    <div className="min-h-screen bg-[#070A12] text-foreground py-10 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto flex flex-col gap-8">
+    <div className="min-h-screen bg-bg-page text-text-primary py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto flex flex-col gap-6">
         
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border pb-6">
           <div>
-            <div className="flex items-center gap-2 text-amber-500 font-bold text-xs uppercase tracking-widest mb-1">
+            <div className="flex items-center gap-1.5 helper-text font-bold text-accent uppercase tracking-wider mb-1">
               <Scale className="w-4 h-4" />
-              <span>Comparative Intelligence</span>
+              <span>Comparative Analysis</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white font-display">
-              Side-by-Side Vehicle Comparison
+            <h1 className="page-title text-text-primary">
+              Vehicle Comparison
             </h1>
-            <p className="text-sm text-gray-400 mt-1">
-              Compare luxury specifications, financing EMIs, and certified inspection ratings.
+            <p className="helper-text mt-1">
+              Compare vehicle specifications, monthly loan EMIs, and inspection ratings side by side.
             </p>
           </div>
 
           {compareList.length > 0 && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <button
                 onClick={clearCompare}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-white border border-gray-800 hover:bg-gray-800 transition-colors cursor-pointer"
+                className="btn-neutral"
               >
-                Clear Comparison
+                Clear All
               </button>
               {compareList.length < 4 && (
                 <button
                   onClick={() => setIsAddPickerOpen(true)}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold transition-all shadow-md cursor-pointer"
+                  className="btn-primary"
                 >
-                  <Plus className="w-4 h-4" /> Add Vehicle ({compareList.length}/4)
+                  <Plus className="w-4 h-4" />
+                  <span>Add Vehicle ({compareList.length}/4)</span>
                 </button>
               )}
             </div>
@@ -106,36 +106,36 @@ export default function ComparePage() {
 
         {/* Empty State */}
         {compareList.length === 0 ? (
-          <div className="p-16 rounded-3xl bg-[#0B0F1A] border border-[#1E2638] text-center flex flex-col items-center justify-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
-              <Scale className="w-8 h-8" />
+          <div className="p-12 rounded-lg bg-bg-surface border border-border text-center flex flex-col items-center justify-center gap-3">
+            <div className="w-12 h-12 rounded-lg bg-bg-surface-alt border border-border flex items-center justify-center text-accent">
+              <Scale className="w-6 h-6" />
             </div>
-            <h3 className="text-xl font-bold text-white font-display">No Vehicles in Comparison</h3>
-            <p className="text-xs text-gray-400 max-w-md">
-              Select up to 4 certified luxury cars from our catalog to compare performance, features, and ownership costs.
+            <h3 className="section-heading text-text-primary">No Vehicles Selected</h3>
+            <p className="body-text text-text-secondary max-w-md">
+              Select up to 4 certified vehicles from our inventory to compare specifications and prices side-by-side.
             </p>
             <div className="flex gap-3 mt-2">
               <button
                 onClick={() => router.push('/cars')}
-                className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs transition-all shadow-md cursor-pointer"
+                className="btn-primary"
               >
                 Browse Inventory
               </button>
               <button
                 onClick={() => setIsAddPickerOpen(true)}
-                className="px-6 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-bold text-xs transition-colors cursor-pointer"
+                className="btn-neutral"
               >
-                Quick Pick From Showroom
+                Quick Add Vehicle
               </button>
             </div>
           </div>
         ) : (
           /* Matrix Comparison Table */
-          <div className="overflow-x-auto rounded-3xl border border-[#1E2638] bg-[#0B0F1A] shadow-2xl">
+          <div className="overflow-x-auto rounded-lg border border-border bg-bg-surface">
             <table className="w-full text-left border-collapse min-w-[760px]">
               <thead>
-                <tr className="border-b border-[#1E2638] bg-[#101626]">
-                  <th className="p-5 w-56 text-xs font-bold uppercase tracking-wider text-gray-400">
+                <tr className="border-b border-border bg-bg-surface-alt">
+                  <th className="p-4 w-56 table-header">
                     Vehicle Model
                   </th>
                   {compareList.map((car) => {
@@ -147,18 +147,18 @@ export default function ComparePage() {
                     const isNewest = newestYearCar && (newestYearCar.vehicle_id || newestYearCar.id) === id;
 
                     return (
-                      <th key={id} className="p-5 min-w-[240px] align-top">
+                      <th key={id} className="p-4 min-w-[240px] align-top bg-bg-surface border-l border-border">
                         <div className="relative flex flex-col gap-3">
                           <button
                             onClick={() => removeFromCompare(String(id))}
-                            className="absolute -top-2 -right-2 p-1.5 rounded-full bg-gray-800 hover:bg-red-500 text-gray-400 hover:text-white transition-colors cursor-pointer"
+                            className="absolute -top-1 -right-1 p-1 rounded-lg bg-bg-surface-alt border border-border text-text-secondary hover:text-status-danger transition-colors cursor-pointer"
                             title="Remove"
                           >
                             <X className="w-4 h-4" />
                           </button>
 
                           {/* Image */}
-                          <div className="relative aspect-video w-full rounded-xl overflow-hidden bg-gray-900 border border-gray-800">
+                          <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-bg-surface-alt border border-border">
                             <img
                               src={car.image_url || car.images?.[0] || 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&q=80&w=600'}
                               alt={car.model}
@@ -169,43 +169,43 @@ export default function ComparePage() {
                           {/* Winner Badges */}
                           <div className="flex flex-wrap gap-1 min-h-[22px]">
                             {isLowestPrice && (
-                              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold">
-                                💰 Best Price
+                              <span className="badge badge-success text-[10px]">
+                                Best Price
                               </span>
                             )}
                             {isLowestKm && (
-                              <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[9px] font-bold">
-                                🚀 Lowest Mileage
+                              <span className="badge badge-info text-[10px]">
+                                Lowest Mileage
                               </span>
                             )}
                             {isNewest && (
-                              <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[9px] font-bold">
-                                ✨ Newest Model
+                              <span className="badge badge-warning text-[10px]">
+                                Newest Model
                               </span>
                             )}
                           </div>
 
                           <div>
-                            <h4 className="font-extrabold text-white text-base font-display">
+                            <h4 className="section-heading text-sm text-text-primary">
                               {make} {car.model}
                             </h4>
-                            <span className="text-xs text-gray-400">{car.color || 'Premium Edition'}</span>
+                            <span className="helper-text">{car.color || 'Standard Edition'}</span>
                           </div>
 
-                          <div className="pt-2 border-t border-gray-800">
-                            <span className="font-mono font-black text-amber-400 text-xl block">
+                          <div className="pt-2 border-t border-border">
+                            <span className="section-heading text-text-primary block">
                               ₹{price.toLocaleString()}
                             </span>
-                            <span className="text-[11px] text-gray-400 font-mono">
+                            <span className="helper-text block">
                               Est. EMI: ₹{calculateEmi(price).toLocaleString()}/mo
                             </span>
                           </div>
 
                           <button
                             onClick={() => router.push(`/cars/${id}`)}
-                            className="mt-1 w-full py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs transition-all shadow-sm cursor-pointer text-center"
+                            className="btn-primary w-full text-xs"
                           >
-                            View Details &rarr;
+                            View Details
                           </button>
                         </div>
                       </th>
@@ -213,110 +213,110 @@ export default function ComparePage() {
                   })}
                   {/* Empty Slot */}
                   {compareList.length < 4 && (
-                    <th className="p-5 min-w-[200px] align-middle text-center bg-[#070A12]/50">
+                    <th className="p-4 min-w-[200px] align-middle text-center bg-bg-surface-alt border-l border-border">
                       <button
                         onClick={() => setIsAddPickerOpen(true)}
-                        className="p-6 rounded-2xl border-2 border-dashed border-gray-800 hover:border-amber-500/60 flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-amber-400 transition-colors cursor-pointer w-full"
+                        className="p-6 rounded-lg border border-dashed border-border hover:border-accent flex flex-col items-center justify-center gap-2 text-text-secondary hover:text-text-primary transition-colors cursor-pointer w-full bg-bg-surface"
                       >
-                        <Plus className="w-8 h-8" />
-                        <span className="text-xs font-bold">Add Another Car</span>
+                        <Plus className="w-6 h-6 text-accent" />
+                        <span className="helper-text font-bold">Add Another Car</span>
                       </button>
                     </th>
                   )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1E2638] text-xs">
+              <tbody>
                 {/* Year */}
                 <tr>
-                  <td className="p-4 font-bold text-gray-400 bg-[#0E1424]">Model Year</td>
+                  <td className="p-4 helper-text font-bold uppercase bg-bg-surface-alt">Model Year</td>
                   {compareList.map((car) => (
-                    <td key={car.id} className="p-4 font-semibold text-white">
+                    <td key={car.id} className="p-4 body-text font-bold border-l border-border">
                       {car.manufacture_year || car.year || 2022}
                     </td>
                   ))}
-                  {compareList.length < 4 && <td className="bg-[#070A12]/30"></td>}
+                  {compareList.length < 4 && <td className="border-l border-border bg-bg-surface-alt">—</td>}
                 </tr>
 
                 {/* Kilometers Driven */}
                 <tr>
-                  <td className="p-4 font-bold text-gray-400 bg-[#0E1424]">Kilometers Driven</td>
+                  <td className="p-4 helper-text font-bold uppercase bg-bg-surface-alt">Kilometers Driven</td>
                   {compareList.map((car) => (
-                    <td key={car.id} className="p-4 font-semibold text-white font-mono">
+                    <td key={car.id} className="p-4 body-text border-l border-border">
                       {(car.kilometers_driven || car.kmDriven || 0).toLocaleString()} km
                     </td>
                   ))}
-                  {compareList.length < 4 && <td className="bg-[#070A12]/30"></td>}
+                  {compareList.length < 4 && <td className="border-l border-border bg-bg-surface-alt">—</td>}
                 </tr>
 
                 {/* Fuel Type */}
                 <tr>
-                  <td className="p-4 font-bold text-gray-400 bg-[#0E1424]">Fuel Type</td>
+                  <td className="p-4 helper-text font-bold uppercase bg-bg-surface-alt">Fuel Type</td>
                   {compareList.map((car) => (
-                    <td key={car.id} className="p-4 font-semibold text-white">
+                    <td key={car.id} className="p-4 body-text border-l border-border">
                       {car.fuel_type || car.fuelType || 'Petrol'}
                     </td>
                   ))}
-                  {compareList.length < 4 && <td className="bg-[#070A12]/30"></td>}
+                  {compareList.length < 4 && <td className="border-l border-border bg-bg-surface-alt">—</td>}
                 </tr>
 
                 {/* Transmission */}
                 <tr>
-                  <td className="p-4 font-bold text-gray-400 bg-[#0E1424]">Transmission</td>
+                  <td className="p-4 helper-text font-bold uppercase bg-bg-surface-alt">Transmission</td>
                   {compareList.map((car) => (
-                    <td key={car.id} className="p-4 font-semibold text-white">
+                    <td key={car.id} className="p-4 body-text border-l border-border">
                       {car.transmission || 'Automatic'}
                     </td>
                   ))}
-                  {compareList.length < 4 && <td className="bg-[#070A12]/30"></td>}
+                  {compareList.length < 4 && <td className="border-l border-border bg-bg-surface-alt">—</td>}
                 </tr>
 
                 {/* Ownership History */}
                 <tr>
-                  <td className="p-4 font-bold text-gray-400 bg-[#0E1424]">Ownership History</td>
+                  <td className="p-4 helper-text font-bold uppercase bg-bg-surface-alt">Ownership History</td>
                   {compareList.map((car) => (
-                    <td key={car.id} className="p-4 font-semibold text-white">
+                    <td key={car.id} className="p-4 body-text border-l border-border">
                       {car.owner_type || car.ownership || '1st Owner'}
                     </td>
                   ))}
-                  {compareList.length < 4 && <td className="bg-[#070A12]/30"></td>}
+                  {compareList.length < 4 && <td className="border-l border-border bg-bg-surface-alt">—</td>}
                 </tr>
 
                 {/* Showroom Branch */}
                 <tr>
-                  <td className="p-4 font-bold text-gray-400 bg-[#0E1424]">Showroom Hub</td>
+                  <td className="p-4 helper-text font-bold uppercase bg-bg-surface-alt">Showroom Location</td>
                   {compareList.map((car) => (
-                    <td key={car.id} className="p-4 font-semibold text-white">
+                    <td key={car.id} className="p-4 body-text border-l border-border">
                       {car.branches?.branch_name || (car.branch_id === 2 ? 'Velachery Showroom' : 'Anna Nagar Showroom')}
                     </td>
                   ))}
-                  {compareList.length < 4 && <td className="bg-[#070A12]/30"></td>}
+                  {compareList.length < 4 && <td className="border-l border-border bg-bg-surface-alt">—</td>}
                 </tr>
 
                 {/* Inspection Quality Certification */}
                 <tr>
-                  <td className="p-4 font-bold text-gray-400 bg-[#0E1424]">Inspection Score</td>
+                  <td className="p-4 helper-text font-bold uppercase bg-bg-surface-alt">Inspection Score</td>
                   {compareList.map((car) => (
-                    <td key={car.id} className="p-4">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30 font-mono">
+                    <td key={car.id} className="p-4 border-l border-border">
+                      <span className="badge badge-success">
                         <Award className="w-3.5 h-3.5" /> 98/100 Gold
                       </span>
                     </td>
                   ))}
-                  {compareList.length < 4 && <td className="bg-[#070A12]/30"></td>}
+                  {compareList.length < 4 && <td className="border-l border-border bg-bg-surface-alt">—</td>}
                 </tr>
 
                 {/* Down Payment & Loan Principal */}
                 <tr>
-                  <td className="p-4 font-bold text-gray-400 bg-[#0E1424]">20% Down Payment</td>
+                  <td className="p-4 helper-text font-bold uppercase bg-bg-surface-alt">20% Down Payment</td>
                   {compareList.map((car) => {
                     const price = Number(car.price || 0);
                     return (
-                      <td key={car.id} className="p-4 font-mono font-semibold text-white">
+                      <td key={car.id} className="p-4 body-text font-bold border-l border-border">
                         ₹{Math.round(price * 0.2).toLocaleString()}
                       </td>
                     );
                   })}
-                  {compareList.length < 4 && <td className="bg-[#070A12]/30"></td>}
+                  {compareList.length < 4 && <td className="border-l border-border bg-bg-surface-alt">—</td>}
                 </tr>
               </tbody>
             </table>
@@ -327,19 +327,19 @@ export default function ComparePage() {
 
       {/* Quick Add Picker Modal */}
       {isAddPickerOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="relative w-full max-w-2xl bg-[#0B0F1A] border border-[#2D374A] rounded-3xl shadow-2xl p-6 my-6">
-            <div className="flex items-center justify-between pb-4 border-b border-gray-800">
-              <h3 className="text-lg font-bold text-white font-display">Add Vehicle to Comparison</h3>
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="relative w-full max-w-xl bg-bg-surface border border-border rounded-lg p-6 my-6 text-text-primary">
+            <div className="flex items-center justify-between pb-3 border-b border-border">
+              <h3 className="section-heading text-sm">Add Vehicle to Comparison</h3>
               <button
                 onClick={() => setIsAddPickerOpen(false)}
-                className="w-8 h-8 rounded-full bg-gray-800 text-gray-400 hover:text-white flex items-center justify-center"
+                className="p-1 rounded-lg text-text-secondary hover:text-text-primary"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="mt-4 max-h-96 overflow-y-auto space-y-2">
+            <div className="mt-4 max-h-80 overflow-y-auto flex flex-col gap-2">
               {allVehicles
                 .filter(v => !compareList.some(c => String(c.id || c.vehicle_id) === String(v.vehicle_id || v.id)))
                 .map((car) => {
@@ -348,17 +348,17 @@ export default function ComparePage() {
                   return (
                     <div
                       key={id}
-                      className="p-3 rounded-xl bg-[#141A2A] border border-gray-800 flex items-center justify-between gap-3 hover:border-amber-500/40 transition-all"
+                      className="p-3 rounded-lg bg-bg-surface-alt border border-border flex items-center justify-between gap-3"
                     >
                       <div className="flex items-center gap-3">
                         <img
                           src={car.image_url || 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&q=80&w=200'}
                           alt={car.model}
-                          className="w-16 h-12 rounded-lg object-cover bg-gray-900 border border-gray-800"
+                          className="w-16 h-12 rounded-lg object-cover bg-bg-surface border border-border"
                         />
                         <div>
-                          <h5 className="font-bold text-white text-sm">{car.make || car.brand} {car.model}</h5>
-                          <span className="text-xs text-gray-400">{car.manufacture_year || 2022} &bull; ₹{price.toLocaleString()}</span>
+                          <h5 className="body-text font-bold">{car.make || car.brand} {car.model}</h5>
+                          <span className="helper-text">{car.manufacture_year || 2022} &bull; ₹{price.toLocaleString()}</span>
                         </div>
                       </div>
                       <button
@@ -366,7 +366,7 @@ export default function ComparePage() {
                           addToCompare({ id: String(id), ...car });
                           setIsAddPickerOpen(false);
                         }}
-                        className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs cursor-pointer"
+                        className="btn-primary h-8 px-3 text-xs"
                       >
                         + Add
                       </button>

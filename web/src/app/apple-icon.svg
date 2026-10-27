@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="appleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E40AF" />
+      <stop offset="50%" stop-color="#1D4ED8" />
+      <stop offset="100%" stop-color="#0F172A" />
+    </linearGradient>
+    <linearGradient id="accentApple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#60A5FA" />
+      <stop offset="100%" stop-color="#38BDF8" />
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="120" fill="url(#appleGrad)" />
+  <rect x="20" y="20" width="472" height="472" rx="100" fill="none" stroke="#60A5FA" stroke-width="2" stroke-opacity="0.3" />
+
+  <!-- Speed Arc -->
+  <path d="M 96 280 C 140 180, 260 140, 416 170" fill="none" stroke="url(#accentApple)" stroke-width="6" stroke-linecap="round" stroke-dasharray="8 6" opacity="0.6" />
+
+  <!-- Sports Car Silhouette -->
+  <path d="M 148 270 Q 190 200 256 195 Q 330 195 380 250 L 418 266 Q 436 274 436 294 L 436 312 Q 436 322 426 322 L 86 322 Q 76 322 76 312 L 76 294 Q 76 278 98 272 Z" fill="#FFFFFF" />
+
+  <!-- Windows -->
+  <path d="M 186 262 Q 215 212 256 210 Q 312 210 348 252 L 370 262 Z" fill="#0F172A" />
+  <path d="M 276 210 L 274 262" stroke="#FFFFFF" stroke-width="3" />
+
+  <!-- Wheels -->
+  <circle cx="152" cy="322" r="38" fill="#0F172A" stroke="#334155" stroke-width="4" />
+  <circle cx="152" cy="322" r="24" fill="#1E293B" stroke="#60A5FA" stroke-width="3" />
+  <circle cx="152" cy="322" r="8" fill="#F8FAFC" />
+
+  <circle cx="360" cy="322" r="38" fill="#0F172A" stroke="#334155" stroke-width="4" />
+  <circle cx="360" cy="322" r="24" fill="#1E293B" stroke="#60A5FA" stroke-width="3" />
+  <circle cx="360" cy="322" r="8" fill="#F8FAFC" />
+
+  <!-- Monogram -->
+  <g transform="translate(256, 396)">
+    <rect x="-84" y="-22" width="168" height="44" rx="22" fill="#0F172A" stroke="#38BDF8" stroke-width="2" stroke-opacity="0.4" />
+    <text x="0" y="8" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="20" fill="#FFFFFF" letterSpacing="4" text-anchor="middle">
+      CARREVIVE
+    </text>
+  </g>
+</svg>

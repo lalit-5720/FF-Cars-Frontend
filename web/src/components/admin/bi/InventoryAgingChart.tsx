@@ -15,25 +15,25 @@ export function InventoryAgingChart({ data, loading }: InventoryAgingChartProps)
 
   const chartData = data && data.length > 0 ? data : [];
 
-  const colors = ['#34d399', '#38bdf8', '#fbbf24', '#fb923c', '#f87171'];
+  const colors = ['var(--success)', 'var(--accent)', 'var(--warning)', 'var(--danger)', 'var(--text-secondary)'];
 
   return (
-    <div className="rounded-2xl bg-card border border-border p-5 shadow-sm">
+    <div className="rounded-lg bg-bg-surface border border-border p-5">
       <div className="mb-4">
-        <h3 className="text-base font-extrabold text-foreground tracking-tight">Inventory Aging & Health</h3>
-        <p className="text-xs text-muted-foreground">Days-on-lot distribution across active vehicles</p>
+        <h3 className="text-base font-bold text-text-primary tracking-tight">Inventory Aging & Health</h3>
+        <p className="text-xs text-text-secondary">Days-on-lot distribution across active vehicles</p>
       </div>
       <div className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
-            <XAxis dataKey="label" stroke="#94a3b8" fontSize={11} tickLine={false} />
-            <YAxis stroke="#94a3b8" fontSize={11} allowDecimals={false} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.5} />
+            <XAxis dataKey="label" stroke="var(--text-secondary)" fontSize={11} tickLine={false} />
+            <YAxis stroke="var(--text-secondary)" fontSize={11} allowDecimals={false} tickLine={false} />
             <Tooltip
-              contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', color: '#f8fafc' }}
+              contentStyle={{ backgroundColor: 'var(--bg-surface)', borderColor: 'var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '12px' }}
               formatter={(value: any) => [`${value} Vehicles`, 'Count']}
             />
-            <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+            <Bar dataKey="count" radius={[4, 4, 0, 0]}>
               {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
               ))}

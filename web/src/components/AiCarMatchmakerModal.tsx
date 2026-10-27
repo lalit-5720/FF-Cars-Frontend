@@ -134,38 +134,40 @@ export function AiCarMatchmakerModal({ isOpen, onClose }: AiCarMatchmakerModalPr
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-[#0B0F1A] border border-[#2D374A] rounded-3xl shadow-2xl overflow-hidden my-6 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="relative w-full max-w-2xl bg-bg-surface border border-border rounded-lg shadow-lg overflow-hidden my-6 animate-in zoom-in-95 duration-200">
         
         {/* Header */}
-        <div className="p-6 border-b border-[#2D374A] flex items-center justify-between bg-[#141A2A]">
+        <div className="p-6 border-b border-border flex items-center justify-between bg-bg-surface-alt">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-black shadow-md">
+            <div className="w-9 h-9 rounded-lg bg-bg-surface border border-border flex items-center justify-center text-text-primary">
               <Sparkles className="w-5 h-5 fill-current" />
             </div>
             <div>
-              <h3 className="text-xl font-extrabold text-white font-display flex items-center gap-2">
+              <h3 className="text-lg font-bold text-text-primary flex items-center gap-2">
                 AI Vehicle Matchmaker
-                <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                <span className="badge-info text-xs">
                   Concierge Quiz
                 </span>
               </h3>
-              <p className="text-xs text-gray-400">Answer 4 quick questions to find your dream luxury car</p>
+              <p className="text-xs text-text-secondary">Answer 4 quick questions to find your dream luxury car</p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="btn-neutral w-8 h-8 p-0 flex items-center justify-center rounded-lg"
+            aria-label="Close"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Progress Bar (for steps 1-4) */}
         {step <= 4 && (
-          <div className="w-full bg-gray-800 h-1.5">
+          <div className="w-full bg-border h-1.5">
             <div
-              className="bg-gradient-to-r from-amber-500 to-amber-400 h-1.5 transition-all duration-300"
+              className="bg-accent h-1.5 transition-all duration-300"
               style={{ width: `${(step / 4) * 100}%` }}
             />
           </div>
@@ -177,8 +179,8 @@ export function AiCarMatchmakerModal({ isOpen, onClose }: AiCarMatchmakerModalPr
           {/* STEP 1: LIFESTYLE */}
           {step === 1 && (
             <div className="space-y-4 animate-in fade-in duration-200">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">Step 1 of 4</span>
-              <h4 className="text-lg font-bold text-white font-display">What is your primary driving purpose?</h4>
+              <span className="text-xs font-bold uppercase tracking-wider text-accent">Step 1 of 4</span>
+              <h4 className="text-base font-bold text-text-primary">What is your primary driving purpose?</h4>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 {[
@@ -192,19 +194,20 @@ export function AiCarMatchmakerModal({ isOpen, onClose }: AiCarMatchmakerModalPr
                   return (
                     <button
                       key={opt.id}
+                      type="button"
                       onClick={() => setLifestyle(opt.id)}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
+                      className={`p-4 rounded-lg border text-left transition-all cursor-pointer flex flex-col gap-2 ${
                         isSelected
-                          ? 'border-amber-500 bg-amber-500/10 shadow-lg'
-                          : 'border-gray-800 bg-[#141A2A]/60 hover:border-gray-700'
+                          ? 'border-accent bg-bg-surface-alt shadow-sm'
+                          : 'border-border bg-bg-surface hover:bg-bg-surface-alt'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <Icon className={`w-5 h-5 ${isSelected ? 'text-amber-400' : 'text-gray-400'}`} />
-                        {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-400" />}
+                        <Icon className={`w-5 h-5 ${isSelected ? 'text-accent' : 'text-text-secondary'}`} />
+                        {isSelected && <CheckCircle2 className="w-4 h-4 text-accent" />}
                       </div>
-                      <span className="text-sm font-bold text-white">{opt.title}</span>
-                      <span className="text-[11px] text-gray-400 leading-snug">{opt.desc}</span>
+                      <span className="text-sm font-bold text-text-primary">{opt.title}</span>
+                      <span className="text-xs text-text-secondary leading-snug">{opt.desc}</span>
                     </button>
                   );
                 })}
@@ -215,8 +218,8 @@ export function AiCarMatchmakerModal({ isOpen, onClose }: AiCarMatchmakerModalPr
           {/* STEP 2: BUDGET */}
           {step === 2 && (
             <div className="space-y-4 animate-in fade-in duration-200">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">Step 2 of 4</span>
-              <h4 className="text-lg font-bold text-white font-display">What is your targeted budget envelope?</h4>
+              <span className="text-xs font-bold uppercase tracking-wider text-accent">Step 2 of 4</span>
+              <h4 className="text-base font-bold text-text-primary">What is your targeted budget envelope?</h4>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 {[
@@ -229,19 +232,20 @@ export function AiCarMatchmakerModal({ isOpen, onClose }: AiCarMatchmakerModalPr
                   return (
                     <button
                       key={opt.id}
+                      type="button"
                       onClick={() => setBudget(opt.id)}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-1.5 ${
+                      className={`p-4 rounded-lg border text-left transition-all cursor-pointer flex flex-col gap-1.5 ${
                         isSelected
-                          ? 'border-amber-500 bg-amber-500/10 shadow-lg'
-                          : 'border-gray-800 bg-[#141A2A]/60 hover:border-gray-700'
+                          ? 'border-accent bg-bg-surface-alt shadow-sm'
+                          : 'border-border bg-bg-surface hover:bg-bg-surface-alt'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-white">{opt.title}</span>
-                        {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-400" />}
+                        <span className="text-sm font-bold text-text-primary">{opt.title}</span>
+                        {isSelected && <CheckCircle2 className="w-4 h-4 text-accent" />}
                       </div>
-                      <span className="text-xs font-mono font-bold text-amber-400">{opt.range}</span>
-                      <span className="text-[11px] text-gray-400 leading-snug">{opt.desc}</span>
+                      <span className="text-xs font-mono font-bold text-accent">{opt.range}</span>
+                      <span className="text-xs text-text-secondary leading-snug">{opt.desc}</span>
                     </button>
                   );
                 })}
@@ -252,8 +256,8 @@ export function AiCarMatchmakerModal({ isOpen, onClose }: AiCarMatchmakerModalPr
           {/* STEP 3: TRANSMISSION */}
           {step === 3 && (
             <div className="space-y-4 animate-in fade-in duration-200">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">Step 3 of 4</span>
-              <h4 className="text-lg font-bold text-white font-display">Preferred transmission style?</h4>
+              <span className="text-xs font-bold uppercase tracking-wider text-accent">Step 3 of 4</span>
+              <h4 className="text-base font-bold text-text-primary">Preferred transmission style?</h4>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 {[
@@ -265,18 +269,19 @@ export function AiCarMatchmakerModal({ isOpen, onClose }: AiCarMatchmakerModalPr
                   return (
                     <button
                       key={opt.id}
+                      type="button"
                       onClick={() => setTransmission(opt.id)}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-1.5 ${
+                      className={`p-4 rounded-lg border text-left transition-all cursor-pointer flex flex-col gap-1.5 ${
                         isSelected
-                          ? 'border-amber-500 bg-amber-500/10 shadow-lg'
-                          : 'border-gray-800 bg-[#141A2A]/60 hover:border-gray-700'
+                          ? 'border-accent bg-bg-surface-alt shadow-sm'
+                          : 'border-border bg-bg-surface hover:bg-bg-surface-alt'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-white">{opt.title}</span>
-                        {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-400" />}
+                        <span className="text-sm font-bold text-text-primary">{opt.title}</span>
+                        {isSelected && <CheckCircle2 className="w-4 h-4 text-accent" />}
                       </div>
-                      <span className="text-[11px] text-gray-400 leading-snug">{opt.desc}</span>
+                      <span className="text-xs text-text-secondary leading-snug">{opt.desc}</span>
                     </button>
                   );
                 })}
@@ -287,8 +292,8 @@ export function AiCarMatchmakerModal({ isOpen, onClose }: AiCarMatchmakerModalPr
           {/* STEP 4: TOP PRIORITY */}
           {step === 4 && (
             <div className="space-y-4 animate-in fade-in duration-200">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">Step 4 of 4</span>
-              <h4 className="text-lg font-bold text-white font-display">What is your single most important buying priority?</h4>
+              <span className="text-xs font-bold uppercase tracking-wider text-accent">Step 4 of 4</span>
+              <h4 className="text-base font-bold text-text-primary">What is your single most important buying priority?</h4>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 {[
@@ -301,18 +306,19 @@ export function AiCarMatchmakerModal({ isOpen, onClose }: AiCarMatchmakerModalPr
                   return (
                     <button
                       key={opt.id}
+                      type="button"
                       onClick={() => setPriority(opt.id)}
-                      className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-1.5 ${
+                      className={`p-4 rounded-lg border text-left transition-all cursor-pointer flex flex-col gap-1.5 ${
                         isSelected
-                          ? 'border-amber-500 bg-amber-500/10 shadow-lg'
-                          : 'border-gray-800 bg-[#141A2A]/60 hover:border-gray-700'
+                          ? 'border-accent bg-bg-surface-alt shadow-sm'
+                          : 'border-border bg-bg-surface hover:bg-bg-surface-alt'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-white">{opt.title}</span>
-                        {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-400" />}
+                        <span className="text-sm font-bold text-text-primary">{opt.title}</span>
+                        {isSelected && <CheckCircle2 className="w-4 h-4 text-accent" />}
                       </div>
-                      <span className="text-[11px] text-gray-400 leading-snug">{opt.desc}</span>
+                      <span className="text-xs text-text-secondary leading-snug">{opt.desc}</span>
                     </button>
                   );
                 })}
@@ -325,24 +331,26 @@ export function AiCarMatchmakerModal({ isOpen, onClose }: AiCarMatchmakerModalPr
             <div className="space-y-4 animate-in fade-in duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-amber-400">AI Recommendations</span>
-                  <h4 className="text-lg font-bold text-white font-display">Your Personalized Vehicle Matches</h4>
+                  <span className="text-xs font-bold uppercase tracking-wider text-accent">AI Recommendations</span>
+                  <h4 className="text-base font-bold text-text-primary">Your Personalized Vehicle Matches</h4>
                 </div>
                 <button
+                  type="button"
                   onClick={resetQuiz}
-                  className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 text-xs text-text-secondary hover:text-text-primary transition-colors cursor-pointer"
                 >
                   <RotateCcw className="w-3.5 h-3.5" /> Retake Quiz
                 </button>
               </div>
 
               {matchedCars.length === 0 ? (
-                <div className="text-center py-12 text-gray-400">
-                  <Car className="w-10 h-10 mx-auto text-gray-600 mb-2" />
+                <div className="text-center py-12 text-text-secondary">
+                  <Car className="w-10 h-10 mx-auto text-text-secondary mb-2" />
                   <p className="text-sm">No vehicles matched this exact criteria right now.</p>
                   <button
+                    type="button"
                     onClick={() => { onClose(); router.push('/cars'); }}
-                    className="mt-4 px-4 py-2 rounded-xl bg-amber-500 text-black font-bold text-xs"
+                    className="btn-primary mt-4"
                   >
                     Browse All Inventory
                   </button>
@@ -359,28 +367,28 @@ export function AiCarMatchmakerModal({ isOpen, onClose }: AiCarMatchmakerModalPr
                     return (
                       <div
                         key={id}
-                        className="p-4 rounded-2xl bg-[#141A2A]/80 border border-[#232D42] flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:border-amber-500/40"
+                        className="p-4 rounded-lg bg-bg-surface-alt border border-border flex flex-col sm:flex-row items-center justify-between gap-4 transition-all hover:border-accent"
                       >
                         <div className="flex items-center gap-4 w-full sm:w-auto">
-                          <div className="relative w-20 h-16 rounded-xl overflow-hidden bg-gray-900 flex-shrink-0 border border-gray-800">
+                          <div className="relative w-20 h-16 rounded-lg overflow-hidden bg-bg-surface flex-shrink-0 border border-border">
                             <img src={img} alt={car.model} className="w-full h-full object-cover" />
-                            <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/70 text-[9px] font-bold text-white font-mono">
+                            <span className="badge-neutral absolute bottom-1 left-1 text-xs">
                               #{idx + 1}
                             </span>
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <h5 className="font-bold text-white text-sm">{make} {car.model}</h5>
-                              <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                              <h5 className="font-bold text-text-primary text-sm">{make} {car.model}</h5>
+                              <span className="badge-success text-xs">
                                 {car.matchScore}% Match
                               </span>
                             </div>
-                            <div className="text-[11px] text-gray-400 mt-0.5">
+                            <div className="text-xs text-text-secondary mt-0.5">
                               {car.manufacture_year || 2022} &bull; {km.toLocaleString()} km &bull; {car.fuel_type || 'Petrol'}
                             </div>
                             <div className="flex flex-wrap gap-1.5 mt-1.5">
                               {car.matchReasons?.map((r: string, rIdx: number) => (
-                                <span key={rIdx} className="text-[9px] px-2 py-0.5 rounded bg-gray-800 text-gray-300">
+                                <span key={rIdx} className="text-xs px-2 py-0.5 rounded bg-bg-surface text-text-secondary border border-border">
                                   &bull; {r}
                                 </span>
                               ))}
@@ -388,16 +396,17 @@ export function AiCarMatchmakerModal({ isOpen, onClose }: AiCarMatchmakerModalPr
                           </div>
                         </div>
 
-                        <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-gray-800">
-                          <span className="font-mono font-black text-amber-400 text-base">
+                        <div className="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-border">
+                          <span className="font-mono font-bold text-accent text-base">
                             ₹{price.toLocaleString()}
                           </span>
                           <button
+                            type="button"
                             onClick={() => {
                               onClose();
                               router.push(`/cars/${id}`);
                             }}
-                            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs transition-all shadow-sm cursor-pointer"
+                            className="btn-primary text-xs"
                           >
                             View Vehicle &rarr;
                           </button>
@@ -412,28 +421,29 @@ export function AiCarMatchmakerModal({ isOpen, onClose }: AiCarMatchmakerModalPr
 
           {/* Navigation Controls (Steps 1-4) */}
           {step <= 4 && (
-            <div className="flex items-center justify-between pt-6 border-t border-gray-800/80">
+            <div className="flex items-center justify-between pt-6 border-t border-border">
               <button
+                type="button"
                 disabled={step === 1}
                 onClick={() => setStep(prev => Math.max(1, prev - 1))}
-                className={`flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-xl transition-colors ${
-                  step === 1 ? 'text-gray-600 cursor-not-allowed' : 'text-gray-300 hover:text-white cursor-pointer'
-                }`}
+                className="btn-neutral text-xs disabled:opacity-50"
               >
                 <ArrowLeft className="w-4 h-4" /> Back
               </button>
 
               {step < 4 ? (
                 <button
+                  type="button"
                   onClick={() => setStep(prev => prev + 1)}
-                  className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs transition-all shadow-md cursor-pointer"
+                  className="btn-primary text-xs"
                 >
                   Continue <ArrowRight className="w-4 h-4" />
                 </button>
               ) : (
                 <button
+                  type="button"
                   onClick={calculateMatches}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-extrabold text-xs transition-all shadow-lg cursor-pointer"
+                  className="btn-primary text-xs flex items-center gap-2"
                 >
                   <Sparkles className="w-4 h-4 fill-current" /> Find My Match
                 </button>

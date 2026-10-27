@@ -59,64 +59,64 @@ export function VisualSalesFunnel({ branchId }: VisualSalesFunnelProps = {}) {
   const salePercent = topCount > 0 ? ((sales / topCount) * 100).toFixed(1) : '0';
 
   return (
-    <div className="rounded-2xl bg-[#1e293b]/90 border border-slate-800/90 p-5 shadow-lg flex flex-col justify-between font-sans">
+    <div className="rounded-2xl bg-white border border-slate-200/90 p-5 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between font-sans text-slate-800">
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-extrabold text-white tracking-tight flex items-center gap-2">
-            <Filter className="w-4 h-4 text-sky-400" />
+          <h3 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <Filter className="w-4 h-4 text-blue-600" />
             <span>Lead to Sale Funnel</span>
           </h3>
-          <span className="text-[10px] text-slate-400 font-bold">
+          <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
             Live Pipeline
           </span>
         </div>
 
         {loading ? (
           <div className="space-y-2 py-4">
-            <div className="h-10 rounded-lg bg-slate-800/60 animate-pulse" />
-            <div className="h-10 rounded-lg bg-slate-800/60 animate-pulse" />
-            <div className="h-10 rounded-lg bg-slate-800/60 animate-pulse" />
-            <div className="h-10 rounded-lg bg-slate-800/60 animate-pulse" />
+            <div className="h-10 rounded-lg bg-slate-100 animate-pulse border border-slate-200" />
+            <div className="h-10 rounded-lg bg-slate-100 animate-pulse border border-slate-200" />
+            <div className="h-10 rounded-lg bg-slate-100 animate-pulse border border-slate-200" />
+            <div className="h-10 rounded-lg bg-slate-100 animate-pulse border border-slate-200" />
           </div>
         ) : (
           <div className="flex flex-col items-center gap-1 py-1 font-sans">
             {/* Level 1: Leads */}
             <div
-              className="w-full bg-[#3b82f6] text-white text-center py-2.5 px-4 font-bold text-xs shadow-md"
+              className="w-full bg-blue-600 text-white text-center py-2.5 px-4 font-bold text-xs shadow-sm rounded-t-lg"
               style={{ clipPath: 'polygon(0 0, 100% 0, 88% 100%, 12% 100%)' }}
             >
               <span>Leads</span>
-              <strong className="block text-sm font-mono font-extrabold">{leads}</strong>
+              <strong className="block text-sm font-mono font-black">{leads}</strong>
             </div>
 
             {/* Level 2: Test Drives */}
             <div
-              className="w-[84%] bg-[#10b981] text-white text-center py-2.5 px-4 font-bold text-xs shadow-md"
+              className="w-[84%] bg-emerald-600 text-white text-center py-2.5 px-4 font-bold text-xs shadow-sm"
               style={{ clipPath: 'polygon(0 0, 100% 0, 86% 100%, 14% 100%)' }}
             >
               <span>Test Drives</span>
-              <strong className="block text-sm font-mono font-extrabold">
+              <strong className="block text-sm font-mono font-black">
                 {testDrives} ({tdPercent}%)
               </strong>
             </div>
 
             {/* Level 3: Qualified */}
             <div
-              className="w-[68%] bg-[#f59e0b] text-slate-950 text-center py-2.5 px-4 font-bold text-xs shadow-md"
+              className="w-[68%] bg-amber-500 text-slate-950 text-center py-2.5 px-4 font-bold text-xs shadow-sm"
               style={{ clipPath: 'polygon(0 0, 100% 0, 84% 100%, 16% 100%)' }}
             >
               <span>Qualified</span>
-              <strong className="block text-sm font-mono font-extrabold">
+              <strong className="block text-sm font-mono font-black">
                 {qualified} ({qualPercent}%)
               </strong>
             </div>
 
             {/* Level 4: Sales */}
             <div
-              className="w-[52%] bg-[#e11d48] text-white text-center py-2.5 px-4 font-bold text-xs shadow-md rounded-b-lg"
+              className="w-[52%] bg-rose-600 text-white text-center py-2.5 px-4 font-bold text-xs shadow-sm rounded-b-lg"
             >
               <span>Sales</span>
-              <strong className="block text-sm font-mono font-extrabold">
+              <strong className="block text-sm font-mono font-black">
                 {sales} ({salePercent}%)
               </strong>
             </div>
@@ -125,11 +125,11 @@ export function VisualSalesFunnel({ branchId }: VisualSalesFunnelProps = {}) {
       </div>
 
       {/* Footer conversion rate indicator */}
-      <div className="mt-4 text-center text-xs font-bold text-slate-300">
+      <div className="mt-4 pt-3 border-t border-slate-100 text-center text-xs font-bold text-slate-600">
         Conversion Rate:{' '}
-        <span className="font-mono font-extrabold text-white">{conversionRate}%</span>
+        <span className="font-mono font-black text-slate-900">{conversionRate}%</span>
         {conversionRate > 0 && (
-          <span className="text-emerald-400 font-extrabold inline-flex items-center gap-0.5 ml-1.5">
+          <span className="text-emerald-700 font-extrabold inline-flex items-center gap-0.5 ml-1.5 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
             <TrendingUp size={12} /> Live Conversion
           </span>
         )}

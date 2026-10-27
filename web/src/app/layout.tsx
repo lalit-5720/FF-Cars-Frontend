@@ -4,9 +4,14 @@ import ClientWrapper from "../components/ClientWrapper";
 import Preloader from "../components/Preloader";
 
 export const metadata: Metadata = {
-  title: "CarRevive | Luxury Automotive Concierge — Chennai's Premier Dealership",
+  title: "CarRevive | Certified Pre-Owned Automotive Dealership",
   description:
-    "Experience the finest pre-owned luxury vehicles at CarRevive. Certified inventory, transparent pricing, and white-glove service across our Chennai showrooms.",
+    "Experience the finest certified vehicles at CarRevive. Transparent pricing, multi-point inspection, and warranty service across our showrooms.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/apple-icon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -15,23 +20,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@300;400;500&display=swap"
-          rel="stylesheet"
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('carrevive_theme')||(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);}catch(e){}})();`,
+          }}
         />
       </head>
-      <body
-        className="min-h-full flex flex-col font-sans"
-        style={{
-          backgroundColor: 'var(--midnight)',
-          color: 'var(--platinum)',
-          fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
-        }}
-      >
+      <body className="min-h-full flex flex-col bg-bg-page text-text-primary">
         <Preloader />
         <ClientWrapper>{children}</ClientWrapper>
       </body>

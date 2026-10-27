@@ -31,10 +31,8 @@ export default function RegisterPage() {
 
     setIsLoading(true);
     try {
-      // 1. Create the user
       await api.post('/auth/register', { name, email, password });
       
-      // 2. Perform auto login
       const loginResponse = await api.post('/auth/login', { email, password });
       const { user, accessToken, refreshToken } = loginResponse.data;
       
@@ -50,96 +48,85 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4 py-8 relative overflow-hidden text-foreground font-sans">
-      <div className="max-w-md w-full p-8 sm:p-10 rounded-3xl border border-border/90 bg-card text-foreground shadow-xl">
-        <div className="text-center mb-8">
-          <span className="font-sans text-2xl font-extrabold tracking-widest text-foreground">
-            CarRevive
-          </span>
-          <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-foreground font-sans">
+    <div className="min-h-screen bg-bg-page flex items-center justify-center p-4 text-text-primary">
+      <div className="max-w-md w-full p-8 rounded-lg border border-border bg-bg-surface text-text-primary">
+        <div className="text-center mb-6">
+          <h1 className="page-title mb-1">
             Create Customer Account
-          </h2>
-          <p className="mt-1.5 text-xs text-muted-foreground font-medium">
+          </h1>
+          <p className="helper-text">
             Already registered?{' '}
-            <Link href="/login" className="font-bold text-foreground underline hover:text-foreground">
+            <Link href="/login" className="font-bold text-accent hover:underline">
               Sign in to your account
             </Link>
           </p>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-text-primary mb-1">
               Full Name
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
-                <UserIcon className="w-4 h-4" />
-              </span>
+              <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
-                className="block w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-card text-xs font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all"
+                className="w-full bg-bg-surface border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-text-primary mb-1">
               Email Address
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
-                <Mail className="w-4 h-4" />
-              </span>
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="john@example.com"
-                className="block w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-card text-xs font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all"
+                className="w-full bg-bg-surface border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-text-primary mb-1">
               Password
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
-                <Lock className="w-4 h-4" />
-              </span>
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Minimum 6 characters"
-                className="block w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-card text-xs font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all"
+                className="w-full bg-bg-surface border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent focus:outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-foreground mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-text-primary mb-1">
               Confirm Password
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-muted-foreground">
-                <Lock className="w-4 h-4" />
-              </span>
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
               <input
                 type="password"
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Repeat password"
-                className="block w-full pl-10 pr-4 py-3 border border-border rounded-xl bg-card text-xs font-semibold text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all"
+                className="w-full bg-bg-surface border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent focus:outline-none"
               />
             </div>
           </div>
@@ -147,7 +134,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl text-xs font-bold text-primary-foreground bg-secondary hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all shadow-md disabled:opacity-50 cursor-pointer mt-2"
+            className="btn-primary w-full mt-2"
           >
             {isLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />

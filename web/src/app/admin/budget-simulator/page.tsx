@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { api } from '../../../services/api';
 import {
   Sliders,
@@ -30,7 +31,8 @@ interface VehicleOption {
   status?: string;
 }
 
-export default function AdvancedDealProfitSimulatorPage() {
+function AdvancedDealProfitSimulatorInner() {
+  const searchParams = useSearchParams();
   const [vehicles, setVehicles] = useState<VehicleOption[]>([]);
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>('custom');
 
@@ -53,12 +55,27 @@ export default function AdvancedDealProfitSimulatorPage() {
         const res = await api.get('/vehicles?limit=50');
         const list = Array.isArray(res.data) ? res.data : res.data?.data || [];
         setVehicles(list);
+
+        const paramVehicleId = searchParams.get('vehicleId');
+        if (paramVehicleId) {
+          const found = list.find((v: any) => String(v.vehicle_id || v.id) === String(paramVehicleId));
+          if (found) {
+            setSelectedVehicleId(String(found.vehicle_id || found.id));
+            const vPrice = Number(found.price || 1500000);
+            const vCost = Number(found.purchase_price || vPrice * 0.82);
+            setSellingPrice(vPrice);
+            setAcquisitionCost(vCost);
+            setDiscount(Math.round(vPrice * 0.025));
+            setTax(Math.round(vPrice * 0.02));
+            setLoanFinancedAmount(Math.round(vPrice * 0.7));
+          }
+        }
       } catch (err) {
         console.error('Failed to load inventory for simulator', err);
       }
     };
     loadVehicles();
-  }, []);
+  }, [searchParams]);
 
   // When a real vehicle is chosen from the inventory
   const handleSelectVehicle = (vId: string) => {
@@ -514,5 +531,13 @@ export default function AdvancedDealProfitSimulatorPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function AdvancedDealProfitSimulatorPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs text-muted-foreground">Loading deal simulator...</div>}>
+      <AdvancedDealProfitSimulatorInner />
+    </Suspense>
   );
 }

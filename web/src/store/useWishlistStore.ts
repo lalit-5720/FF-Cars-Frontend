@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { api } from '../services/api';
 
 interface WishlistStore {
   wishlistIds: string[];
@@ -35,8 +36,18 @@ export const useWishlistStore = create<WishlistStore>((set, get) => ({
 
     if (exists) {
       updatedIds = currentIds.filter((id) => id !== strId);
+      // Non-blocking BI activity tracking
+      api.post('/bi/activities', {
+        event_type: 'WISHLIST_REMOVE',
+        vehicle_id: Number(carId),
+      }).catch(() => null);
     } else {
       updatedIds = [...currentIds, strId];
+      // Non-blocking BI activity tracking
+      api.post('/bi/activities', {
+        event_type: 'WISHLIST_ADD',
+        vehicle_id: Number(carId),
+      }).catch(() => null);
     }
 
     const emailKey = userEmail ? userEmail.toLowerCase().trim() : 'guest';
