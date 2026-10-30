@@ -7,6 +7,7 @@ import { RequireRole } from '../../../components/auth/RequireRole';
 import { showLocalToast } from '../../../components/Toast';
 import { Users, Plus, ShieldCheck, Mail, Phone, Lock, Trash2, X, Loader2, Building2 } from 'lucide-react';
 
+import { firstError, email as checkEmail, phone as checkPhone, password as checkPassword, money, maxLen } from '../../../lib/validation';
 interface EmployeeItem {
   employee_id: number;
   first_name: string;
@@ -52,7 +53,7 @@ export default function EmployeesPage() {
     job_title: 'Sales & Concierge Specialist',
     branch_id: 1,
     salary: 45000,
-    password: 'password123',
+    password: '',
     status: 'Active',
   });
 
@@ -103,6 +104,18 @@ export default function EmployeesPage() {
       showLocalToast('Please fill in required name and email fields.');
       return;
     }
+    const empErr = firstError(
+      maxLen(newEmployee.first_name.trim(), 50, 'First name'),
+      maxLen(newEmployee.last_name, 50, 'Last name'),
+      checkEmail(newEmployee.email, 'Email', true),
+      checkPhone(newEmployee.phone),
+      money(newEmployee.salary, 'Salary', { max: 10_000_000 }),
+      checkPassword(newEmployee.password, 'Login password'),
+    );
+    if (empErr) {
+      showLocalToast(empErr);
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -123,7 +136,7 @@ export default function EmployeesPage() {
         job_title: 'Sales & Concierge Specialist',
         branch_id: branches[0]?.branch_id || 1,
         salary: 45000,
-        password: 'password123',
+        password: '',
         status: 'Active',
       });
       fetchData();
@@ -279,7 +292,7 @@ export default function EmployeesPage() {
                       type="text"
                       required
                       placeholder="e.g. Ramesh"
-                      value={newEmployee.first_name}
+                      value={newEmployee.first_name} maxLength={50}
                       onChange={(e) => setNewEmployee({ ...newEmployee, first_name: e.target.value })}
                       className="input-base w-full"
                     />
@@ -289,7 +302,7 @@ export default function EmployeesPage() {
                     <input
                       type="text"
                       placeholder="e.g. V"
-                      value={newEmployee.last_name}
+                      value={newEmployee.last_name} maxLength={50}
                       onChange={(e) => setNewEmployee({ ...newEmployee, last_name: e.target.value })}
                       className="input-base w-full"
                     />
@@ -303,7 +316,7 @@ export default function EmployeesPage() {
                       type="email"
                       required
                       placeholder="ramesh.v@carrevive.in"
-                      value={newEmployee.email}
+                      value={newEmployee.email} maxLength={100}
                       onChange={(e) => setNewEmployee({ ...newEmployee, email: e.target.value })}
                       className="input-base w-full"
                     />
@@ -313,7 +326,7 @@ export default function EmployeesPage() {
                     <input
                       type="text"
                       placeholder="+91 98401 23456"
-                      value={newEmployee.phone}
+                      value={newEmployee.phone} maxLength={15} inputMode="tel"
                       onChange={(e) => setNewEmployee({ ...newEmployee, phone: e.target.value })}
                       className="input-base w-full"
                     />
@@ -328,7 +341,7 @@ export default function EmployeesPage() {
                       onChange={(e) => setNewEmployee({ ...newEmployee, role: e.target.value })}
                       className="input-base w-full cursor-pointer"
                     >
-                      {availableRoles.map((r) => (
+                      {availableRoles.filter((r) => ['SYSTEM_ADMIN', 'BRANCH_MANAGER', 'SALES_EXECUTIVE'].includes(r.id)).map((r) => (
                         <option key={r.id} value={r.id} className="bg-bg-surface text-text-primary">
                           {r.name} ({r.id})
                         </option>
@@ -357,7 +370,7 @@ export default function EmployeesPage() {
                     <input
                       type="text"
                       placeholder="e.g. Senior Customer Concierge"
-                      value={newEmployee.job_title}
+                      value={newEmployee.job_title} maxLength={50}
                       onChange={(e) => setNewEmployee({ ...newEmployee, job_title: e.target.value })}
                       className="input-base w-full"
                     />
@@ -367,7 +380,7 @@ export default function EmployeesPage() {
                     <input
                       type="number"
                       placeholder="55000"
-                      value={newEmployee.salary}
+                      value={newEmployee.salary} min={0} max={10000000}
                       onChange={(e) => setNewEmployee({ ...newEmployee, salary: Number(e.target.value) })}
                       className="input-base w-full"
                     />
@@ -378,7 +391,7 @@ export default function EmployeesPage() {
                   <label className="block text-text-secondary font-bold mb-1 text-[12px]">Initial Password</label>
                   <input
                     type="password"
-                    placeholder="password123"
+                    placeholder="Minimum 6 characters" minLength={6} maxLength={100} required
                     value={newEmployee.password}
                     onChange={(e) => setNewEmployee({ ...newEmployee, password: e.target.value })}
                     className="input-base w-full"

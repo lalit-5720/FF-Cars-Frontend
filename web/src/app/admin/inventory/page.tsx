@@ -34,6 +34,7 @@ import {
 import { VehicleInspectionReportModal } from '../../../components/VehicleInspectionReportModal';
 import { VehicleProfitWhatIfSimulatorModal } from '../../../components/admin/inventory/VehicleProfitWhatIfSimulatorModal';
 
+import { firstError, regNo, money, intRange, maxLen, maxVehicleYear } from '../../../lib/validation';
 const CAR_IMAGE_PRESETS = [
   { name: 'Mercedes E-Class', url: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80' },
   { name: 'BMW M4 Competition', url: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1200&q=80' },
@@ -264,6 +265,20 @@ function InventoryPageInner() {
       showLocalToast('Please specify a valid listing price.', 'error');
       return;
     }
+    const vehErr = firstError(
+      maxLen(editForm.make.trim(), 50, 'Make'),
+      maxLen(editForm.model.trim(), 50, 'Model'),
+      intRange(editForm.manufacture_year, 'Manufacture year', 1980, maxVehicleYear(), true),
+      regNo(String(editForm.registration_number || ''), false),
+      intRange(editForm.kilometers_driven, 'Kilometres driven', 0, 2_000_000),
+      money(editForm.price, 'Listing price', { min: 1 }),
+      money(editForm.purchase_price, 'Purchase price', { mandatory: false }),
+      maxLen(editForm.color, 30, 'Colour'),
+    );
+    if (vehErr) {
+      showLocalToast(vehErr, 'error');
+      return;
+    }
 
     setIsUpdating(true);
     try {
@@ -388,6 +403,20 @@ function InventoryPageInner() {
       showLocalToast('Please specify a valid listing price.', 'error');
       return;
     }
+    const vehErr = firstError(
+      maxLen(addForm.make.trim(), 50, 'Make'),
+      maxLen(addForm.model.trim(), 50, 'Model'),
+      intRange(addForm.manufacture_year, 'Manufacture year', 1980, maxVehicleYear(), true),
+      regNo(String(addForm.registration_number || ''), false),
+      intRange(addForm.kilometers_driven, 'Kilometres driven', 0, 2_000_000),
+      money(addForm.price, 'Listing price', { min: 1 }),
+      money(addForm.purchase_price, 'Purchase price', { mandatory: false }),
+      maxLen(addForm.color, 30, 'Colour'),
+    );
+    if (vehErr) {
+      showLocalToast(vehErr, 'error');
+      return;
+    }
 
     setIsAdding(true);
     try {
@@ -504,15 +533,15 @@ function InventoryPageInner() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
-                <CarFront className="w-5 h-5 text-sky-400" /> Vehicle Inventory Management
+                <CarFront className="w-5 h-5 text-sky-700 dark:text-sky-400" /> Vehicle Inventory Management
               </h1>
               {permissions.isBranchManager && (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 border border-indigo-500/20">
                   Manager Portal · Branch #{user?.branch_id || 1}
                 </span>
               )}
               {permissions.isSystemAdmin && (
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/20">
                   Admin Master Access (All Showrooms)
                 </span>
               )}
@@ -600,7 +629,7 @@ function InventoryPageInner() {
                   <tr>
                     <td colSpan={8} className="py-12 text-center text-muted-foreground">
                       <div className="flex items-center justify-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin text-sky-400" />
+                        <Loader2 className="w-4 h-4 animate-spin text-sky-700 dark:text-sky-400" />
                         <span>Loading vehicle inventory...</span>
                       </div>
                     </td>
@@ -639,14 +668,14 @@ function InventoryPageInner() {
                             </div>
                           </div>
                         </td>
-                        <td className="py-3.5 px-4 font-mono text-sky-400 font-bold">{v.registration_number || 'Unregistered'}</td>
-                        <td className="py-3.5 px-4 text-slate-300 font-medium">
+                        <td className="py-3.5 px-4 font-mono text-sky-700 dark:text-sky-400 font-bold">{v.registration_number || 'Unregistered'}</td>
+                        <td className="py-3.5 px-4 text-text-primary font-medium">
                           {v.manufacture_year || v.year} · {v.fuel_type || 'Petrol'} · {v.transmission || 'Auto'}
                         </td>
-                        <td className="py-3.5 px-4 text-slate-300">
+                        <td className="py-3.5 px-4 text-text-primary">
                           {v.branches?.branch_name || `Branch #${v.branch_id || 1}`}
                         </td>
-                        <td className="py-3.5 px-4 font-mono font-bold text-emerald-400 text-sm">
+                        <td className="py-3.5 px-4 font-mono font-bold text-emerald-700 dark:text-emerald-400 text-sm">
                           ₹{Number(v.price || 0).toLocaleString('en-IN')}
                         </td>
                         <td className="py-3.5 px-4">
@@ -654,29 +683,29 @@ function InventoryPageInner() {
                             inspection.isGoodToUse !== false ? (
                               <button
                                 onClick={() => setInspectingVehicle(v)}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition-all cursor-pointer"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition-all cursor-pointer"
                                 title="Certified Good to Use - Click to review or edit 150-point checklist"
                               >
-                                <CheckCircle className="w-3 h-3 text-emerald-400" />
+                                <CheckCircle className="w-3 h-3 text-emerald-700 dark:text-emerald-400" />
                                 <span>Certified Good ({inspection.overallScore}/100)</span>
                               </button>
                             ) : (
                               <button
                                 onClick={() => setInspectingVehicle(v)}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-all cursor-pointer"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-all cursor-pointer"
                                 title="Attention Needed - Click to inspect checkpoints"
                               >
-                                <AlertTriangle className="w-3 h-3 text-amber-400" />
+                                <AlertTriangle className="w-3 h-3 text-amber-800 dark:text-amber-400" />
                                 <span>Attention Needed ({inspection.overallScore}/100)</span>
                               </button>
                             )
                           ) : (
                             <button
                               onClick={() => setInspectingVehicle(v)}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-rose-500/10 text-rose-400 border border-rose-500/30 hover:bg-rose-500/20 transition-all cursor-pointer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/30 hover:bg-rose-500/20 transition-all cursor-pointer"
                               title="Audit Pending - Click to audit and certify vehicle as Good to Use"
                             >
-                              <Award className="w-3 h-3 text-rose-400" />
+                              <Award className="w-3 h-3 text-rose-700 dark:text-rose-400" />
                               <span>Audit Pending</span>
                             </button>
                           )}
@@ -698,7 +727,7 @@ function InventoryPageInner() {
                                 setSimulatorVehicle(v);
                                 setIsSimulatorOpen(true);
                               }}
-                              className="px-2.5 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 border border-purple-500/30 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer hover:border-purple-400 shadow-sm"
+                              className="px-2.5 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-500/30 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer hover:border-purple-400 shadow-sm"
                               title="Simulate price reduction and profit margin for this car"
                             >
                               <Sliders className="w-3.5 h-3.5" />
@@ -707,7 +736,7 @@ function InventoryPageInner() {
 
                             <button
                               onClick={() => setInspectingVehicle(v)}
-                              className="px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                              className="px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
                               title="Audit & Edit 150-Point Roadworthiness Certificate"
                             >
                               <Award className="w-3.5 h-3.5" />
@@ -716,7 +745,7 @@ function InventoryPageInner() {
                             {permissions.canManageInventory && (
                               <button
                                 onClick={() => openEditVehicleModal(v)}
-                                className="px-2.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer hover:border-sky-400"
+                                className="px-2.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-500/30 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer hover:border-sky-400"
                                 title="Edit Vehicle Specifications, Pricing & Status"
                               >
                                 <Edit className="w-3.5 h-3.5" />
@@ -726,7 +755,7 @@ function InventoryPageInner() {
                             {permissions.isSystemAdmin && (
                               <button
                                 onClick={() => handleDeleteVehicle(v.vehicle_id || v.id, `${v.make} ${v.model}`)}
-                                className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-all cursor-pointer"
+                                className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-700 dark:text-red-400 border border-red-500/30 transition-all cursor-pointer"
                                 title="Remove Vehicle from Inventory"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -786,7 +815,7 @@ function InventoryPageInner() {
                       list="makes-list"
                       required
                       placeholder="e.g. Mercedes-Benz, BMW, Porsche"
-                      value={addForm.make}
+                      value={addForm.make} maxLength={50}
                       onChange={(e) => setAddForm({ ...addForm, make: e.target.value })}
                       className="input-base w-full"
                     />
@@ -806,7 +835,7 @@ function InventoryPageInner() {
                       type="text"
                       required
                       placeholder="e.g. C-Class C220d Progressive"
-                      value={addForm.model}
+                      value={addForm.model} maxLength={50}
                       onChange={(e) => setAddForm({ ...addForm, model: e.target.value })}
                       className="input-base w-full"
                     />
@@ -820,8 +849,8 @@ function InventoryPageInner() {
                     <input
                       type="number"
                       required
-                      min={2015}
-                      max={2027}
+                      min={1980}
+                      max={maxVehicleYear()}
                       value={addForm.manufacture_year}
                       onChange={(e) => setAddForm({ ...addForm, manufacture_year: Number(e.target.value) })}
                       className="input-base w-full"
@@ -836,7 +865,7 @@ function InventoryPageInner() {
                     <input
                       type="text"
                       placeholder="e.g. TN 09 BK 8890"
-                      value={addForm.registration_number}
+                      value={addForm.registration_number} maxLength={20}
                       onChange={(e) => setAddForm({ ...addForm, registration_number: e.target.value })}
                       className="input-base w-full uppercase"
                     />
@@ -907,7 +936,7 @@ function InventoryPageInner() {
                     <input
                       type="number"
                       placeholder="e.g. 15000"
-                      value={addForm.kilometers_driven}
+                      value={addForm.kilometers_driven} min={0} max={2000000}
                       onChange={(e) => setAddForm({ ...addForm, kilometers_driven: e.target.value })}
                       className="input-base w-full"
                     />
@@ -919,7 +948,7 @@ function InventoryPageInner() {
                     <input
                       type="text"
                       placeholder="e.g. Obsidian Black Metallic"
-                      value={addForm.color}
+                      value={addForm.color} maxLength={30}
                       onChange={(e) => setAddForm({ ...addForm, color: e.target.value })}
                       className="input-base w-full"
                     />
@@ -936,7 +965,7 @@ function InventoryPageInner() {
                         type="number"
                         required
                         placeholder="e.g. 4850000"
-                        value={addForm.price}
+                        value={addForm.price} min={1} max={1000000000}
                         onChange={(e) => setAddForm({ ...addForm, price: e.target.value })}
                         className="input-base w-full pl-8"
                       />
@@ -953,7 +982,7 @@ function InventoryPageInner() {
                       <input
                         type="number"
                         placeholder="e.g. 4200000"
-                        value={addForm.purchase_price}
+                        value={addForm.purchase_price} min={0} max={1000000000}
                         onChange={(e) => setAddForm({ ...addForm, purchase_price: e.target.value })}
                         className="input-base w-full pl-8"
                       />
@@ -967,7 +996,7 @@ function InventoryPageInner() {
                   <input
                     type="url"
                     placeholder="https://images.unsplash.com/photo-..."
-                    value={addForm.image_url}
+                    value={addForm.image_url} maxLength={1000}
                     onChange={(e) => setAddForm({ ...addForm, image_url: e.target.value })}
                     className="input-base w-full mb-2"
                   />
@@ -1102,7 +1131,7 @@ function InventoryPageInner() {
                       list="makes-list"
                       required
                       placeholder="e.g. Mercedes-Benz, BMW, Porsche"
-                      value={editForm.make}
+                      value={editForm.make} maxLength={50}
                       onChange={(e) => setEditForm({ ...editForm, make: e.target.value })}
                       className="input-base text-xs"
                     />
@@ -1117,7 +1146,7 @@ function InventoryPageInner() {
                       type="text"
                       required
                       placeholder="e.g. C-Class C220d Progressive"
-                      value={editForm.model}
+                      value={editForm.model} maxLength={50}
                       onChange={(e) => setEditForm({ ...editForm, model: e.target.value })}
                       className="input-base text-xs"
                     />
@@ -1132,7 +1161,7 @@ function InventoryPageInner() {
                       type="number"
                       required
                       min={2010}
-                      max={2027}
+                      max={maxVehicleYear()}
                       value={editForm.manufacture_year}
                       onChange={(e) => setEditForm({ ...editForm, manufacture_year: Number(e.target.value) })}
                       className="input-base text-xs"
@@ -1147,7 +1176,7 @@ function InventoryPageInner() {
                     <input
                       type="text"
                       placeholder="e.g. TN 09 BK 8890"
-                      value={editForm.registration_number}
+                      value={editForm.registration_number} maxLength={20}
                       onChange={(e) => setEditForm({ ...editForm, registration_number: e.target.value })}
                       className="input-base text-xs font-bold uppercase"
                     />
@@ -1258,7 +1287,7 @@ function InventoryPageInner() {
                     <input
                       type="number"
                       min={0}
-                      value={editForm.kilometers_driven}
+                      value={editForm.kilometers_driven} max={2000000}
                       onChange={(e) => setEditForm({ ...editForm, kilometers_driven: e.target.value })}
                       className="input-base text-xs"
                     />
@@ -1270,7 +1299,7 @@ function InventoryPageInner() {
                     <input
                       type="text"
                       placeholder="e.g. Tanzanite Blue Metallic"
-                      value={editForm.color}
+                      value={editForm.color} maxLength={30}
                       onChange={(e) => setEditForm({ ...editForm, color: e.target.value })}
                       className="input-base text-xs"
                     />
@@ -1297,7 +1326,7 @@ function InventoryPageInner() {
                         required
                         min={10000}
                         placeholder="e.g. 5800000"
-                        value={editForm.price}
+                        value={editForm.price} max={1000000000}
                         onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
                         className="input-base text-xs font-bold pl-7"
                       />
@@ -1314,7 +1343,7 @@ function InventoryPageInner() {
                       <input
                         type="number"
                         placeholder="e.g. 5200000 (Internal Margin Tracking)"
-                        value={editForm.purchase_price}
+                        value={editForm.purchase_price} min={0} max={1000000000}
                         onChange={(e) => setEditForm({ ...editForm, purchase_price: e.target.value })}
                         className="input-base text-xs pl-7"
                       />
@@ -1331,7 +1360,7 @@ function InventoryPageInner() {
                     <input
                       type="url"
                       placeholder="https://..."
-                      value={editForm.image_url}
+                      value={editForm.image_url} maxLength={1000}
                       onChange={(e) => setEditForm({ ...editForm, image_url: e.target.value })}
                       className="flex-1 input-base text-xs"
                     />
@@ -1366,7 +1395,7 @@ function InventoryPageInner() {
                   <textarea
                     rows={2}
                     placeholder="Enter vehicle highlight notes..."
-                    value={editForm.description}
+                    value={editForm.description} maxLength={10000}
                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                     className="w-full input-base text-xs"
                   />
@@ -1629,7 +1658,7 @@ function InventoryPageInner() {
 
 export default function InventoryPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-xs text-gray-400">Loading inventory dashboard...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-xs text-text-secondary">Loading inventory dashboard...</div>}>
       <InventoryPageInner />
     </Suspense>
   );

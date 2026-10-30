@@ -68,40 +68,40 @@ export function MultiBranchIntelligenceView({ onSelectBranch }: MultiBranchIntel
       {/* Network Overview Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
-          <span className="text-[11px] text-slate-500 font-semibold block">Active Showrooms</span>
+          <span className="text-[11px] text-text-secondary font-semibold block">Active Showrooms</span>
           <strong className="text-xl font-bold font-mono text-slate-900 mt-1 block">
             {branches.length} Branches
           </strong>
         </div>
 
         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
-          <span className="text-[11px] text-slate-500 font-semibold block">Available Stock (Dealership)</span>
+          <span className="text-[11px] text-text-secondary font-semibold block">Available Stock (Dealership)</span>
           <strong className="text-xl font-bold font-mono text-emerald-600 mt-1 block">
             {totalAvailableStock} Units
           </strong>
-          <span className="text-[10px] text-slate-400">Excludes reserved &amp; sold</span>
+          <span className="text-[10px] text-text-secondary">Excludes reserved &amp; sold</span>
         </div>
 
         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
-          <span className="text-[11px] text-slate-500 font-semibold block">Active Inventory Value</span>
+          <span className="text-[11px] text-text-secondary font-semibold block">Active Inventory Value</span>
           <strong className="text-xl font-bold font-mono text-slate-900 mt-1 block">
             ₹{(totalStockValue / 10000000).toFixed(2)} Cr
           </strong>
         </div>
 
         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
-          <span className="text-[11px] text-slate-500 font-semibold block">Network Customer Interest</span>
+          <span className="text-[11px] text-text-secondary font-semibold block">Network Customer Interest</span>
           <strong className="text-xl font-bold font-mono text-blue-600 mt-1 block">
             {totalInterest} Enquiries
           </strong>
         </div>
 
         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
-          <span className="text-[11px] text-slate-500 font-semibold block">Total Revenue Realized</span>
+          <span className="text-[11px] text-text-secondary font-semibold block">Total Revenue Realized</span>
           <strong className="text-xl font-bold font-mono text-purple-600 mt-1 block">
             ₹{(totalRevenue / 100000).toFixed(1)} L
           </strong>
-          <span className="text-[10px] text-slate-400">{totalSales} closed sales</span>
+          <span className="text-[10px] text-text-secondary">{totalSales} closed sales</span>
         </div>
       </div>
 
@@ -140,14 +140,14 @@ export function MultiBranchIntelligenceView({ onSelectBranch }: MultiBranchIntel
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-slate-400">
+                  <td colSpan={9} className="py-12 text-center text-text-secondary">
                     <Loader2 size={24} className="animate-spin mx-auto text-blue-600 mb-1" />
                     <span>Comparing branch inventory and demand metrics...</span>
                   </td>
                 </tr>
               ) : branches.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-10 text-center text-slate-400">
+                  <td colSpan={9} className="py-10 text-center text-text-secondary">
                     No branches configured.
                   </td>
                 </tr>
@@ -170,7 +170,7 @@ export function MultiBranchIntelligenceView({ onSelectBranch }: MultiBranchIntel
                             </button>
                           )}
                         </div>
-                        <span className="text-[11px] text-slate-500 font-medium">{b.city}, {b.state}</span>
+                        <span className="text-[11px] text-text-secondary font-medium">{b.city}, {b.state}</span>
                       </td>
 
                       {/* Available Stock */}
@@ -179,7 +179,7 @@ export function MultiBranchIntelligenceView({ onSelectBranch }: MultiBranchIntel
                       </td>
 
                       {/* Reserved / Sold */}
-                      <td className="py-3.5 px-4 text-center font-mono text-slate-500">
+                      <td className="py-3.5 px-4 text-center font-mono text-text-secondary">
                         {b.reservedStockCount} res / {b.soldStockCount} sold
                       </td>
 
@@ -242,7 +242,7 @@ export function MultiBranchIntelligenceView({ onSelectBranch }: MultiBranchIntel
             </span>
             <div>
               <h3 className="text-sm font-extrabold text-slate-900">Inter-Branch Vehicle Transfer Opportunities</h3>
-              <p className="text-[11px] text-slate-500 font-medium">
+              <p className="text-[11px] text-text-secondary font-medium">
                 Matches show surplus available inventory in one branch against unmet buyer demand in another branch.
               </p>
             </div>
@@ -253,7 +253,7 @@ export function MultiBranchIntelligenceView({ onSelectBranch }: MultiBranchIntel
         </div>
 
         {transferOpportunities.length === 0 ? (
-          <div className="p-6 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-slate-500 font-medium">
+          <div className="p-6 rounded-xl bg-slate-50 border border-slate-200 text-center text-xs text-text-secondary font-medium">
             No active cross-branch stock mismatches detected. Showroom allocations are currently aligned with regional demand.
           </div>
         ) : (
@@ -268,14 +268,14 @@ export function MultiBranchIntelligenceView({ onSelectBranch }: MultiBranchIntel
                     <CarFront size={13} className="text-purple-600" />
                     {opp.make} {opp.model}
                   </span>
-                  <span className="font-mono text-[10px] text-slate-500 font-bold">
+                  <span className="font-mono text-[10px] text-text-secondary font-bold">
                     {opp.registrationNumber || `#${opp.vehicleId}`}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between text-xs p-2.5 rounded-lg bg-white border border-slate-200">
                   <div className="text-left">
-                    <span className="text-[10px] text-slate-400 block font-semibold">Surplus Branch:</span>
+                    <span className="text-[10px] text-text-secondary block font-semibold">Surplus Branch:</span>
                     <strong className="text-slate-800 text-[11px]">{opp.sourceBranchName}</strong>
                     <span className="text-[9px] text-amber-700 block font-mono font-bold">{opp.daysInStock} days on lot</span>
                   </div>
@@ -283,9 +283,9 @@ export function MultiBranchIntelligenceView({ onSelectBranch }: MultiBranchIntel
                   <ArrowRight size={14} className="text-blue-600 shrink-0" />
 
                   <div className="text-right">
-                    <span className="text-[10px] text-slate-400 block font-semibold">Unmet Demand Branch:</span>
+                    <span className="text-[10px] text-text-secondary block font-semibold">Unmet Demand Branch:</span>
                     <strong className="text-emerald-700 text-[11px]">{opp.targetBranchName}</strong>
-                    <span className="text-[9px] text-slate-500 block font-medium">Active Inquiries</span>
+                    <span className="text-[9px] text-text-secondary block font-medium">Active Inquiries</span>
                   </div>
                 </div>
 

@@ -53,7 +53,7 @@ function DeliveriesContent() {
   };
 
   return (
-    <RequireRole allow={['SYSTEM_ADMIN', 'BRANCH_MANAGER', 'SALES_EXECUTIVE']}>
+    <RequireRole allow={['SYSTEM_ADMIN', 'ADMIN', 'SALES_EXECUTIVE']}>
       <div className="space-y-6">
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-bg-surface border border-border p-6 rounded-[8px]">
@@ -121,15 +121,17 @@ function DeliveriesContent() {
                 onClick={() => setActiveTab('deliveries')}
                 className={`w-full text-left px-3.5 py-2.5 rounded-[8px] text-[12px] font-bold transition-all flex items-center justify-between border cursor-pointer ${
                   activeTab === 'deliveries'
-                    ? 'bg-accent text-accent-text border-accent'
-                    : 'bg-bg-surface-alt text-text-secondary border-border hover:text-text-primary'
+                    ? 'bg-accent text-accent-text border-accent shadow-sm'
+                    : 'bg-bg-surface-alt text-text-primary border-border hover:bg-bg-surface'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
                   <PackageCheck size={16} />
                   <span>Deliveries Component</span>
                 </div>
-                <span className="px-2 py-0.5 rounded-[999px] bg-bg-surface text-text-secondary text-[12px] border border-border">
+                <span className={`px-2 py-0.5 rounded-[999px] text-[11px] font-extrabold ${
+                  activeTab === 'deliveries' ? 'bg-white text-blue-800 shadow-2xs' : 'bg-bg-surface text-text-primary border border-border'
+                }`}>
                   All Handovers
                 </span>
               </button>
@@ -138,15 +140,17 @@ function DeliveriesContent() {
                 onClick={() => setActiveTab('test_drives')}
                 className={`w-full text-left px-3.5 py-2.5 rounded-[8px] text-[12px] font-bold transition-all flex items-center justify-between border cursor-pointer ${
                   activeTab === 'test_drives'
-                    ? 'bg-accent text-accent-text border-accent'
-                    : 'bg-bg-surface-alt text-text-secondary border-border hover:text-text-primary'
+                    ? 'bg-accent text-accent-text border-accent shadow-sm'
+                    : 'bg-bg-surface-alt text-text-primary border-border hover:bg-bg-surface'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
                   <CarFront size={16} />
                   <span>Test Drives Component</span>
                 </div>
-                <span className="px-2 py-0.5 rounded-[999px] bg-bg-surface text-text-secondary text-[12px] border border-border">
+                <span className={`px-2 py-0.5 rounded-[999px] text-[11px] font-extrabold ${
+                  activeTab === 'test_drives' ? 'bg-white text-blue-800 shadow-2xs' : 'bg-bg-surface text-text-primary border border-border'
+                }`}>
                   All Requests
                 </span>
               </button>
@@ -155,15 +159,17 @@ function DeliveriesContent() {
                 onClick={() => setActiveTab('leads')}
                 className={`w-full text-left px-3.5 py-2.5 rounded-[8px] text-[12px] font-bold transition-all flex items-center justify-between border cursor-pointer ${
                   activeTab === 'leads'
-                    ? 'bg-accent text-accent-text border-accent'
-                    : 'bg-bg-surface-alt text-text-secondary border-border hover:text-text-primary'
+                    ? 'bg-accent text-accent-text border-accent shadow-sm'
+                    : 'bg-bg-surface-alt text-text-primary border-border hover:bg-bg-surface'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
                   <ClipboardList size={16} />
                   <span>Leads Component</span>
                 </div>
-                <span className="px-2 py-0.5 rounded-[999px] bg-bg-surface text-text-secondary text-[12px] border border-border">
+                <span className={`px-2 py-0.5 rounded-[999px] text-[11px] font-extrabold ${
+                  activeTab === 'leads' ? 'bg-white text-blue-800 shadow-2xs' : 'bg-bg-surface text-text-primary border border-border'
+                }`}>
                   All Inquiries
                 </span>
               </button>
@@ -172,15 +178,17 @@ function DeliveriesContent() {
                 onClick={() => setActiveTab('payments')}
                 className={`w-full text-left px-3.5 py-2.5 rounded-[8px] text-[12px] font-bold transition-all flex items-center justify-between border cursor-pointer ${
                   activeTab === 'payments'
-                    ? 'bg-accent text-accent-text border-accent'
-                    : 'bg-bg-surface-alt text-text-secondary border-border hover:text-text-primary'
+                    ? 'bg-accent text-accent-text border-accent shadow-sm'
+                    : 'bg-bg-surface-alt text-text-primary border-border hover:bg-bg-surface'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
                   <CreditCard size={16} />
                   <span>Payment &amp; Loan Check</span>
                 </div>
-                <span className="px-2 py-0.5 rounded-[999px] bg-bg-surface text-text-secondary text-[12px] border border-border">
+                <span className={`px-2 py-0.5 rounded-[999px] text-[11px] font-extrabold ${
+                  activeTab === 'payments' ? 'bg-white text-blue-800 shadow-2xs' : 'bg-bg-surface text-text-primary border border-border'
+                }`}>
                   Verified
                 </span>
               </button>
@@ -258,7 +266,7 @@ function DeliveriesContent() {
 
 export default function DeliveriesPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-slate-400">Loading operational components...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-text-secondary">Loading operational components...</div>}>
       <DeliveriesContent />
     </Suspense>
   );

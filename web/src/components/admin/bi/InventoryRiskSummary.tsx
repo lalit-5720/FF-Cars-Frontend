@@ -148,7 +148,7 @@ export function InventoryRiskSummary({ branchId }: InventoryRiskSummaryProps = {
                   High Risk (120+ Days)
                   <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </span>
-                <span className="font-mono text-slate-500 font-bold">
+                <span className="font-mono text-text-secondary font-bold">
                   {highRiskList.length} Vehicles{' '}
                   <strong className="text-slate-900 ml-1">{formatCurrency(highRiskValue)}</strong>
                 </span>
@@ -171,7 +171,7 @@ export function InventoryRiskSummary({ branchId }: InventoryRiskSummaryProps = {
                   Medium Risk (61-120 Days)
                   <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </span>
-                <span className="font-mono text-slate-500 font-bold">
+                <span className="font-mono text-text-secondary font-bold">
                   {mediumRiskList.length} Vehicles{' '}
                   <strong className="text-slate-900 ml-1">{formatCurrency(mediumRiskValue)}</strong>
                 </span>
@@ -194,7 +194,7 @@ export function InventoryRiskSummary({ branchId }: InventoryRiskSummaryProps = {
                   Low Risk (0-60 Days)
                   <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </span>
-                <span className="font-mono text-slate-500 font-bold">
+                <span className="font-mono text-text-secondary font-bold">
                   {lowRiskList.length} Vehicles{' '}
                   <strong className="text-slate-900 ml-1">{formatCurrency(lowRiskValue)}</strong>
                 </span>
@@ -236,14 +236,14 @@ export function InventoryRiskSummary({ branchId }: InventoryRiskSummaryProps = {
                       ? 'Medium-Risk Vehicles (61–120 Days on Lot)'
                       : 'Low-Risk Fresh Vehicles (0–60 Days on Lot)'}
                   </h3>
-                  <p className="text-xs text-slate-500 font-medium">
+                  <p className="text-xs text-text-secondary font-medium">
                     Live database records with actual days on lot and recommended repricing
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedRiskCategory(null)}
-                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-text-secondary hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -252,7 +252,7 @@ export function InventoryRiskSummary({ branchId }: InventoryRiskSummaryProps = {
             {/* List of Cars */}
             <div className="space-y-3">
               {activeRosterList.length === 0 ? (
-                <div className="py-12 text-center text-xs text-slate-400 font-medium">
+                <div className="py-12 text-center text-xs text-text-secondary font-medium">
                   No vehicles currently in this risk category.
                 </div>
               ) : (
@@ -274,12 +274,12 @@ export function InventoryRiskSummary({ branchId }: InventoryRiskSummaryProps = {
                         </span>
                       </div>
 
-                      <div className="text-[11px] text-slate-500">
+                      <div className="text-[11px] text-text-secondary">
                         Branch: <span className="text-slate-800 font-bold">{v.branch_name}</span>
                       </div>
 
                       <div className="flex items-center gap-3 text-xs">
-                        <span className="text-slate-500">
+                        <span className="text-text-secondary">
                           Current Price:{' '}
                           <strong className="text-slate-900 font-mono font-extrabold">
                             ₹{v.price.toLocaleString('en-IN')}

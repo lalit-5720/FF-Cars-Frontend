@@ -99,7 +99,7 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
         {/* Modal Header */}
         <div className="p-6 border-b border-border flex items-center justify-between bg-secondary/30">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+            <div className="p-2.5 rounded-2xl bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-500/20">
               <DollarSign className="w-6 h-6" />
             </div>
             <div>
@@ -107,7 +107,7 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
                 <h2 className="text-xl font-extrabold text-foreground font-display">
                   Gross Profit & Difference Breakdown
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-500/20">
                   Audited Margin Ledger
                 </span>
               </div>
@@ -118,7 +118,7 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
           </div>
           
           <div className="flex items-center gap-2">
-            <div className="flex rounded-xl bg-slate-800/80 p-1 border border-border text-xs font-bold">
+            <div className="flex rounded-xl bg-bg-surface-alt p-1 border border-border text-xs font-bold">
               <button
                 onClick={() => setActiveTab('breakdown')}
                 className={`px-3 py-1.5 rounded-lg transition-all ${
@@ -158,29 +158,29 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
               {/* Formula & Explanation Banner */}
               <div className="rounded-2xl bg-purple-950/20 border border-purple-500/30 p-4 text-xs space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-extrabold text-purple-300 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
-                    <HelpCircle size={14} className="text-purple-400" />
+                  <span className="font-extrabold text-purple-700 dark:text-purple-300 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                    <HelpCircle size={14} className="text-purple-700 dark:text-purple-400" />
                     How Gross Profit &amp; Differences Are Calculated
                   </span>
-                  <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-200 text-[10px] font-mono font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-800 dark:text-purple-200 text-[10px] font-mono font-bold">
                     GAAP Financial Standard
                   </span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 text-slate-300">
-                  <div className="bg-slate-900/60 rounded-xl p-3 border border-purple-500/20">
-                    <p className="text-[10px] font-bold uppercase text-slate-400">1. Raw Difference (Spread)</p>
-                    <p className="font-mono text-xs text-white mt-1">Selling Price - Acquisition Cost</p>
-                    <p className="text-[10px] text-slate-400 mt-1">Direct markup on vehicle stock before customer negotiations</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 text-text-primary">
+                  <div className="bg-bg-surface-alt rounded-xl p-3 border border-purple-500/20">
+                    <p className="text-[10px] font-bold uppercase text-text-secondary">1. Raw Difference (Spread)</p>
+                    <p className="font-mono text-xs text-text-primary mt-1">Selling Price - Acquisition Cost</p>
+                    <p className="text-[10px] text-text-secondary mt-1">Direct markup on vehicle stock before customer negotiations</p>
                   </div>
-                  <div className="bg-slate-900/60 rounded-xl p-3 border border-purple-500/20">
-                    <p className="text-[10px] font-bold uppercase text-slate-400">2. Net Vehicle Margin</p>
-                    <p className="font-mono text-xs text-white mt-1">Contract Value - Acquisition Cost</p>
-                    <p className="text-[10px] text-slate-400 mt-1">Incorporates commercial discounts and statutory tax adjustments</p>
+                  <div className="bg-bg-surface-alt rounded-xl p-3 border border-purple-500/20">
+                    <p className="text-[10px] font-bold uppercase text-text-secondary">2. Net Vehicle Margin</p>
+                    <p className="font-mono text-xs text-text-primary mt-1">Contract Value - Acquisition Cost</p>
+                    <p className="text-[10px] text-text-secondary mt-1">Incorporates commercial discounts and statutory tax adjustments</p>
                   </div>
-                  <div className="bg-slate-900/60 rounded-xl p-3 border border-purple-500/20">
-                    <p className="text-[10px] font-bold uppercase text-slate-400">3. Final Audited Gross Profit</p>
-                    <p className="font-mono text-xs text-emerald-400 mt-1">Net Margin + 2% Loan Commission</p>
-                    <p className="text-[10px] text-slate-400 mt-1">Total revenue accrued to dealership including bank finance fees</p>
+                  <div className="bg-bg-surface-alt rounded-xl p-3 border border-purple-500/20">
+                    <p className="text-[10px] font-bold uppercase text-text-secondary">3. Final Audited Gross Profit</p>
+                    <p className="font-mono text-xs text-emerald-700 dark:text-emerald-400 mt-1">Net Margin + 2% Loan Commission</p>
+                    <p className="text-[10px] text-text-secondary mt-1">Total revenue accrued to dealership including bank finance fees</p>
                   </div>
                 </div>
               </div>
@@ -192,7 +192,7 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
                 <div className="rounded-2xl bg-secondary/30 border border-border p-4 flex flex-col justify-between">
                   <div className="flex items-center justify-between text-xs text-muted-foreground font-bold">
                     <span>Total Selling Value</span>
-                    <CarFront size={16} className="text-sky-400" />
+                    <CarFront size={16} className="text-sky-700 dark:text-sky-400" />
                   </div>
                   <div className="mt-3">
                     <span className="text-2xl font-extrabold text-foreground font-mono">
@@ -208,7 +208,7 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
                 <div className="rounded-2xl bg-secondary/30 border border-border p-4 flex flex-col justify-between">
                   <div className="flex items-center justify-between text-xs text-muted-foreground font-bold">
                     <span>Total Acquisition Cost</span>
-                    <DollarSign size={16} className="text-amber-400" />
+                    <DollarSign size={16} className="text-amber-800 dark:text-amber-400" />
                   </div>
                   <div className="mt-3">
                     <span className="text-2xl font-extrabold text-foreground font-mono">
@@ -222,12 +222,12 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
 
                 {/* 3. Raw Difference / Spread */}
                 <div className="rounded-2xl bg-purple-500/10 border border-purple-500/30 p-4 flex flex-col justify-between ring-1 ring-purple-500/20">
-                  <div className="flex items-center justify-between text-xs text-purple-300 font-bold">
+                  <div className="flex items-center justify-between text-xs text-purple-700 dark:text-purple-300 font-bold">
                     <span>The Difference (Spread)</span>
-                    <TrendingUp size={16} className="text-purple-400" />
+                    <TrendingUp size={16} className="text-purple-700 dark:text-purple-400" />
                   </div>
                   <div className="mt-3">
-                    <span className="text-2xl font-extrabold text-purple-300 font-mono">
+                    <span className="text-2xl font-extrabold text-purple-700 dark:text-purple-300 font-mono">
                       {formatCurrency(rawDifference)}
                     </span>
                     <span className="block text-[11px] text-purple-400/80 mt-1 font-semibold">
@@ -238,16 +238,16 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
 
                 {/* 4. Audited Net Gross Profit */}
                 <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/30 p-4 flex flex-col justify-between ring-1 ring-emerald-500/20">
-                  <div className="flex items-center justify-between text-xs text-emerald-300 font-bold">
+                  <div className="flex items-center justify-between text-xs text-emerald-700 dark:text-emerald-300 font-bold">
                     <span>Net Gross Profit</span>
-                    <CheckCircle2 size={16} className="text-emerald-400" />
+                    <CheckCircle2 size={16} className="text-emerald-700 dark:text-emerald-400" />
                   </div>
                   <div className="mt-3">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-extrabold text-emerald-400 font-mono">
+                      <span className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400 font-mono">
                         {formatCurrency(totalGrossProfit)}
                       </span>
-                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300">
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
                         {overallMarginPct}%
                       </span>
                     </div>
@@ -316,29 +316,29 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
                                       {d.registration_number} • Sale #{d.sale_id}
                                     </div>
                                   </td>
-                                  <td className="py-3 px-4 text-slate-300">
+                                  <td className="py-3 px-4 text-text-primary">
                                     <div>{d.customer_name}</div>
                                     <div className="text-[10px] text-muted-foreground">{d.branch_name}</div>
                                   </td>
-                                  <td className="py-3 px-4 text-right font-mono text-slate-200">
+                                  <td className="py-3 px-4 text-right font-mono text-text-primary">
                                     {formatCurrency(d.selling_price)}
                                   </td>
                                   <td className="py-3 px-4 text-right font-mono text-amber-400/90">
                                     {formatCurrency(d.acquisition_cost)}
                                   </td>
                                   <td className="py-3 px-4 text-right font-mono font-bold">
-                                    <span className="px-2 py-0.5 rounded-full text-[11px] bg-purple-500/10 text-purple-300 border border-purple-500/20">
+                                    <span className="px-2 py-0.5 rounded-full text-[11px] bg-purple-500/10 text-purple-700 dark:text-purple-300 border border-purple-500/20">
                                       +{formatCurrency(d.raw_spread)}
                                     </span>
                                   </td>
-                                  <td className="py-3 px-4 text-right font-mono text-rose-400">
+                                  <td className="py-3 px-4 text-right font-mono text-rose-700 dark:text-rose-400">
                                     {d.discount > 0 ? `-${formatCurrency(d.discount)}` : '₹0'}
                                   </td>
-                                  <td className="py-3 px-4 text-right font-mono text-sky-400">
+                                  <td className="py-3 px-4 text-right font-mono text-sky-700 dark:text-sky-400">
                                     {d.bank_commission > 0 ? `+${formatCurrency(d.bank_commission)}` : '₹0'}
                                   </td>
                                   <td className="py-3 px-4 text-right font-mono font-extrabold">
-                                    <div className={isPositive ? 'text-emerald-400' : 'text-rose-400'}>
+                                    <div className={isPositive ? 'text-emerald-700 dark:text-emerald-400' : 'text-rose-700 dark:text-rose-400'}>
                                       {formatCurrency(d.net_gross_profit)}
                                     </div>
                                     <span className="text-[10px] text-muted-foreground font-normal">
@@ -363,7 +363,7 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                       <div>
                         <h3 className="text-base font-extrabold text-foreground flex items-center gap-2">
-                          <Sliders className="w-5 h-5 text-purple-400" />
+                          <Sliders className="w-5 h-5 text-purple-700 dark:text-purple-400" />
                           What-If Profit Reduction &amp; Concession Analyzer
                         </h3>
                         <p className="text-xs text-muted-foreground mt-0.5">
@@ -372,7 +372,7 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
                       </div>
 
                       {/* Mode Toggle */}
-                      <div className="flex rounded-xl bg-slate-900 border border-border p-1 text-xs">
+                      <div className="flex rounded-xl bg-bg-surface-alt border border-border p-1 text-xs">
                         <button
                           onClick={() => setReductionMode('PERCENT')}
                           className={`px-3 py-1 rounded-lg font-bold transition-all ${
@@ -397,8 +397,8 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
                       {reductionMode === 'PERCENT' ? (
                         <div className="space-y-3">
                           <div className="flex justify-between items-center text-xs font-bold">
-                            <span className="text-slate-300">Target Profit Reduction Percentage</span>
-                            <span className="font-mono text-purple-400 text-base font-extrabold">{profitReductionPct}%</span>
+                            <span className="text-text-primary">Target Profit Reduction Percentage</span>
+                            <span className="font-mono text-purple-700 dark:text-purple-400 text-base font-extrabold">{profitReductionPct}%</span>
                           </div>
                           <input
                             type="range"
@@ -407,7 +407,7 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
                             step="1"
                             value={profitReductionPct}
                             onChange={(e) => setProfitReductionPct(Number(e.target.value))}
-                            className="w-full accent-purple-500 h-2 bg-slate-800 rounded-lg cursor-pointer"
+                            className="w-full accent-purple-500 h-2 bg-bg-surface-alt rounded-lg cursor-pointer"
                           />
                           <div className="flex justify-between text-[10px] text-muted-foreground">
                             <span>0% (Full Price)</span>
@@ -419,8 +419,8 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
                       ) : (
                         <div className="space-y-3">
                           <div className="flex justify-between items-center text-xs font-bold">
-                            <span className="text-slate-300">Target Profit Concession (₹ INR)</span>
-                            <span className="font-mono text-purple-400 text-base font-extrabold">
+                            <span className="text-text-primary">Target Profit Concession (₹ INR)</span>
+                            <span className="font-mono text-purple-700 dark:text-purple-400 text-base font-extrabold">
                               {formatCurrency(profitReductionFixed)}
                             </span>
                           </div>
@@ -439,37 +439,37 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
 
                       {/* Quick Scenarios */}
                       <div className="space-y-2">
-                        <span className="text-xs font-bold text-slate-400 block">Quick Concession Presets</span>
+                        <span className="text-xs font-bold text-text-secondary block">Quick Concession Presets</span>
                         <div className="grid grid-cols-3 gap-2">
                           <button
                             onClick={() => {
                               setReductionMode('PERCENT');
                               setProfitReductionPct(5);
                             }}
-                            className="p-2.5 rounded-xl border border-border bg-slate-900/60 hover:border-purple-500/50 text-left transition-all"
+                            className="p-2.5 rounded-xl border border-border bg-bg-surface-alt hover:border-purple-500/50 text-left transition-all"
                           >
                             <span className="text-[10px] text-muted-foreground block font-bold">Festive Concession</span>
-                            <span className="text-xs font-extrabold text-white font-mono">-5% Profit</span>
+                            <span className="text-xs font-extrabold text-text-primary font-mono">-5% Profit</span>
                           </button>
                           <button
                             onClick={() => {
                               setReductionMode('PERCENT');
                               setProfitReductionPct(15);
                             }}
-                            className="p-2.5 rounded-xl border border-border bg-slate-900/60 hover:border-purple-500/50 text-left transition-all"
+                            className="p-2.5 rounded-xl border border-border bg-bg-surface-alt hover:border-purple-500/50 text-left transition-all"
                           >
                             <span className="text-[10px] text-muted-foreground block font-bold">High Volume Push</span>
-                            <span className="text-xs font-extrabold text-white font-mono">-15% Profit</span>
+                            <span className="text-xs font-extrabold text-text-primary font-mono">-15% Profit</span>
                           </button>
                           <button
                             onClick={() => {
                               setReductionMode('PERCENT');
                               setProfitReductionPct(25);
                             }}
-                            className="p-2.5 rounded-xl border border-border bg-slate-900/60 hover:border-purple-500/50 text-left transition-all"
+                            className="p-2.5 rounded-xl border border-border bg-bg-surface-alt hover:border-purple-500/50 text-left transition-all"
                           >
                             <span className="text-[10px] text-muted-foreground block font-bold">Aged Stock Liquidation</span>
-                            <span className="text-xs font-extrabold text-white font-mono">-25% Profit</span>
+                            <span className="text-xs font-extrabold text-text-primary font-mono">-25% Profit</span>
                           </button>
                         </div>
                       </div>
@@ -494,9 +494,9 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
 
                     {/* 2. Total Concession Given */}
                     <div className="rounded-2xl bg-rose-500/10 border border-rose-500/30 p-4">
-                      <span className="text-xs font-bold text-rose-300">Profit Given Away</span>
+                      <span className="text-xs font-bold text-rose-700 dark:text-rose-300">Profit Given Away</span>
                       <div className="mt-2">
-                        <span className="text-xl font-extrabold text-rose-400 font-mono">
+                        <span className="text-xl font-extrabold text-rose-700 dark:text-rose-400 font-mono">
                           -{formatCurrency(calculatedReduction)}
                         </span>
                         <span className="block text-[11px] text-rose-300/80 mt-1 font-semibold">
@@ -507,9 +507,9 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
 
                     {/* 3. Revised Gross Profit */}
                     <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/30 p-4 ring-2 ring-emerald-500/30">
-                      <span className="text-xs font-bold text-emerald-300">Revised Gross Profit You Get</span>
+                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300">Revised Gross Profit You Get</span>
                       <div className="mt-2">
-                        <span className="text-2xl font-extrabold text-emerald-400 font-mono">
+                        <span className="text-2xl font-extrabold text-emerald-700 dark:text-emerald-400 font-mono">
                           {formatCurrency(reducedGrossProfit)}
                         </span>
                         <span className="block text-[11px] text-emerald-300/90 mt-1 font-bold">
@@ -521,16 +521,16 @@ export function GrossProfitBreakdownModal({ isOpen, onClose }: GrossProfitBreakd
                   </div>
 
                   {/* Negotiation Guidance Card */}
-                  <div className="rounded-2xl bg-slate-900/90 border border-border p-4 text-xs space-y-2">
-                    <span className="font-extrabold text-amber-400 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
+                  <div className="rounded-2xl bg-bg-surface-alt border border-border p-4 text-xs space-y-2">
+                    <span className="font-extrabold text-amber-800 dark:text-amber-400 flex items-center gap-1.5 uppercase tracking-wider text-[11px]">
                       <AlertTriangle size={14} /> Dealership Negotiation Boundary
                     </span>
-                    <p className="text-slate-300 leading-relaxed text-[11px]">
+                    <p className="text-text-primary leading-relaxed text-[11px]">
                       At this concession level, the average gross profit per car becomes{' '}
-                      <strong className="text-white font-mono">
+                      <strong className="text-text-primary font-mono">
                         {formatCurrency(data?.totalSalesCount ? reducedGrossProfit / data.totalSalesCount : 0)}
                       </strong>. Sales consultants can safely negotiate discounts up to{' '}
-                      <strong className="text-emerald-400 font-mono">
+                      <strong className="text-emerald-700 dark:text-emerald-400 font-mono">
                         {formatCurrency(data?.totalSalesCount ? calculatedReduction / data.totalSalesCount : 0)}
                       </strong>{' '}
                       per vehicle before dipping below the dealership minimum margin floor.

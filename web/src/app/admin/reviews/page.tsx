@@ -44,7 +44,7 @@ export default function ReviewsPage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-card border border-border p-5 rounded-2xl">
           <div>
             <h1 className="text-xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
-              <Award className="w-5 h-5 text-amber-400" /> Customer Reviews & Ratings Moderation
+              <Award className="w-5 h-5 text-amber-800 dark:text-amber-400" /> Customer Reviews & Ratings Moderation
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
               Moderate and publish customer testimonials & vehicle feedback
@@ -82,16 +82,16 @@ export default function ReviewsPage() {
                 ) : (
                   reviews.map((r) => (
                     <tr key={r.review_id} className="hover:bg-secondary/40 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-sky-400">#REV-{r.review_id}</td>
+                      <td className="py-3.5 px-4 font-mono font-bold text-sky-700 dark:text-sky-400">#REV-{r.review_id}</td>
                       <td className="py-3.5 px-4 font-bold text-foreground">
                         {r.customers ? `${r.customers.first_name} ${r.customers.last_name || ''}` : `Customer #${r.customer_id}`}
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className="flex items-center gap-1 text-amber-400 font-bold">
+                        <span className="flex items-center gap-1 text-amber-800 dark:text-amber-400 font-bold">
                           <Star className="w-3.5 h-3.5 fill-amber-400" /> {r.rating}/5
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 max-w-xs truncate text-slate-300">{r.comment}</td>
+                      <td className="py-3.5 px-4 max-w-xs truncate text-text-primary">{r.comment}</td>
                       <td className="py-3.5 px-4">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
                           r.is_published ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :

@@ -685,7 +685,7 @@ export default function CarDetailPage({ params }: CarDetailProps) {
                 <textarea
                   rows={4}
                   required
-                  value={enquiryRemarks}
+                  value={enquiryRemarks} maxLength={2000}
                   onChange={(e) => setEnquiryRemarks(e.target.value)}
                   placeholder="e.g. I am interested in viewing this vehicle in person, negotiating terms, and exploring finance options..."
                   className="w-full p-3 rounded-lg bg-bg-surface border border-border text-text-primary focus:border-accent focus:outline-none"

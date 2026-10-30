@@ -101,12 +101,12 @@ export function CustomerDemandIntelligenceReport({ data: initialData }: Customer
               <Sparkles className="w-3.5 h-3.5 text-amber-600" />
               CUSTOMER DECISION EVIDENCE REPORT
             </span>
-            <span className="text-xs text-slate-500 font-semibold">Live Database Analytics</span>
+            <span className="text-xs text-text-secondary font-semibold">Live Database Analytics</span>
           </div>
           <h2 className="text-2xl font-black tracking-tight text-slate-900 font-display">
             Customer Demand &amp; Procurement Analysis
           </h2>
-          <p className="text-xs text-slate-500 mt-1 max-w-2xl font-medium">
+          <p className="text-xs text-text-secondary mt-1 max-w-2xl font-medium">
             Evidence-backed procurement guide derived dynamically from customer inquiries, test drives, and stock turnover in the database.
           </p>
         </div>
@@ -210,7 +210,7 @@ export function CustomerDemandIntelligenceReport({ data: initialData }: Customer
                 </div>
 
                 <div className="pt-3 border-t border-slate-100 text-xs">
-                  <span className="text-slate-400 block text-[10px] uppercase font-bold">Suggested Action</span>
+                  <span className="text-text-secondary block text-[10px] uppercase font-bold">Suggested Action</span>
                   <span className="font-bold text-slate-800 mt-0.5 block">{item.action}</span>
                 </div>
               </div>
@@ -252,7 +252,7 @@ export function CustomerDemandIntelligenceReport({ data: initialData }: Customer
                 </div>
 
                 <div className="pt-3 border-t border-slate-100 text-xs">
-                  <span className="text-slate-400 block text-[10px] uppercase font-bold">Stock Status</span>
+                  <span className="text-text-secondary block text-[10px] uppercase font-bold">Stock Status</span>
                   <span className="font-bold text-emerald-700 mt-0.5 block">{item.stockInfo}</span>
                 </div>
               </div>
@@ -264,13 +264,13 @@ export function CustomerDemandIntelligenceReport({ data: initialData }: Customer
       {/* TAB 3: REAL CUSTOMER EVIDENCE */}
       {activeTab === 'evidence' && (
         <div className="space-y-4 animate-in fade-in duration-300">
-          <div className="flex items-center justify-between text-xs text-slate-500 mb-2 font-medium">
+          <div className="flex items-center justify-between text-xs text-text-secondary mb-2 font-medium">
             <span>Verified Customer Activity from Database</span>
             <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{evidenceList.length} Customer Records</span>
           </div>
 
           {evidenceList.length === 0 ? (
-            <div className="py-12 text-center text-xs text-slate-400">
+            <div className="py-12 text-center text-xs text-text-secondary">
               No customer inquiries recorded yet.
             </div>
           ) : (
@@ -288,7 +288,7 @@ export function CustomerDemandIntelligenceReport({ data: initialData }: Customer
                         </div>
                         <div>
                           <strong className="text-xs text-slate-900 block font-bold">{cust.customer_name}</strong>
-                          <span className="text-[10px] text-slate-500">{cust.branch_name || cust.customer_phone}</span>
+                          <span className="text-[10px] text-text-secondary">{cust.branch_name || cust.customer_phone}</span>
                         </div>
                       </div>
                       <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -297,7 +297,7 @@ export function CustomerDemandIntelligenceReport({ data: initialData }: Customer
                     </div>
 
                     <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1 mb-3 text-xs">
-                      <div className="text-slate-500 text-[10px] uppercase font-bold">Vehicle Activity</div>
+                      <div className="text-text-secondary text-[10px] uppercase font-bold">Vehicle Activity</div>
                       <div className="font-bold text-slate-900">{cust.vehicle_preferred}</div>
                     </div>
 
@@ -307,7 +307,7 @@ export function CustomerDemandIntelligenceReport({ data: initialData }: Customer
                   </div>
 
                   <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                    <span className="text-slate-400 font-medium">{cust.date}</span>
+                    <span className="text-text-secondary font-medium">{cust.date}</span>
                     <span className="text-blue-600 font-bold flex items-center gap-1">
                       Verified DB Record ✓
                     </span>

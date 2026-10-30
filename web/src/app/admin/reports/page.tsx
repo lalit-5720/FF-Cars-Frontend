@@ -801,7 +801,7 @@ export default function ReportsPage() {
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
                 Business Reports
               </span>
-              <span className="text-xs text-slate-500">• Dealership Intelligence</span>
+              <span className="text-xs text-text-secondary">• Dealership Intelligence</span>
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
               <FileText className="w-6 h-6 text-blue-600" />
@@ -976,7 +976,7 @@ export default function ReportsPage() {
                       </>
                     ) : (
                       <>
-                        <Download className="w-4 h-4 text-white" />
+                        <Download className="w-4 h-4 text-text-primary" />
                         <span>Generate &amp; Download PDF</span>
                       </>
                     )}
@@ -991,7 +991,7 @@ export default function ReportsPage() {
                   <span className="text-xs font-semibold text-slate-700">Custom Date Range:</span>
                   <div className="flex items-center gap-2 text-xs">
                     <label className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5">
-                      <span className="text-slate-500 font-semibold text-xs">From</span>
+                      <span className="text-text-secondary font-semibold text-xs">From</span>
                       <input
                         type="date"
                         value={startDate}
@@ -999,9 +999,9 @@ export default function ReportsPage() {
                         className="bg-transparent font-medium text-slate-800 outline-hidden text-xs cursor-pointer"
                       />
                     </label>
-                    <span className="text-slate-400">to</span>
+                    <span className="text-text-secondary">to</span>
                     <label className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5">
-                      <span className="text-slate-500 font-semibold text-xs">To</span>
+                      <span className="text-text-secondary font-semibold text-xs">To</span>
                       <input
                         type="date"
                         value={endDate}
@@ -1032,12 +1032,12 @@ export default function ReportsPage() {
                     <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
                       Performance Summary
                     </span>
-                    <span className="text-xs text-slate-400">• All Showroom Branches</span>
+                    <span className="text-xs text-text-secondary">• All Showroom Branches</span>
                   </div>
                   <h2 className="text-xl font-bold text-slate-900 tracking-tight">
                     Dealership &amp; Branch Business Performance
                   </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-text-secondary mt-0.5">
                     Live operational metrics, profit per car sold, carrying costs, and branch comparison.
                   </p>
                 </div>
@@ -1059,7 +1059,7 @@ export default function ReportsPage() {
                   <strong className="text-2xl font-bold text-slate-900 block">
                     {formatInr(dynamicProfitPerCar)}
                   </strong>
-                  <span className="text-xs text-slate-500 block">
+                  <span className="text-xs text-text-secondary block">
                     Average gross profit on completed car sales
                   </span>
                 </div>
@@ -1069,9 +1069,9 @@ export default function ReportsPage() {
                     Monthly Carrying Cost
                   </span>
                   <strong className="text-2xl font-bold text-slate-900 block">
-                    {formatInr(dynamicHoldingCost)}<span className="text-xs font-normal text-slate-500">/mo</span>
+                    {formatInr(dynamicHoldingCost)}<span className="text-xs font-normal text-text-secondary">/mo</span>
                   </strong>
-                  <span className="text-xs text-slate-500 block">
+                  <span className="text-xs text-text-secondary block">
                     Estimated holding interest on unsold showroom stock
                   </span>
                 </div>
@@ -1083,7 +1083,7 @@ export default function ReportsPage() {
                   <strong className="text-2xl font-bold text-slate-900 block">
                     {dynamicTurnover}x
                   </strong>
-                  <span className="text-xs text-slate-500 block">
+                  <span className="text-xs text-text-secondary block">
                     How quickly vehicle inventory converts to sales
                   </span>
                 </div>
@@ -1095,7 +1095,7 @@ export default function ReportsPage() {
                   <strong className="text-2xl font-bold text-slate-900 block">
                     {dynamicCollectionRate}%
                   </strong>
-                  <span className="text-xs text-slate-500 block">
+                  <span className="text-xs text-text-secondary block">
                     Payments received vs total sales contract value
                   </span>
                 </div>
@@ -1110,11 +1110,11 @@ export default function ReportsPage() {
                       <Building2 className="w-4 h-4 text-blue-600" />
                       Branch Performance Comparison
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-text-secondary">
                       Breakdown of sales, revenue, profit, and available vehicles for each showroom location.
                     </p>
                   </div>
-                  <span className="text-xs text-slate-500 font-medium">
+                  <span className="text-xs text-text-secondary font-medium">
                     {branchMatrixRows.length} Active Showrooms
                   </span>
                 </div>
@@ -1199,11 +1199,11 @@ export default function ReportsPage() {
             </div>
 
             {/* 2. REPORT STATUS & INSTRUCTIONS */}
-            <div className="flex items-center justify-between text-xs text-slate-500 px-1">
+            <div className="flex items-center justify-between text-xs text-text-secondary px-1">
               <span>
                 Showing report preview for: <strong className="text-slate-800">{meta?.periodLabel || 'Current Period'}</strong> • Branch: <strong className="text-slate-800">{meta?.branchInfo?.branchName || 'All Showrooms'}</strong>
               </span>
-              <span className="text-slate-400">Generated: {meta?.generatedAt ? new Date(meta.generatedAt).toLocaleString('en-IN') : 'Just now'}</span>
+              <span className="text-text-secondary">Generated: {meta?.generatedAt ? new Date(meta.generatedAt).toLocaleString('en-IN') : 'Just now'}</span>
             </div>
 
             {/* 3. REPORT CONTAINER PREVIEW */}
@@ -1216,7 +1216,7 @@ export default function ReportsPage() {
               >
                 
                 {/* Brand Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b-2 border-slate-900">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b-2 border-border">
                   <div className="flex items-center gap-3.5">
                     <div className="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xl shadow-xs">
                       CR
@@ -1228,7 +1228,7 @@ export default function ReportsPage() {
                           Pre-Owned Cars
                         </span>
                       </div>
-                      <span className="text-xs font-semibold text-slate-500 block uppercase tracking-wider">
+                      <span className="text-xs font-semibold text-text-secondary block uppercase tracking-wider">
                         Business Intelligence &amp; Performance Report
                       </span>
                     </div>
@@ -1237,7 +1237,7 @@ export default function ReportsPage() {
                   <div className="text-left sm:text-right text-xs space-y-0.5">
                     <span className="font-bold text-slate-900 block">{meta?.branchInfo?.branchName || 'CarRevive Showrooms'}</span>
                     <span className="text-slate-600 block">{meta?.periodLabel || 'Reporting Period'}</span>
-                    <span className="text-xs text-slate-400 block">
+                    <span className="text-xs text-text-secondary block">
                       Generated: {meta?.generatedAt ? new Date(meta.generatedAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : ''}
                     </span>
                   </div>
@@ -1246,7 +1246,7 @@ export default function ReportsPage() {
                 {/* KPI Metrics Grid */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">
                       1. Executive Key Metrics
                     </h3>
                   </div>
@@ -1254,13 +1254,13 @@ export default function ReportsPage() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     
                     <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                      <span className="text-xs font-semibold text-slate-500 block">
+                      <span className="text-xs font-semibold text-text-secondary block">
                         Completed Sales Revenue
                       </span>
                       <strong className="text-xl font-bold text-slate-900 block">
                         {formatInr(exec.totalCompletedSalesRevenue)}
                       </strong>
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-text-secondary">
                         {comp.revenueGrowthPct != null && (
                           <span className={`font-semibold mr-1 ${comp.revenueGrowthPct >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
                             {comp.revenueGrowthPct >= 0 ? '+' : ''}{comp.revenueGrowthPct}%
@@ -1271,7 +1271,7 @@ export default function ReportsPage() {
                     </div>
 
                     <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                      <span className="text-xs font-semibold text-slate-500 block">
+                      <span className="text-xs font-semibold text-text-secondary block">
                         Gross Profit &amp; Margin
                       </span>
                       <strong className="text-xl font-bold text-emerald-700 block">
@@ -1283,73 +1283,73 @@ export default function ReportsPage() {
                     </div>
 
                     <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                      <span className="text-xs font-semibold text-slate-500 block">
+                      <span className="text-xs font-semibold text-text-secondary block">
                         Vehicles Sold
                       </span>
                       <strong className="text-xl font-bold text-slate-900 block">
-                        {exec.vehiclesSold ?? 0} <span className="text-xs font-normal text-slate-500">cars</span>
+                        {exec.vehiclesSold ?? 0} <span className="text-xs font-normal text-text-secondary">cars</span>
                       </strong>
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-text-secondary">
                         Avg: <strong className="text-slate-700">{formatInr(exec.averageSellingPrice)}</strong>
                       </div>
                     </div>
 
                     <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                      <span className="text-xs font-semibold text-slate-500 block">
+                      <span className="text-xs font-semibold text-text-secondary block">
                         Cars in Stock
                       </span>
                       <strong className="text-xl font-bold text-slate-900 block">
-                        {exec.vehiclesInStock ?? 0} <span className="text-xs font-normal text-slate-500">cars</span>
+                        {exec.vehiclesInStock ?? 0} <span className="text-xs font-normal text-text-secondary">cars</span>
                       </strong>
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-text-secondary">
                         Live Showroom Inventory
                       </div>
                     </div>
 
                     <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                      <span className="text-xs font-semibold text-slate-500 block">
+                      <span className="text-xs font-semibold text-text-secondary block">
                         Inventory Investment (Cost)
                       </span>
                       <strong className="text-xl font-bold text-slate-900 block">
                         {formatInr(exec.totalInventoryAcquisitionCost)}
                       </strong>
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-text-secondary">
                         List Value: {formatInr(exec.totalInventoryListingValue)}
                       </div>
                     </div>
 
                     <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                      <span className="text-xs font-semibold text-slate-500 block">
+                      <span className="text-xs font-semibold text-text-secondary block">
                         Outstanding Receivables
                       </span>
                       <strong className="text-xl font-bold text-slate-900 block">
                         {formatInr(exec.outstandingCustomerBalances)}
                       </strong>
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-text-secondary">
                         Collection Rate: <strong className="text-slate-800">{exec.collectionPercentage}%</strong>
                       </div>
                     </div>
 
                     <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                      <span className="text-xs font-semibold text-slate-500 block">
+                      <span className="text-xs font-semibold text-text-secondary block">
                         Period Revenue Delta
                       </span>
                       <div className="text-xl font-bold text-slate-900">
                         {comp.revenueGrowthPct != null ? `${comp.revenueGrowthPct >= 0 ? '+' : ''}${comp.revenueGrowthPct}%` : '0%'}
                       </div>
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-text-secondary">
                         Volume: {comp.salesVolumeGrowthPct != null ? `${comp.salesVolumeGrowthPct >= 0 ? '+' : ''}${comp.salesVolumeGrowthPct}%` : '0%'}
                       </div>
                     </div>
 
                     <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1">
-                      <span className="text-xs font-semibold text-slate-500 block">
+                      <span className="text-xs font-semibold text-text-secondary block">
                         Cash Collected
                       </span>
                       <strong className="text-xl font-bold text-slate-900 block">
                         {formatInr(exec.totalPaymentsCollected)}
                       </strong>
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-text-secondary">
                         Contract: {formatInr(exec.totalReceivableContract)}
                       </div>
                     </div>
@@ -1359,7 +1359,7 @@ export default function ReportsPage() {
 
                 {/* Trajectory & Aging */}
                 <div className="space-y-2">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">
                     2. Monthly Trend &amp; Inventory Aging
                   </h3>
 
@@ -1371,7 +1371,7 @@ export default function ReportsPage() {
                         <span className="text-xs font-bold text-slate-800">
                           Monthly Revenue Trend
                         </span>
-                        <span className="text-xs text-slate-500">Last 6 Months</span>
+                        <span className="text-xs text-text-secondary">Last 6 Months</span>
                       </div>
 
                       <div className="space-y-2 pt-1">
@@ -1385,7 +1385,7 @@ export default function ReportsPage() {
                                 <span className="font-bold w-12">{m.month}</span>
                                 <span className="text-slate-900 font-semibold">{formatInr(m.revenue)}</span>
                                 <span className="text-slate-600 font-medium">Profit: {formatInr(m.grossProfit)}</span>
-                                <span className="text-slate-400">({m.unitsSold} sold)</span>
+                                <span className="text-text-secondary">({m.unitsSold} sold)</span>
                               </div>
                               <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
                                 <div style={{ width: `${revPct}%` }} className="bg-blue-600 h-full rounded-full" />
@@ -1402,7 +1402,7 @@ export default function ReportsPage() {
                         <span className="text-xs font-bold text-slate-800">
                           Inventory Aging
                         </span>
-                        <span className="text-xs text-slate-500">Car Days on Lot</span>
+                        <span className="text-xs text-text-secondary">Car Days on Lot</span>
                       </div>
 
                       <div className="space-y-2 pt-1">
@@ -1434,7 +1434,7 @@ export default function ReportsPage() {
 
                 {/* Key Business Insights */}
                 <div className="space-y-2 pt-1">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary">
                     3. Key Business Insights
                   </h3>
 
@@ -1468,7 +1468,7 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Footer */}
-                <div className="pt-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+                <div className="pt-4 border-t border-slate-200 flex items-center justify-between text-xs text-text-secondary">
                   <span>Page 1 of 2 • Executive Summary</span>
                   <span>Confidential — Internal Dealership Report</span>
                 </div>
@@ -1483,7 +1483,7 @@ export default function ReportsPage() {
                 <div className="flex items-center justify-between pb-4 border-b border-slate-300">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-slate-900">CarRevive</span>
-                    <span className="text-xs text-slate-500">• Branch Details &amp; Records Ledger</span>
+                    <span className="text-xs text-text-secondary">• Branch Details &amp; Records Ledger</span>
                   </div>
                   <span className="text-xs font-semibold text-slate-600">
                     Scope: <span className="uppercase text-blue-600">{reportType.replace('_', ' ')}</span>
@@ -1676,21 +1676,21 @@ export default function ReportsPage() {
                   <div className="space-y-6">
                     <span className="block font-semibold">Prepared By:</span>
                     <div className="border-b border-slate-300 w-48" />
-                    <span className="text-xs text-slate-500 block">
+                    <span className="text-xs text-text-secondary block">
                       Branch Manager ({user?.email || 'Staff'})
                     </span>
                   </div>
                   <div className="space-y-6 text-right">
                     <span className="block font-semibold">Approved By:</span>
                     <div className="border-b border-slate-300 w-48 ml-auto" />
-                    <span className="text-xs text-slate-500 block">
+                    <span className="text-xs text-text-secondary block">
                       Managing Director / Owner
                     </span>
                   </div>
                 </div>
 
                 {/* Footer */}
-                <div className="pt-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+                <div className="pt-4 border-t border-slate-200 flex items-center justify-between text-xs text-text-secondary">
                   <span>Page 2 of 2 • Detailed Records</span>
                   <span>CarRevive System Report</span>
                 </div>

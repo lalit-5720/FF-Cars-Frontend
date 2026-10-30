@@ -257,10 +257,12 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
   const filteredLeads = leads.filter((ld) => {
     if (filterInterest === 'ALL') return true;
     const s = (ld.status || '').toUpperCase();
+    const tdStatus = (ld.test_drive_status || '').toUpperCase();
     if (filterInterest === 'CONVERTED') return s.includes('CONVERT') || s.includes('WON') || s.includes('BOOKED') || ld.is_sold || ld.is_delivered;
-    if (filterInterest === 'TEST-DRIVE') return s.includes('TEST') || s.includes('DRIVE');
+    if (filterInterest === 'COMPLETED') return s.includes('COMPLETE') || tdStatus.includes('COMPLETE') || ld.is_delivered;
+    if (filterInterest === 'TEST-DRIVE') return s.includes('TEST') || s.includes('DRIVE') || tdStatus.length > 0 || Boolean(ld.test_drive_id);
     if (filterInterest === 'HOT') return s.includes('HOT');
-    if (filterInterest === 'NEW') return (s.includes('NEW') || s.includes('ASSIGN')) && !ld.is_sold && !ld.is_delivered;
+    if (filterInterest === 'NEW') return (s.includes('NEW') || s.includes('ASSIGN')) && !ld.is_sold && !ld.is_delivered && !s.includes('COMPLETE');
     if (filterInterest === 'CONTACTED') return s.includes('CONTACT');
     return s.includes(filterInterest.toUpperCase());
   });
@@ -293,17 +295,17 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
         {/* KPI 1: Total Assigned Leads */}
         <div className="p-5 rounded-2xl bg-card border border-border shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+            <span className="text-xs font-bold text-text-secondary uppercase tracking-wider block">
               {isSalesExecutive ? 'My Assigned Leads' : 'Total Pipeline Leads'}
             </span>
-            <div className="text-2xl font-black text-foreground font-mono mt-1">
+            <div className="text-2xl font-black text-text-primary font-mono mt-1">
               {displayTotalLeads}
             </div>
-            <span className="text-[11px] text-muted-foreground mt-0.5 block">
+            <span className="text-[11px] text-text-secondary font-medium mt-0.5 block">
               {displayActiveLeads} active in progress
             </span>
           </div>
-          <div className="p-3 rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+          <div className="p-3 rounded-2xl bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
             <ClipboardList className="w-5 h-5" />
           </div>
         </div>
@@ -311,17 +313,17 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
         {/* KPI 2: Converted Leads */}
         <div className="p-5 rounded-2xl bg-card border border-border shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+            <span className="text-xs font-bold text-text-secondary uppercase tracking-wider block">
               Converted Leads (Won)
             </span>
-            <div className="text-2xl font-black text-emerald-400 font-mono mt-1">
+            <div className="text-2xl font-black text-emerald-700 dark:text-emerald-400 font-mono mt-1">
               {displayConvertedLeads}
             </div>
-            <span className="text-[11px] text-emerald-500 font-bold mt-0.5 block">
+            <span className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold mt-0.5 block">
               Successfully qualified
             </span>
           </div>
-          <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
             <Target className="w-5 h-5" />
           </div>
         </div>
@@ -329,19 +331,19 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
         {/* KPI 3: Successful Purchases (Sales Closed) */}
         <div className="p-5 rounded-2xl bg-card border border-border shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+            <span className="text-xs font-bold text-text-secondary uppercase tracking-wider block">
               Successful Purchases Closed
             </span>
-            <div className="text-2xl font-black text-blue-400 font-mono mt-1">
+            <div className="text-2xl font-black text-blue-700 dark:text-blue-400 font-mono mt-1">
               {displayPurchases}
             </div>
-            <span className="text-[11px] text-muted-foreground mt-0.5 block">
+            <span className="text-[11px] text-text-secondary font-medium mt-0.5 block">
               {stats?.pipelineSales > 0
                 ? `${stats.pipelineSales} pending payment`
                 : 'Verified paid & delivered'}
             </span>
           </div>
-          <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+          <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
             <Award className="w-5 h-5" />
           </div>
         </div>
@@ -349,17 +351,17 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
         {/* KPI 4: Conversion Rate % */}
         <div className="p-5 rounded-2xl bg-card border border-border shadow-sm flex items-center justify-between">
           <div>
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+            <span className="text-xs font-bold text-text-secondary uppercase tracking-wider block">
               Conversion Win Rate
             </span>
-            <div className="text-2xl font-black text-amber-400 font-mono mt-1">
+            <div className="text-2xl font-black text-amber-700 dark:text-amber-400 font-mono mt-1">
               {displayWinRate}%
             </div>
-            <span className="text-[11px] text-muted-foreground mt-0.5 block">
+            <span className="text-[11px] text-text-secondary font-medium mt-0.5 block">
               Leads turned to purchases
             </span>
           </div>
-          <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+          <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
             <TrendingUp className="w-5 h-5" />
           </div>
         </div>
@@ -373,17 +375,17 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-extrabold text-foreground flex items-center gap-2">
-                <ClipboardList size={18} className="text-purple-400" />
+              <h2 className="text-base font-extrabold text-text-primary flex items-center gap-2">
+                <ClipboardList size={18} className="text-accent" />
                 {isSalesExecutive ? `My Assigned Customer Leads (${leads.length})` : `All Showroom Leads (${leads.length})`}
               </h2>
               {isSalesExecutive && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-900 border border-blue-300 dark:bg-blue-950/60 dark:text-blue-300">
                   Assigned to You
                 </span>
               )}
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-xs text-text-secondary mt-0.5">
               {isSalesExecutive
                 ? 'Only displaying leads specifically assigned to you by your branch manager'
                 : 'Manage customer leads, reassign inquiries to sales representatives, and track sales conversions'}
@@ -391,13 +393,13 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            {['ALL', 'NEW', 'CONTACTED', 'HOT', 'TEST-DRIVE', 'CONVERTED'].map((st) => (
+            {['ALL', 'NEW', 'CONTACTED', 'HOT', 'TEST-DRIVE', 'COMPLETED', 'CONVERTED'].map((st) => (
               <button
                 key={st}
                 onClick={() => setFilterInterest(st)}
                 className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all cursor-pointer border ${filterInterest === st
-                  ? 'bg-purple-600 text-white border-purple-400 shadow'
-                  : 'bg-secondary text-muted-foreground border-border hover:text-foreground'
+                  ? 'bg-accent text-accent-text border-accent shadow'
+                  : 'bg-bg-surface-alt text-text-secondary border-border hover:text-text-primary'
                   }`}
               >
                 {st}
@@ -408,7 +410,7 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
                 fetchLeads();
                 fetchStats();
               }}
-              className="p-1.5 rounded-xl bg-secondary text-muted-foreground hover:text-foreground border border-border cursor-pointer transition-colors"
+              className="p-1.5 rounded-xl bg-bg-surface-alt text-text-secondary hover:text-text-primary border border-border cursor-pointer transition-colors"
               title="Refresh List"
             >
               <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
@@ -418,32 +420,32 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
 
         {/* Leads Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-left text-xs font-sans">
             <thead>
-              <tr className="border-b border-border bg-secondary/40 text-muted-foreground uppercase text-[10px] tracking-wider font-bold">
-                <th className="py-3 px-4">Lead ID</th>
-                <th className="py-3 px-4">Customer Details</th>
-                <th className="py-3 px-4">Vehicle of Interest</th>
-                <th className="py-3 px-4">Assigned Executive</th>
-                <th className="py-3 px-4">Follow-up Notes</th>
-                <th className="py-3 px-4">Inquiry Date</th>
-                <th className="py-3 px-4">Lead Status</th>
-                <th className="py-3 px-4 text-right">What To Do Next</th>
+              <tr className="border-b-2 border-border bg-bg-surface-alt text-text-primary uppercase text-[11px] tracking-wider font-extrabold">
+                <th className="py-3 px-4 font-black">Lead ID</th>
+                <th className="py-3 px-4 font-black">Customer Details</th>
+                <th className="py-3 px-4 font-black">Vehicle of Interest</th>
+                <th className="py-3 px-4 font-black">Assigned Executive</th>
+                <th className="py-3 px-4 font-black">Follow-up Notes</th>
+                <th className="py-3 px-4 font-black">Inquiry Date</th>
+                <th className="py-3 px-4 font-black">Lead Status</th>
+                <th className="py-3 px-4 text-right font-black">What To Do Next</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/60 text-foreground">
+            <tbody className="divide-y divide-border text-text-primary">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-muted-foreground">
+                  <td colSpan={8} className="py-12 text-center text-text-secondary font-bold">
                     Loading your assigned leads...
                   </td>
                 </tr>
               ) : filteredLeads.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-muted-foreground">
+                  <td colSpan={8} className="py-12 text-center text-text-secondary">
                     <div className="max-w-xs mx-auto space-y-1">
-                      <p className="font-bold text-foreground">No leads found</p>
-                      <p className="text-[11px]">
+                      <p className="font-bold text-text-primary">No leads found</p>
+                      <p className="text-[11px] text-text-secondary">
                         {isSalesExecutive
                           ? 'You do not have any leads matching this filter assigned to you yet.'
                           : 'No leads available in this filter bracket.'}
@@ -467,23 +469,23 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
                   const isNewUnassigned = ld.status === 'New' && !ld.employee_id;
 
                   return (
-                    <tr key={ld.lead_id} className={`hover:bg-secondary/40 transition-colors ${isNewUnassigned ? 'bg-amber-500/5' : ''}`}>
-                      <td className="py-3.5 px-4 font-mono font-bold text-purple-400">
+                    <tr key={ld.lead_id} className={`hover:bg-bg-surface-alt/70 transition-colors border-b border-border/80 ${isNewUnassigned ? 'bg-amber-500/10' : ''}`}>
+                      <td className="py-3.5 px-4 font-mono font-black text-text-primary">
                         #LD-{ld.lead_id}
                       </td>
                       <td className="py-3.5 px-4">
-                        <div className="font-extrabold text-foreground flex items-center gap-1.5">
-                          <User size={13} className="text-muted-foreground" />
+                        <div className="font-bold text-text-primary flex items-center gap-1.5">
+                          <User size={13} className="text-text-secondary" />
                           <span>{cName}</span>
                         </div>
-                        <span className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <Phone size={10} /> {ld.customers?.phone || ld.phone || '9840112233'}
+                        <span className="text-[11px] text-text-secondary font-mono font-bold flex items-center gap-1 mt-0.5">
+                          <Phone size={11} /> {ld.customers?.phone || ld.phone || '9840112233'}
                         </span>
                       </td>
                       <td className="py-3.5 px-4">
-                        <div className="font-bold text-foreground">{vName}</div>
-                        <span className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                          <Building2 size={10} /> {branch}
+                        <div className="font-bold text-text-primary">{vName}</div>
+                        <span className="text-[11px] text-text-secondary font-semibold flex items-center gap-1 mt-0.5">
+                          <Building2 size={11} /> {branch}
                         </span>
                       </td>
 
@@ -492,14 +494,14 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
                         {isManagerOrAdmin ? (
                           <div className="space-y-1">
                             {(!ld.employee_id || ld.status === 'New') && (
-                              <span className="text-[9px] text-amber-500 font-extrabold uppercase tracking-wider block">
+                              <span className="text-[9px] text-amber-700 dark:text-amber-400 font-extrabold uppercase tracking-wider block">
                                 ⚠️ Needs Assignment
                               </span>
                             )}
                             <select
                               value={ld.employees?.role === 'SALES_EXECUTIVE' ? ld.employee_id : (ld.employee_id || '')}
                               onChange={(e) => handleAssignEmployee(ld.lead_id, Number(e.target.value))}
-                              className="bg-secondary border border-border text-foreground text-[11px] font-bold rounded-lg px-2 py-1 cursor-pointer focus:outline-none focus:border-purple-400"
+                              className="bg-bg-surface border border-border text-text-primary text-[11px] font-bold rounded-lg px-2 py-1.5 cursor-pointer focus:outline-none focus:border-accent"
                             >
                               <option value="">-- Assign Sales Executive --</option>
                               {salesExecutives.map((emp) => (
@@ -510,8 +512,8 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
                             </select>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
-                            <UserCheck size={13} className="text-emerald-400" />
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-text-primary">
+                            <UserCheck size={13} className="text-status-success" />
                             <span>{assignedRepName}</span>
                           </div>
                         )}
@@ -526,33 +528,37 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
                               setSelectedLeadForNote(ld);
                               setFollowupNote('');
                             }}
-                            className="px-2 py-1 rounded-lg bg-secondary hover:bg-secondary/80 text-foreground border border-border text-[10px] font-bold transition-all flex items-center gap-1 shrink-0 cursor-pointer"
+                            className="px-2 py-1 rounded-lg bg-bg-surface hover:bg-bg-surface-alt text-text-primary border border-border text-[11px] font-bold transition-all flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs"
                             title="Click to view history or add follow-up note"
                           >
-                            <FileText size={11} className="text-purple-400" />
+                            <FileText size={11} className="text-accent" />
                             <span>Notes</span>
                           </button>
-                          <span className="text-[10px] text-muted-foreground truncate" title={ld.remarks || 'No notes recorded'}>
+                          <span className="text-[11px] text-text-secondary font-medium truncate" title={ld.remarks || 'No notes recorded'}>
                             {ld.remarks ? ld.remarks.split('\n').pop() : 'No notes'}
                           </span>
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4 text-muted-foreground font-mono text-[11px]">
+                      <td className="py-3.5 px-4 text-text-secondary font-mono font-bold text-[11px]">
                         {inqDate}
                       </td>
 
                       <td className="py-3.5 px-4">
                         {ld.is_sold || (ld.status || '').toLowerCase().includes('convert') ? (
-                          <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 w-fit">
+                          <span className="px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700 flex items-center gap-1.5 w-fit">
                             <CheckCircle2 size={12} />
                             {ld.is_delivered ? 'Delivered & Completed' : 'Converted & Booked'}
                           </span>
                         ) : isManagerOrAdmin ? (
                           <select
-                            value={ld.status || 'New'}
+                            value={
+                              (ld.status === 'Completed' || (ld.test_drive_status || '').toLowerCase().includes('complete'))
+                                ? 'Completed'
+                                : (ld.status || 'New')
+                            }
                             onChange={(e) => handleStatusChange(ld.lead_id, e.target.value)}
-                            className="bg-secondary border border-border text-foreground text-[11px] font-bold rounded-lg px-2.5 py-1 cursor-pointer focus:outline-none focus:border-purple-400"
+                            className="bg-bg-surface border border-border text-text-primary text-[11px] font-bold rounded-lg px-2.5 py-1.5 cursor-pointer focus:outline-none focus:border-accent"
                           >
                             <option value="New">New</option>
                             <option value="Assigned">Assigned</option>
@@ -560,35 +566,60 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
                             <option value="Hot Lead">Hot Lead 🔥</option>
                             <option value="Qualified Inquiry">Qualified Inquiry</option>
                             <option value="Test-Drive Contact">Test-Drive Contact</option>
+                            <option value="Completed">Completed</option>
                             <option value="Converted & Booked">Converted &amp; Booked</option>
                             <option value="Lost">Lost</option>
                           </select>
                         ) : (
                           <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
-                            ld.status === 'New' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                            ld.status === 'Assigned' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                            ld.status === 'Contacted' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
-                            ld.status === 'Test-Drive Contact' ? 'bg-sky-500/10 text-sky-400 border-sky-500/20' :
-                            'bg-secondary text-foreground border-border'
+                            ld.is_delivered ? 'bg-sky-100 text-sky-900 border-sky-300' :
+                            (ld.is_payment_received && (ld.status || '').toLowerCase().includes('convert')) ? 'bg-emerald-100 text-emerald-900 border-emerald-300' :
+                            (ld.status === 'Completed' || (ld.test_drive_status || '').toLowerCase().includes('complete')) ? 'bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700' :
+                            ld.status === 'New' ? 'bg-blue-100 text-blue-900 border-blue-300' :
+                            ld.status === 'Assigned' ? 'bg-purple-100 text-purple-900 border-purple-300' :
+                            ld.status === 'Contacted' ? 'bg-indigo-100 text-indigo-900 border-indigo-300' :
+                            ld.status === 'Test-Drive Contact' ? 'bg-sky-100 text-sky-900 border-sky-300' :
+                            (ld.status || '').includes('Awaiting Payment') || (ld.sale_id && !ld.is_payment_received) ? 'bg-amber-100 text-amber-900 border-amber-300' :
+                            'bg-bg-surface-alt text-text-primary border-border'
                           }`}>
-                            {ld.status || 'New'}
+                            {ld.is_delivered
+                              ? 'Delivered'
+                              : (ld.is_payment_received && (ld.status || '').toLowerCase().includes('convert'))
+                                ? 'Converted & Booked'
+                                : ld.sale_id && !ld.is_payment_received
+                                  ? 'Awaiting Payment'
+                                  : (ld.status === 'Completed' || (ld.test_drive_status || '').toLowerCase().includes('complete'))
+                                    ? 'Completed'
+                                    : (ld.status || 'New')}
                           </span>
                         )}
                       </td>
 
                       {/* ACTION COLUMN */}
                       <td className="py-3.5 px-4 text-right">
-                        {ld.is_sold || (ld.status || '').toLowerCase().includes('convert') ? (
+                        {ld.is_sold || (ld.status || '').toLowerCase().includes('convert') || ld.sale_id ? (
                           <div className="flex items-center justify-end gap-1.5">
-                            <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-bold text-[10px] flex items-center gap-1">
-                              <CheckCircle2 size={12} />
-                              {ld.is_delivered ? 'Delivered' : 'Sale Converted'}
-                            </span>
-                            {isManagerOrAdmin && (
+                            {ld.is_delivered ? (
+                              <span className="px-2.5 py-1 rounded-lg bg-sky-100 text-sky-900 border border-sky-300 font-bold text-[11px] flex items-center gap-1">
+                                <CheckCircle2 size={12} />
+                                Delivered
+                              </span>
+                            ) : ld.is_payment_received ? (
+                              <span className="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold text-[11px] flex items-center gap-1">
+                                <CheckCircle2 size={12} />
+                                Sale Converted
+                              </span>
+                            ) : (
+                              <span className="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 border border-amber-300 font-bold text-[11px] flex items-center gap-1">
+                                <Clock size={12} />
+                                Awaiting Payment
+                              </span>
+                            )}
+                            {(isManagerOrAdmin || ld.sale_id) && (
                               <button
                                 onClick={() => router.push('/admin/sales')}
-                                className="px-2.5 py-1 rounded-lg bg-secondary hover:bg-secondary/80 text-foreground border border-border text-[10px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"
-                                title="View finalized sales contract in Sales Operations"
+                                className="px-2.5 py-1 rounded-lg bg-bg-surface hover:bg-bg-surface-alt text-text-primary border border-border text-[11px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"
+                                title="View sales contract in Sales Operations"
                               >
                                 <span>Contract #{ld.sale_id || ''}</span>
                                 <ArrowRight size={11} />
@@ -597,16 +628,48 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
                           </div>
                         ) : (
                           <div className="flex items-center justify-end gap-1.5">
-                            {/* SALES EXECUTIVE ACTION: Contact & Schedule Test Drive */}
-                            <button
-                              type="button"
-                              onClick={() => openScheduleTestDriveModal(ld)}
-                              className="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[11px] transition-all shadow cursor-pointer inline-flex items-center gap-1"
-                              title="Contact customer, choose appointment date & time slot, and schedule test drive"
-                            >
-                              <Calendar size={12} />
-                              <span>Schedule Test-Drive</span>
-                            </button>
+                            {/* If test drive is completed, show Completed badge + direct link to drive */}
+                            {ld.status === 'Completed' || (ld.test_drive_status || '').toLowerCase().includes('complete') ? (
+                              <>
+                                <span className="px-2.5 py-1.5 rounded-lg bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700 font-black text-[11px] inline-flex items-center gap-1">
+                                  <CheckCircle2 size={12} className="text-emerald-600 dark:text-emerald-400" />
+                                  <span>Completed</span>
+                                </span>
+                                {ld.test_drive_id && (
+                                  <button
+                                    type="button"
+                                    onClick={() => router.push('/admin/test-drives')}
+                                    className="px-2.5 py-1.5 rounded-lg bg-bg-surface hover:bg-bg-surface-alt text-text-primary border border-border text-[11px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"
+                                    title="View completed test drive in Test Drives"
+                                  >
+                                    <span>Drive #{ld.test_drive_id}</span>
+                                    <ArrowRight size={11} />
+                                  </button>
+                                )}
+                              </>
+                            ) : (ld.test_drive_status || '').toLowerCase().includes('schedule') ? (
+                              <button
+                                type="button"
+                                onClick={() => router.push('/admin/test-drives')}
+                                className="px-2.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-black text-[11px] transition-all shadow cursor-pointer inline-flex items-center gap-1"
+                                title="Test drive is already scheduled. View in Test Drives schedule"
+                              >
+                                <Calendar size={12} />
+                                <span>Drive Scheduled</span>
+                                <ArrowRight size={11} />
+                              </button>
+                            ) : (
+                              /* SALES EXECUTIVE ACTION: Contact & Schedule Test Drive */
+                              <button
+                                type="button"
+                                onClick={() => openScheduleTestDriveModal(ld)}
+                                className="px-2.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-[11px] transition-all shadow cursor-pointer inline-flex items-center gap-1"
+                                title="Contact customer, choose appointment date & time slot, and schedule test drive"
+                              >
+                                <Calendar size={12} />
+                                <span>Schedule Test-Drive</span>
+                              </button>
+                            )}
 
                             {/* SALES EXECUTIVE ACTION: Add Note */}
                             <button
@@ -615,15 +678,15 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
                                 setSelectedLeadForNote(ld);
                                 setFollowupNote('');
                               }}
-                              className="px-2 py-1.5 rounded-lg bg-secondary hover:bg-purple-500/20 text-purple-300 border border-border hover:border-purple-500/40 text-[11px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"
+                              className="px-2 py-1.5 rounded-lg bg-secondary hover:bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-border hover:border-purple-500/40 text-[11px] font-bold transition-all cursor-pointer inline-flex items-center gap-1"
                               title="Add customer follow-up notes"
                             >
                               <FileText size={12} />
                               <span>+ Note</span>
                             </button>
 
-                            {/* MANAGER CONVERT ACTION */}
-                            {isManagerOrAdmin && (
+                            {/* CONVERT ACTION: Manager or executive for completed test drive */}
+                            {(isManagerOrAdmin || ld.status === 'Completed' || (ld.test_drive_status || '').toLowerCase().includes('complete')) && (
                               <button
                                 type="button"
                                 onClick={() => {
@@ -657,7 +720,7 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
           <div className="bg-card border border-border rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                <div className="p-2 rounded-xl bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-500/20">
                   <FileText className="w-5 h-5" />
                 </div>
                 <div>
@@ -728,7 +791,7 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
           <div className="bg-card border border-border rounded-2xl w-full max-w-lg p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/20">
                   <Calendar className="w-5 h-5" />
                 </div>
                 <div>
@@ -752,12 +815,12 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
             {/* Vehicle Summary Banner */}
             <div className="p-3 bg-secondary/40 border border-border rounded-xl flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CarFront size={16} className="text-amber-400" />
+                <CarFront size={16} className="text-amber-800 dark:text-amber-400" />
                 <span className="text-xs font-bold text-foreground">
                   {selectedLeadForSchedule.vehicles?.make} {selectedLeadForSchedule.vehicles?.model} ({selectedLeadForSchedule.vehicles?.manufacture_year || ''})
                 </span>
               </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-bold">
                 Assigned Rep: {user?.name || 'Sales Exec'}
               </span>
             </div>
@@ -766,7 +829,7 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
               {/* Test Drive Date Picker */}
               <div>
                 <label className="block text-xs font-bold text-muted-foreground mb-1.5 flex items-center gap-1.5">
-                  <Calendar size={13} className="text-amber-400" />
+                  <Calendar size={13} className="text-amber-800 dark:text-amber-400" />
                   Select Test Drive Appointment Date <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -782,7 +845,7 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
               {/* Time Slot Selector */}
               <div>
                 <label className="block text-xs font-bold text-muted-foreground mb-1.5 flex items-center gap-1.5">
-                  <Clock size={13} className="text-amber-400" />
+                  <Clock size={13} className="text-amber-800 dark:text-amber-400" />
                   Select Preferred Time Slot <span className="text-rose-500">*</span>
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -813,7 +876,7 @@ export function LeadListComponent({ onMoveToDelivery }: LeadListComponentProps) 
               {/* Location Type */}
               <div>
                 <label className="block text-xs font-bold text-muted-foreground mb-1.5 flex items-center gap-1.5">
-                  <MapPin size={13} className="text-amber-400" />
+                  <MapPin size={13} className="text-amber-800 dark:text-amber-400" />
                   Drive Location
                 </label>
                 <div className="grid grid-cols-2 gap-2">

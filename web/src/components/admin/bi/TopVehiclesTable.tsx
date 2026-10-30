@@ -76,7 +76,7 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
               <h3 className="text-xs font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
                 <span>Top Performing Models</span>
               </h3>
-              <span className="text-[10px] text-slate-500 font-semibold block -mt-0.5">
+              <span className="text-[10px] text-text-secondary font-semibold block -mt-0.5">
                 Aggregated by Model Line
               </span>
             </div>
@@ -88,7 +88,7 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
             </span>
             <button
               onClick={() => setIsMinimized(!isMinimized)}
-              className="p-1 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer border border-slate-200"
+              className="p-1 rounded-md bg-slate-50 hover:bg-slate-100 text-text-secondary hover:text-slate-800 transition-colors cursor-pointer border border-slate-200"
               title={isMinimized ? 'Expand details' : 'Minimize widget'}
             >
               {isMinimized ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
@@ -112,7 +112,7 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
               <span className="text-[11px] font-mono font-bold text-emerald-600">
                 {selectedVehicle ? `${selectedVehicle.sales} sold • ${formatCurrency(selectedVehicle.revenue)}` : ''}
               </span>
-              <ChevronDown size={13} className="text-slate-400" />
+              <ChevronDown size={13} className="text-text-secondary" />
             </div>
           </div>
         ) : loading ? (
@@ -121,7 +121,7 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
             <div className="h-24 rounded-xl bg-slate-100 animate-pulse" />
           </div>
         ) : vehicles.length === 0 ? (
-          <div className="py-6 text-center text-xs text-slate-400 font-medium">
+          <div className="py-6 text-center text-xs text-text-secondary font-medium">
             No completed vehicle sales recorded yet.
           </div>
         ) : (
@@ -150,7 +150,7 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
                   Compact List ({vehicles.length})
                 </button>
               </div>
-              <span className="text-[10px] text-slate-500 font-mono font-bold">
+              <span className="text-[10px] text-text-secondary font-mono font-bold">
                 {vehicles.length} top models
               </span>
             </div>
@@ -171,7 +171,7 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={13} />
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none" size={13} />
                 </div>
 
                 {/* Selected Model Detailed Card */}
@@ -189,7 +189,7 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
                             }}
                           />
                         ) : (
-                          <div className="w-10 h-8 bg-white rounded-md border border-slate-200 flex items-center justify-center text-slate-400 shrink-0">
+                          <div className="w-10 h-8 bg-white rounded-md border border-slate-200 flex items-center justify-center text-text-secondary shrink-0">
                             <CarFront size={14} />
                           </div>
                         )}
@@ -217,19 +217,19 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
                     {/* 3 Metrics Strip */}
                     <div className="grid grid-cols-3 gap-1.5 pt-2 border-t border-slate-200 text-[10px]">
                       <div className="bg-white rounded-lg p-1.5 text-center border border-slate-100">
-                        <span className="text-slate-400 block text-[9px] font-semibold">UNITS SOLD</span>
+                        <span className="text-text-secondary block text-[9px] font-semibold">UNITS SOLD</span>
                         <strong className="text-slate-900 font-mono text-xs font-black">
                           {selectedVehicle.sales}
                         </strong>
                       </div>
                       <div className="bg-white rounded-lg p-1.5 text-center border border-slate-100">
-                        <span className="text-slate-400 block text-[9px] font-semibold">TOTAL REVENUE</span>
+                        <span className="text-text-secondary block text-[9px] font-semibold">TOTAL REVENUE</span>
                         <strong className="text-emerald-600 font-mono text-xs font-black">
                           {formatCurrency(selectedVehicle.revenue)}
                         </strong>
                       </div>
                       <div className="bg-white rounded-lg p-1.5 text-center border border-slate-100">
-                        <span className="text-slate-400 block text-[9px] font-semibold">AVG PRICE</span>
+                        <span className="text-text-secondary block text-[9px] font-semibold">AVG PRICE</span>
                         <strong className="text-blue-600 font-mono text-xs font-black">
                           {formatCurrency(avgPrice)}
                         </strong>
@@ -238,7 +238,7 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
 
                     {/* Revenue Contribution Progress Bar */}
                     <div className="space-y-1 pt-1">
-                      <div className="flex items-center justify-between text-[9px] text-slate-500 font-medium">
+                      <div className="flex items-center justify-between text-[9px] text-text-secondary font-medium">
                         <span>Revenue Contribution</span>
                         <strong className="text-slate-800 font-mono font-bold">{revenueShare}% of top sales</strong>
                       </div>
@@ -265,14 +265,14 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
                     className="p-2 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-pointer text-xs"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="text-[10px] font-mono text-slate-400 w-4 shrink-0 font-bold">
+                      <span className="text-[10px] font-mono text-text-secondary w-4 shrink-0 font-bold">
                         #{idx + 1}
                       </span>
                       <div className="min-w-0">
                         <span className="font-bold text-slate-800 block truncate text-[11px]">
                           {v.vehicle}
                         </span>
-                        <span className="text-[9px] text-slate-400 block -mt-0.5">
+                        <span className="text-[9px] text-text-secondary block -mt-0.5">
                           {v.make || 'Pre-Owned'}
                         </span>
                       </div>
@@ -281,7 +281,7 @@ export function TopVehiclesTable({ branchId }: TopVehiclesTableProps = {}) {
                       <span className="font-mono font-bold text-emerald-600 block text-[11px]">
                         {formatCurrency(v.revenue)}
                       </span>
-                      <span className="text-[9px] font-mono text-slate-400 block -mt-0.5 font-medium">
+                      <span className="text-[9px] font-mono text-text-secondary block -mt-0.5 font-medium">
                         {v.sales} {v.sales === 1 ? 'unit' : 'units'}
                       </span>
                     </div>

@@ -66,7 +66,7 @@ export function VisualSalesFunnel({ branchId }: VisualSalesFunnelProps = {}) {
             <Filter className="w-4 h-4 text-blue-600" />
             <span>Lead to Sale Funnel</span>
           </h3>
-          <span className="text-[10px] text-slate-500 font-bold bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+          <span className="text-[10px] text-text-secondary font-bold bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
             Live Pipeline
           </span>
         </div>

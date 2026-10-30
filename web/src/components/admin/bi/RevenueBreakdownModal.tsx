@@ -55,13 +55,30 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
   };
 
   const fullPaymentTotal = data?.fullPayment?.totalAmount || 0;
+  const totalTokenAdvance = data?.totalTokenAdvanceAmount || 0;
   const downPaymentTotal = data?.loanPayment?.totalDownPayment || 0;
   const loanFinancedTotal = data?.loanPayment?.totalLoanAmount || 0;
-  const totalCollected = data?.totalCollectedRevenue || 0;
-  const totalContract = data?.totalContractValue || 1;
+  const activeDeals = (data?.deals || []).filter(
+    (d: any) => !['cancelled', 'refunded'].includes(String(d.payment_status || '').toLowerCase()),
+  );
+  const totalContract = activeDeals.reduce((sum: number, d: any) => sum + Number(d.final_amount || 0), 0);
+  const totalCollected = activeDeals.reduce((sum: number, d: any) => sum + Number(d.total_amount_paid || 0), 0);
+  const totalPending = activeDeals.reduce((sum: number, d: any) => sum + Number(d.outstanding_balance || 0), 0);
+  const pendingDealsCount = activeDeals.filter((d: any) => Number(d.outstanding_balance || 0) > 0).length;
 
-  const collectedPct = Math.min(100, Math.round((totalCollected / totalContract) * 100));
-  const loanPct = Math.max(0, 100 - collectedPct);
+  // Cash actually received on direct cash purchases beyond the token advance (unpaid balances are not counted)
+  const fullPaymentBalanceTotal = activeDeals
+    .filter((d: any) => d.type === 'FULL_PAYMENT')
+    .reduce((sum: number, d: any) => {
+      const adv = Number(d.token_advance_amount ?? d.deposit_amount ?? 0);
+      return sum + Math.max(0, Number(d.total_amount_paid || 0) - adv);
+    }, 0);
+  const fullyPaidCashCount = activeDeals.filter(
+    (d: any) => d.type === 'FULL_PAYMENT' && Number(d.outstanding_balance || 0) === 0,
+  ).length;
+
+  const collectedPct = totalContract > 0 ? Math.min(100, Math.round((totalCollected / totalContract) * 100)) : 0;
+  const pendingPct = Math.max(0, 100 - collectedPct);
 
   const filteredDeals = (data?.deals || []).filter((deal: any) => {
     if (filterType !== 'ALL' && deal.type !== filterType) return false;
@@ -77,7 +94,7 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in font-sans">
-      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-5xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden text-slate-800">
+      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-6xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden text-slate-800">
         
         {/* Modal Header */}
         <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
@@ -94,7 +111,7 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
                   Audited Cash vs Loan
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5 font-medium">
+              <p className="text-xs text-text-secondary mt-0.5 font-medium">
                 Exact distinction between liquid cash received upfront vs bank-financed loan balances
               </p>
             </div>
@@ -102,7 +119,7 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="p-2 rounded-xl text-text-secondary hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -121,94 +138,138 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
             </div>
           ) : (
             <>
-              {/* TOP 4 SEGREGATED REVENUE CARDS */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                
-                {/* Card 1: Token Advance Amount */}
-                <div className="p-5 rounded-2xl bg-emerald-50/40 border border-emerald-200 shadow-2xs relative overflow-hidden flex flex-col justify-between">
+              {/* TOP 5 SEGREGATED REVENUE CARDS: TOKEN, FULL CASH, DOWN PAYMENT, LOAN & COMMISSION */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
+
+                {/* Card 0: Total Payment Pending */}
+                <div className="p-4 rounded-2xl bg-rose-50/50 border border-rose-200 shadow-2xs relative overflow-hidden flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-1">
-                      <span className="uppercase tracking-wider">Token Advance</span>
+                    <div className="flex items-center justify-between text-xs font-bold text-text-secondary mb-1">
+                      <span className="uppercase tracking-wider text-[10px]">Payment Pending</span>
+                      <AlertCircle className="w-4 h-4 text-rose-600" />
+                    </div>
+                    <div className="text-xl font-black text-rose-700 font-mono">
+                      {formatCurrency(totalPending)}
+                    </div>
+                    <p className="text-[10px] text-text-secondary mt-1 font-medium leading-tight">
+                      Still to be collected on {pendingDealsCount} deal{pendingDealsCount === 1 ? '' : 's'}
+                    </p>
+                  </div>
+                  <div className="mt-3 pt-2.5 border-t border-rose-200/60 flex items-center justify-between text-[10px]">
+                    <span className="text-rose-700 font-bold flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> To Collect
+                    </span>
+                    <span className="text-text-secondary font-medium">Outstanding</span>
+                  </div>
+                </div>
+
+                {/* Card 1: Token Advance Amount */}
+                <div className="p-4 rounded-2xl bg-emerald-50/40 border border-emerald-200 shadow-2xs relative overflow-hidden flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between text-xs font-bold text-text-secondary mb-1">
+                      <span className="uppercase tracking-wider text-[10px]">Token Advance</span>
                       <DollarSign className="w-4 h-4 text-emerald-600" />
                     </div>
-                    <div className="text-2xl font-black text-emerald-700 font-mono">
-                      {formatCurrency(data?.totalTokenAdvanceAmount || totalCollected)}
+                    <div className="text-xl font-black text-emerald-700 font-mono">
+                      {formatCurrency(totalTokenAdvance)}
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                    <p className="text-[10px] text-text-secondary mt-1 font-medium leading-tight">
                       Upfront reservation deposits across active bookings
                     </p>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-emerald-200/60 flex items-center justify-between text-[11px]">
+                  <div className="mt-3 pt-2.5 border-t border-emerald-200/60 flex items-center justify-between text-[10px]">
                     <span className="text-emerald-700 font-bold flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Upfront Deposit
                     </span>
-                    <span className="text-slate-500 font-medium">Received</span>
+                    <span className="text-text-secondary font-medium">Received</span>
                   </div>
                 </div>
 
-                {/* Card 2: Down Payment Amount */}
-                <div className="p-5 rounded-2xl bg-blue-50/40 border border-blue-200 shadow-2xs relative overflow-hidden flex flex-col justify-between">
+                {/* Card 2: Full Cash Settlement Balance */}
+                <div className="p-4 rounded-2xl bg-teal-50/40 border border-teal-200 shadow-2xs relative overflow-hidden flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-1">
-                      <span className="uppercase tracking-wider">Down Payment</span>
+                    <div className="flex items-center justify-between text-xs font-bold text-text-secondary mb-1">
+                      <span className="uppercase tracking-wider text-[10px]">Full Cash Settled</span>
+                      <CheckCircle2 className="w-4 h-4 text-teal-600" />
+                    </div>
+                    <div className="text-xl font-black text-teal-700 font-mono">
+                      {formatCurrency(fullPaymentBalanceTotal)}
+                    </div>
+                    <p className="text-[10px] text-text-secondary mt-1 font-medium leading-tight">
+                      Balance received after token • {fullyPaidCashCount} of {data?.fullPayment?.count || 0} cash deal(s) fully paid
+                    </p>
+                  </div>
+                  <div className="mt-3 pt-2.5 border-t border-teal-200/60 flex items-center justify-between text-[10px]">
+                    <span className="text-teal-700 font-bold flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> 100% Cash Settled
+                    </span>
+                    <span className="text-text-secondary font-medium">Cleared</span>
+                  </div>
+                </div>
+
+                {/* Card 3: Down Payment Amount */}
+                <div className="p-4 rounded-2xl bg-blue-50/40 border border-blue-200 shadow-2xs relative overflow-hidden flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between text-xs font-bold text-text-secondary mb-1">
+                      <span className="uppercase tracking-wider text-[10px]">Down Payment</span>
                       <CreditCard className="w-4 h-4 text-blue-600" />
                     </div>
-                    <div className="text-2xl font-black text-blue-700 font-mono">
+                    <div className="text-xl font-black text-blue-700 font-mono">
                       {formatCurrency(downPaymentTotal)}
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                    <p className="text-[10px] text-text-secondary mt-1 font-medium leading-tight">
                       Customer equity across {data?.loanPayment?.count || 0} financed deal{(data?.loanPayment?.count || 0) === 1 ? '' : 's'}
                     </p>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-blue-200/60 flex items-center justify-between text-[11px]">
+                  <div className="mt-3 pt-2.5 border-t border-blue-200/60 flex items-center justify-between text-[10px]">
                     <span className="text-blue-700 font-bold flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Buyer Equity
                     </span>
-                    <span className="text-slate-500 font-medium">Financed Deals</span>
+                    <span className="text-text-secondary font-medium">Financed</span>
                   </div>
                 </div>
 
-                {/* Card 3: Bank Redressal Amount */}
-                <div className="p-5 rounded-2xl bg-amber-50/40 border border-amber-200 shadow-2xs relative overflow-hidden flex flex-col justify-between">
+                {/* Card 4: Bank Financed Amount */}
+                <div className="p-4 rounded-2xl bg-amber-50/40 border border-amber-200 shadow-2xs relative overflow-hidden flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-1">
-                      <span className="uppercase tracking-wider">Bank Financed</span>
+                    <div className="flex items-center justify-between text-xs font-bold text-text-secondary mb-1">
+                      <span className="uppercase tracking-wider text-[10px]">Bank Financed</span>
                       <Landmark className="w-4 h-4 text-amber-600" />
                     </div>
-                    <div className="text-2xl font-black text-amber-700 font-mono">
+                    <div className="text-xl font-black text-amber-700 font-mono">
                       {formatCurrency(loanFinancedTotal)}
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                    <p className="text-[10px] text-text-secondary mt-1 font-medium leading-tight">
                       Sanctioned loan principal from partner banks
                     </p>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-amber-200/60 flex items-center justify-between text-[11px]">
+                  <div className="mt-3 pt-2.5 border-t border-amber-200/60 flex items-center justify-between text-[10px]">
                     <span className="text-amber-700 font-bold flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Partner Disbursal
+                      <Clock className="w-3 h-3" /> Bank Disbursal
                     </span>
-                    <span className="text-slate-500 font-medium">Bank Credit</span>
+                    <span className="text-text-secondary font-medium">Credit</span>
                   </div>
                 </div>
 
-                {/* Card 4: 2% Bank Excess Commission */}
-                <div className="p-5 rounded-2xl bg-purple-50/40 border border-purple-200 shadow-2xs relative overflow-hidden flex flex-col justify-between">
+                {/* Card 5: 2% Bank Excess Commission */}
+                <div className="p-4 rounded-2xl bg-purple-50/40 border border-purple-200 shadow-2xs relative overflow-hidden flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-500 mb-1">
-                      <span className="uppercase tracking-wider">Bank 2% Redressal</span>
+                    <div className="flex items-center justify-between text-xs font-bold text-text-secondary mb-1">
+                      <span className="uppercase tracking-wider text-[10px]">Bank 2% Commission</span>
                       <Percent className="w-4 h-4 text-purple-600" />
                     </div>
-                    <div className="text-2xl font-black text-purple-700 font-mono">
+                    <div className="text-xl font-black text-purple-700 font-mono">
                       {formatCurrency(data?.totalBankCommission)}
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-1 font-medium">
+                    <p className="text-[10px] text-text-secondary mt-1 font-medium leading-tight">
                       Dealer redressal bonus on partner loan disbursals
                     </p>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-purple-200/60 flex items-center justify-between text-[11px]">
+                  <div className="mt-3 pt-2.5 border-t border-purple-200/60 flex items-center justify-between text-[10px]">
                     <span className="text-purple-700 font-bold flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3" /> Extra Revenue
+                      <TrendingUp className="w-3 h-3" /> Redressal Bonus
                     </span>
-                    <span className="text-slate-500 font-medium">Dealer Profit</span>
+                    <span className="text-text-secondary font-medium">Dealer Profit</span>
                   </div>
                 </div>
 
@@ -219,35 +280,35 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                   <div>
                     <span className="text-xs font-black text-slate-900 uppercase tracking-wider block">
-                      Total Liquid Cash Collected vs Financed Balance
+                      Collected vs Pending
                     </span>
-                    <span className="text-[11px] text-slate-500 font-medium">
-                      Gross Contract Value: <strong className="text-slate-900 font-mono">{formatCurrency(totalContract)}</strong>
+                    <span className="text-[11px] text-text-secondary font-medium">
+                      Total contract value (active deals): <strong className="text-slate-900 font-mono">{formatCurrency(totalContract)}</strong>
                     </span>
                   </div>
                   <div className="flex items-center gap-4 text-xs font-bold">
                     <div className="flex items-center gap-1.5 text-emerald-700">
                       <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                      <span>Liquid Cash: {formatCurrency(totalCollected)} ({collectedPct}%)</span>
+                      <span>Collected: {formatCurrency(totalCollected)} ({collectedPct}%)</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-amber-700">
-                      <div className="w-2.5 h-2.5 rounded-full bg-amber-500" />
-                      <span>Financed Loan: {formatCurrency(loanFinancedTotal)} ({loanPct}%)</span>
+                    <div className="flex items-center gap-1.5 text-rose-700">
+                      <div className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                      <span>Pending: {formatCurrency(totalPending)} ({pendingPct}%)</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Split Bar */}
                 <div className="w-full h-3.5 bg-slate-200 rounded-full overflow-hidden flex border border-slate-300">
-                  <div 
-                    style={{ width: `${collectedPct}%` }} 
-                    className="bg-emerald-500 h-full transition-all duration-500 rounded-l-full" 
-                    title={`Liquid Cash: ${formatCurrency(totalCollected)}`}
+                  <div
+                    style={{ width: `${collectedPct}%` }}
+                    className="bg-emerald-500 h-full transition-all duration-500"
+                    title={`Collected: ${formatCurrency(totalCollected)}`}
                   />
-                  <div 
-                    style={{ width: `${loanPct}%` }} 
-                    className="bg-amber-500 h-full transition-all duration-500 rounded-r-full" 
-                    title={`Financed Loan: ${formatCurrency(loanFinancedTotal)}`}
+                  <div
+                    style={{ width: `${pendingPct}%` }}
+                    className="bg-rose-500 h-full transition-all duration-500"
+                    title={`Pending: ${formatCurrency(totalPending)}`}
                   />
                 </div>
               </div>
@@ -289,7 +350,7 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
                   </div>
 
                   <div className="relative w-full sm:w-64">
-                    <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
                     <input
                       type="text"
                       placeholder="Search customer, car..."
@@ -303,15 +364,15 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
                 <div className="rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-2xs">
                   <div className="overflow-x-auto max-h-72">
                     <table className="w-full text-left text-xs font-sans">
-                      <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10 text-[10px] uppercase font-bold text-slate-500">
+                      <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10 text-[10px] uppercase font-bold text-text-secondary">
                         <tr>
                           <th className="py-2.5 px-3.5">Contract</th>
                           <th className="py-2.5 px-3.5">Customer &amp; Vehicle</th>
                           <th className="py-2.5 px-3.5">Delivery Status</th>
                           <th className="py-2.5 px-3.5">Payment Type</th>
                           <th className="py-2.5 px-3.5">Token Advance</th>
-                          <th className="py-2.5 px-3.5">Down Payment</th>
-                          <th className="py-2.5 px-3.5">Bank Redressal</th>
+                          <th className="py-2.5 px-3.5">Full Balance / Down Payment</th>
+                          <th className="py-2.5 px-3.5">Bank Financed</th>
                           <th className="py-2.5 px-3.5">Final Total</th>
                           <th className="py-2.5 px-3.5">Settlement Status</th>
                         </tr>
@@ -319,7 +380,7 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
                       <tbody className="divide-y divide-slate-100">
                         {filteredDeals.length === 0 ? (
                           <tr>
-                            <td colSpan={9} className="py-8 text-center text-slate-400 font-medium">
+                            <td colSpan={9} className="py-8 text-center text-text-secondary font-medium">
                               No contracts matching this filter.
                             </td>
                           </tr>
@@ -327,9 +388,12 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
                           filteredDeals.map((deal: any) => {
                             const isLoan = deal.type === 'LOAN_FINANCED';
                             const isDelivered = deal.is_delivered || (deal.delivery_status || '').toLowerCase() === 'delivered';
-                            const tokenAdvance = deal.token_advance_amount ?? deal.deposit_amount ?? 0;
-                            const totalDownPayment = deal.down_payment_amount ?? (isLoan ? Math.max(0, deal.final_amount - deal.loan_amount) : deal.final_amount);
-                            const bankRedressal = deal.bank_redressal_amount ?? deal.loan_amount ?? 0;
+                            const tokenAdvance = Number(deal.token_advance_amount ?? deal.deposit_amount ?? 0);
+                            const finalAmt = Number(deal.final_amount ?? deal.selling_price ?? 0);
+                            const balancePaid = isLoan
+                              ? Number(deal.down_payment_paid || deal.down_payment_amount || Math.max(0, finalAmt - deal.loan_amount - tokenAdvance))
+                              : Math.max(0, finalAmt - tokenAdvance);
+                            const bankRedressal = Number(deal.bank_redressal_amount ?? deal.loan_amount ?? 0);
 
                             return (
                               <tr key={deal.sale_id} className="hover:bg-slate-50 transition-colors">
@@ -338,7 +402,7 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
                                 </td>
                                 <td className="py-3 px-3.5">
                                   <div className="font-bold text-slate-900">{deal.customer_name}</div>
-                                  <div className="text-[11px] text-slate-500">{deal.vehicle_name}</div>
+                                  <div className="text-[11px] text-text-secondary">{deal.vehicle_name}</div>
                                 </td>
                                 <td className="py-3 px-3.5">
                                   {isDelivered ? (
@@ -365,14 +429,31 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
                                 <td className="py-3 px-3.5 font-mono font-bold text-emerald-700">
                                   {formatCurrency(tokenAdvance)}
                                 </td>
-                                <td className="py-3 px-3.5 font-mono font-bold text-blue-700">
-                                  {formatCurrency(totalDownPayment)}
+                                <td className="py-3 px-3.5 font-mono font-bold">
+                                  {isLoan ? (
+                                    <div>
+                                      <span className="text-blue-700">{formatCurrency(balancePaid)}</span>
+                                      <span className="text-[9px] text-blue-600 block font-sans font-medium">Down Payment Equity</span>
+                                    </div>
+                                  ) : (
+                                    <div>
+                                      <span className="text-teal-700">{formatCurrency(balancePaid)}</span>
+                                      <span className="text-[9px] text-teal-600 block font-sans font-medium">Cash Balance Paid</span>
+                                    </div>
+                                  )}
                                 </td>
-                                <td className="py-3 px-3.5 font-mono font-bold text-amber-700">
-                                  {isLoan ? formatCurrency(bankRedressal) : '₹0 (None)'}
+                                <td className="py-3 px-3.5 font-mono">
+                                  {isLoan ? (
+                                    <div>
+                                      <span className="font-bold text-amber-700">{formatCurrency(bankRedressal)}</span>
+                                      <span className="text-[9px] text-amber-600 block font-sans font-medium">Bank Financed</span>
+                                    </div>
+                                  ) : (
+                                    <span className="text-text-secondary font-medium">₹0 (None)</span>
+                                  )}
                                 </td>
-                                <td className="py-3 px-3.5 font-mono font-bold text-slate-900">
-                                  {formatCurrency(deal.final_amount)}
+                                <td className="py-3 px-3.5 font-mono font-black text-slate-900">
+                                  {formatCurrency(finalAmt)}
                                 </td>
                                 <td className="py-3 px-3.5">
                                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
@@ -400,7 +481,7 @@ export function RevenueBreakdownModal({ isOpen, onClose }: RevenueBreakdownModal
         <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs transition-colors cursor-pointer"
+            className="px-5 py-2 rounded-xl bg-bg-surface-alt hover:bg-black text-text-primary font-bold text-xs transition-colors cursor-pointer"
           >
             Close Breakdown
           </button>

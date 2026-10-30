@@ -89,7 +89,7 @@ export function DynamicRepricingWidget() {
                 Action Advisor
               </span>
             </h3>
-            <p className="text-[11px] text-slate-500 font-medium">
+            <p className="text-[11px] text-text-secondary font-medium">
               Recommended price drops for aging vehicles (&gt;30 days) to trigger instant customer test drives
             </p>
           </div>
@@ -131,8 +131,8 @@ export function DynamicRepricingWidget() {
               </div>
 
               <div className="flex items-center gap-3 text-[11px]">
-                <span className="text-slate-500">
-                  Current: <span className="line-through text-slate-400 font-semibold">{formatRupees(item.current_price)}</span>
+                <span className="text-text-secondary">
+                  Current: <span className="line-through text-text-secondary font-semibold">{formatRupees(item.current_price)}</span>
                 </span>
                 <span className="text-purple-700 font-extrabold flex items-center gap-1">
                   <ArrowDownRight size={14} />
@@ -149,7 +149,7 @@ export function DynamicRepricingWidget() {
             >
               <Edit3 size={14} />
               <span>Edit Price in Inventory</span>
-              <ExternalLink size={12} className="text-purple-200" />
+              <ExternalLink size={12} className="text-purple-800 dark:text-purple-200" />
             </button>
           </div>
         ))}

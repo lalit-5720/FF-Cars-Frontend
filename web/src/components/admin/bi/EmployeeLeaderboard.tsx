@@ -34,7 +34,7 @@ export function EmployeeLeaderboard({ data, loading }: EmployeeLeaderboardProps)
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-base font-extrabold text-foreground tracking-tight flex items-center gap-2">
-            <Award className="w-4 h-4 text-amber-400" /> Employee Performance Leaderboard
+            <Award className="w-4 h-4 text-amber-800 dark:text-amber-400" /> Employee Performance Leaderboard
           </h3>
           <p className="text-xs text-muted-foreground">Top sales reps by total revenue & deal conversion rate</p>
         </div>
@@ -69,17 +69,17 @@ export function EmployeeLeaderboard({ data, loading }: EmployeeLeaderboardProps)
                     </div>
                   </div>
                 </td>
-                <td className="py-3 px-3 text-slate-300 font-medium">{emp.branchName}</td>
+                <td className="py-3 px-3 text-text-primary font-medium">{emp.branchName}</td>
                 <td className="py-3 px-3">
-                  <span className="inline-flex items-center gap-1 font-mono font-bold text-sky-400">
+                  <span className="inline-flex items-center gap-1 font-mono font-bold text-sky-700 dark:text-sky-400">
                     <UserCheck className="w-3 h-3" /> {emp.salesCount}
                   </span>
                 </td>
-                <td className="py-3 px-3 font-mono font-bold text-emerald-400">
+                <td className="py-3 px-3 font-mono font-bold text-emerald-700 dark:text-emerald-400">
                   {formatCurrency(emp.totalRevenue)}
                 </td>
                 <td className="py-3 px-3 text-right">
-                  <span className="inline-flex items-center gap-1 font-mono font-bold text-purple-400">
+                  <span className="inline-flex items-center gap-1 font-mono font-bold text-purple-700 dark:text-purple-400">
                     <TrendingUp className="w-3 h-3" /> {emp.conversionRate}%
                   </span>
                 </td>

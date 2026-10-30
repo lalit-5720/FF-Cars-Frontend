@@ -126,19 +126,19 @@ function AdvancedDealProfitSimulatorInner() {
   // Deal Health Classification
   let dealStatus = {
     badge: 'HEALTHY MARGIN',
-    color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    color: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30',
     description: 'Highly profitable deal. Safe for sales rep sign-off without manager escalation.',
   };
   if (revisedMarginPct < 5) {
     dealStatus = {
       badge: 'LOSS WARNING / FLOOR BREACH',
-      color: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
+      color: 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/30',
       description: 'Dangerous margin compression! Dealership earns minimal return or risks loss.',
     };
   } else if (revisedMarginPct < 12) {
     dealStatus = {
       badge: 'MODERATE CONCESSION',
-      color: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+      color: 'bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/30',
       description: 'Acceptable volume concession. Requires Branch Manager verbal approval.',
     };
   }
@@ -156,12 +156,12 @@ function AdvancedDealProfitSimulatorInner() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/20">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-500/20">
                 Executive Financial Tool
               </span>
               <span className="text-xs text-muted-foreground">• Real-time GAAP Margin Modeler</span>
             </div>
-            <h1 className="mt-1.5 text-2xl sm:text-3xl font-extrabold tracking-tight font-display text-white">
+            <h1 className="mt-1.5 text-2xl sm:text-3xl font-extrabold tracking-tight font-display text-text-primary">
               Deal Profitability &amp; Margin Simulator
             </h1>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -181,7 +181,7 @@ function AdvancedDealProfitSimulatorInner() {
               setSelectedVehicleId('custom');
               setActivePreset('custom');
             }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-secondary/60 hover:bg-secondary border border-border text-xs font-bold text-slate-300 transition-all self-start md:self-auto"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-secondary/60 hover:bg-secondary border border-border text-xs font-bold text-text-primary transition-all self-start md:self-auto"
           >
             <RotateCcw size={13} />
             Reset Defaults
@@ -191,7 +191,7 @@ function AdvancedDealProfitSimulatorInner() {
         {/* Live Inventory Quick Loader */}
         <div className="rounded-2xl bg-secondary/30 border border-border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2.5">
-            <CarFront size={18} className="text-sky-400" />
+            <CarFront size={18} className="text-sky-700 dark:text-sky-400" />
             <div>
               <span className="text-xs font-extrabold text-foreground block">Simulate from Live Showroom Stock</span>
               <span className="text-[11px] text-muted-foreground">
@@ -221,8 +221,8 @@ function AdvancedDealProfitSimulatorInner() {
             
             {/* 1. Core Deal Inputs Card */}
             <div className="rounded-3xl border border-border bg-card p-6 space-y-5 shadow-xl">
-              <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-300 flex items-center gap-2">
-                <DollarSign size={16} className="text-purple-400" />
+              <h2 className="text-sm font-extrabold uppercase tracking-wider text-text-primary flex items-center gap-2">
+                <DollarSign size={16} className="text-purple-700 dark:text-purple-400" />
                 1. Vehicle Financial Parameters
               </h2>
 
@@ -230,7 +230,7 @@ function AdvancedDealProfitSimulatorInner() {
                 
                 {/* Selling Price */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                  <label className="block text-xs font-bold text-text-primary mb-1">
                     Agreed Selling Price (₹)
                   </label>
                   <input
@@ -246,7 +246,7 @@ function AdvancedDealProfitSimulatorInner() {
 
                 {/* Acquisition Cost */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                  <label className="block text-xs font-bold text-text-primary mb-1">
                     Vehicle Acquisition Cost (₹)
                   </label>
                   <input
@@ -255,14 +255,14 @@ function AdvancedDealProfitSimulatorInner() {
                     step="10000"
                     value={acquisitionCost}
                     onChange={(e) => setAcquisitionCost(Number(e.target.value))}
-                    className="w-full rounded-xl border border-border bg-secondary/50 px-3.5 py-2.5 text-xs font-mono font-bold text-amber-400 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                    className="w-full rounded-xl border border-border bg-secondary/50 px-3.5 py-2.5 text-xs font-mono font-bold text-amber-800 dark:text-amber-400 focus:outline-none focus:ring-1 focus:ring-purple-500"
                   />
                   <span className="text-[10px] text-muted-foreground mt-1 block">Trade-in / Stockyard procurement cost</span>
                 </div>
 
                 {/* Discount */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                  <label className="block text-xs font-bold text-text-primary mb-1">
                     Customer Discount (₹)
                   </label>
                   <input
@@ -271,14 +271,14 @@ function AdvancedDealProfitSimulatorInner() {
                     step="5000"
                     value={discount}
                     onChange={(e) => setDiscount(Number(e.target.value))}
-                    className="w-full rounded-xl border border-border bg-secondary/50 px-3.5 py-2.5 text-xs font-mono font-bold text-rose-400 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                    className="w-full rounded-xl border border-border bg-secondary/50 px-3.5 py-2.5 text-xs font-mono font-bold text-rose-700 dark:text-rose-400 focus:outline-none focus:ring-1 focus:ring-purple-500"
                   />
                   <span className="text-[10px] text-muted-foreground mt-1 block">Negotiated commercial concession</span>
                 </div>
 
                 {/* Statutory Tax */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                  <label className="block text-xs font-bold text-text-primary mb-1">
                     Statutory Taxes &amp; RTO (₹)
                   </label>
                   <input
@@ -310,7 +310,7 @@ function AdvancedDealProfitSimulatorInner() {
                     </label>
                   </div>
                   {hasLoan && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/20">
                       +2% Dealership Commission Earned
                     </span>
                   )}
@@ -326,12 +326,12 @@ function AdvancedDealProfitSimulatorInner() {
                         step="50000"
                         value={loanFinancedAmount}
                         onChange={(e) => setLoanFinancedAmount(Number(e.target.value))}
-                        className="mt-1 w-full rounded-xl border border-border bg-secondary/50 px-3 py-1.5 text-xs font-mono font-bold text-sky-300"
+                        className="mt-1 w-full rounded-xl border border-border bg-secondary/50 px-3 py-1.5 text-xs font-mono font-bold text-sky-700 dark:text-sky-300"
                       />
                     </div>
                     <div className="flex flex-col justify-center">
                       <span className="text-[11px] text-muted-foreground">Dealership Commission (2%)</span>
-                      <span className="mt-1 font-mono text-sm font-extrabold text-sky-400">
+                      <span className="mt-1 font-mono text-sm font-extrabold text-sky-700 dark:text-sky-400">
                         +{formatCurrency(bankCommission)}
                       </span>
                     </div>
@@ -344,8 +344,8 @@ function AdvancedDealProfitSimulatorInner() {
             <div className="rounded-3xl border border-purple-500/30 bg-purple-950/10 p-6 space-y-4 shadow-xl ring-1 ring-purple-500/20">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h2 className="text-sm font-extrabold uppercase tracking-wider text-purple-300 flex items-center gap-2">
-                    <Sliders size={16} className="text-purple-400" />
+                  <h2 className="text-sm font-extrabold uppercase tracking-wider text-purple-700 dark:text-purple-300 flex items-center gap-2">
+                    <Sliders size={16} className="text-purple-700 dark:text-purple-400" />
                     2. Profit Reduction &amp; Sensitivity Slider
                   </h2>
                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -353,7 +353,7 @@ function AdvancedDealProfitSimulatorInner() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-2xl font-extrabold text-purple-400 font-mono">
+                  <span className="text-2xl font-extrabold text-purple-700 dark:text-purple-400 font-mono">
                     {profitReductionPct}%
                   </span>
                   <span className="text-[10px] text-muted-foreground block">Concession</span>
@@ -371,7 +371,7 @@ function AdvancedDealProfitSimulatorInner() {
                   setProfitReductionPct(Number(e.target.value));
                   setActivePreset('custom');
                 }}
-                className="w-full accent-purple-500 h-2.5 bg-slate-800 rounded-lg cursor-pointer"
+                className="w-full accent-purple-500 h-2.5 bg-bg-surface-alt rounded-lg cursor-pointer"
               />
 
               {/* Slider Scale Points */}
@@ -385,7 +385,7 @@ function AdvancedDealProfitSimulatorInner() {
 
               {/* Preset Buttons */}
               <div className="pt-2">
-                <span className="text-[11px] font-bold text-slate-400 block mb-2">Target Strategy Presets:</span>
+                <span className="text-[11px] font-bold text-text-secondary block mb-2">Target Strategy Presets:</span>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
                     { label: 'Firm MSRP', pct: 0, id: 'firm' },
@@ -428,20 +428,20 @@ function AdvancedDealProfitSimulatorInner() {
 
               {/* Revised Gross Profit Spotlight */}
               <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/30 p-5 ring-2 ring-emerald-500/20">
-                <span className="text-xs font-bold text-emerald-300 block">
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 block">
                   Revised Gross Profit You Get
                 </span>
                 <div className="mt-2 flex items-baseline justify-between">
-                  <span className="text-3xl sm:text-4xl font-extrabold text-emerald-400 font-mono tracking-tight">
+                  <span className="text-3xl sm:text-4xl font-extrabold text-emerald-700 dark:text-emerald-400 font-mono tracking-tight">
                     {formatCurrency(revisedGrossProfit)}
                   </span>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-500/20 text-emerald-300 font-mono">
+                  <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-mono">
                     {revisedMarginPct}% Margin
                   </span>
                 </div>
                 <div className="mt-3 flex items-center justify-between text-xs text-emerald-400/80 pt-2 border-t border-emerald-500/20">
                   <span>Concession given away:</span>
-                  <span className="font-mono font-bold text-rose-400">
+                  <span className="font-mono font-bold text-rose-700 dark:text-rose-400">
                     -{formatCurrency(profitGivenAway)} (-{profitReductionPct}%)
                   </span>
                 </div>
@@ -449,46 +449,46 @@ function AdvancedDealProfitSimulatorInner() {
 
               {/* Exact Difference Waterfall */}
               <div className="space-y-3 text-xs">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-text-secondary block">
                   Exact Accounting Breakdown
                 </span>
 
                 <div className="space-y-2 rounded-2xl bg-secondary/20 p-4 border border-border">
-                  <div className="flex justify-between items-center text-slate-300">
+                  <div className="flex justify-between items-center text-text-primary">
                     <span>1. Vehicle Selling Price</span>
-                    <span className="font-mono font-bold text-white">{formatCurrency(sellingPrice)}</span>
+                    <span className="font-mono font-bold text-text-primary">{formatCurrency(sellingPrice)}</span>
                   </div>
-                  <div className="flex justify-between items-center text-slate-300">
+                  <div className="flex justify-between items-center text-text-primary">
                     <span>2. Vehicle Acquisition Cost</span>
-                    <span className="font-mono font-bold text-amber-400">-{formatCurrency(acquisitionCost)}</span>
+                    <span className="font-mono font-bold text-amber-800 dark:text-amber-400">-{formatCurrency(acquisitionCost)}</span>
                   </div>
                   
                   {/* Highlight: RAW DIFFERENCE / SPREAD */}
-                  <div className="flex justify-between items-center py-1.5 px-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 font-bold">
+                  <div className="flex justify-between items-center py-1.5 px-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-700 dark:text-purple-300 font-bold">
                     <span className="flex items-center gap-1">
                       <TrendingUp size={13} /> Raw Difference (Spread)
                     </span>
-                    <span className="font-mono font-extrabold text-purple-300">
+                    <span className="font-mono font-extrabold text-purple-700 dark:text-purple-300">
                       +{formatCurrency(rawSpread)}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center text-slate-300">
+                  <div className="flex justify-between items-center text-text-primary">
                     <span>3. Commercial Discount</span>
-                    <span className="font-mono font-bold text-rose-400">-{formatCurrency(discount)}</span>
+                    <span className="font-mono font-bold text-rose-700 dark:text-rose-400">-{formatCurrency(discount)}</span>
                   </div>
-                  <div className="flex justify-between items-center text-slate-300">
+                  <div className="flex justify-between items-center text-text-primary">
                     <span>4. Statutory Tax (GST / RTO)</span>
-                    <span className="font-mono font-bold text-slate-400">+{formatCurrency(tax)}</span>
+                    <span className="font-mono font-bold text-text-secondary">+{formatCurrency(tax)}</span>
                   </div>
-                  <div className="flex justify-between items-center text-slate-300">
+                  <div className="flex justify-between items-center text-text-primary">
                     <span>5. 2% Bank Partner Loan Comm.</span>
-                    <span className="font-mono font-bold text-sky-400">+{formatCurrency(bankCommission)}</span>
+                    <span className="font-mono font-bold text-sky-700 dark:text-sky-400">+{formatCurrency(bankCommission)}</span>
                   </div>
 
-                  <div className="pt-2 border-t border-border/80 flex justify-between items-center text-slate-300">
+                  <div className="pt-2 border-t border-border/80 flex justify-between items-center text-text-primary">
                     <span className="font-bold">Original Baseline Gross Profit:</span>
-                    <span className="font-mono font-extrabold text-slate-200">{formatCurrency(baseGrossProfit)}</span>
+                    <span className="font-mono font-extrabold text-text-primary">{formatCurrency(baseGrossProfit)}</span>
                   </div>
                 </div>
               </div>
@@ -503,23 +503,23 @@ function AdvancedDealProfitSimulatorInner() {
                     Margin Drop: -{marginDelta}%
                   </span>
                 </div>
-                <p className="text-[11px] leading-relaxed text-slate-300">
+                <p className="text-[11px] leading-relaxed text-text-primary">
                   {dealStatus.description}
                 </p>
               </div>
 
               {/* Sales Rep Floor & Guidance */}
-              <div className="rounded-2xl bg-slate-900 border border-border p-4 text-xs space-y-2.5">
-                <span className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider">
+              <div className="rounded-2xl bg-bg-surface-alt border border-border p-4 text-xs space-y-2.5">
+                <span className="text-[11px] font-bold text-text-secondary block uppercase tracking-wider">
                   Sales Rep Negotiation Limits
                 </span>
-                <div className="flex justify-between items-center text-slate-300">
+                <div className="flex justify-between items-center text-text-primary">
                   <span>Max Allowable Discount:</span>
-                  <span className="font-mono font-bold text-emerald-400">{formatCurrency(maxAllowableDiscount)}</span>
+                  <span className="font-mono font-bold text-emerald-700 dark:text-emerald-400">{formatCurrency(maxAllowableDiscount)}</span>
                 </div>
-                <div className="flex justify-between items-center text-slate-300">
+                <div className="flex justify-between items-center text-text-primary">
                   <span>Absolute Breakeven Floor:</span>
-                  <span className="font-mono font-bold text-rose-400">{formatCurrency(breakevenFloorPrice)}</span>
+                  <span className="font-mono font-bold text-rose-700 dark:text-rose-400">{formatCurrency(breakevenFloorPrice)}</span>
                 </div>
               </div>
 

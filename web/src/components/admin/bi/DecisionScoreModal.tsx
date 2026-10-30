@@ -108,7 +108,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                   Buy / Do Not Buy Model
                 </span>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5 font-medium">
+              <p className="text-xs text-text-secondary mt-0.5 font-medium">
                 Brand &amp; Vehicle purchase scores derived from previous purchase orders, sales velocity, and gross margins
               </p>
             </div>
@@ -153,7 +153,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
 
             <button
               onClick={onClose}
-              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-text-secondary hover:text-slate-900 transition-colors cursor-pointer"
             >
               <X size={18} />
             </button>
@@ -165,7 +165,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
           {loading ? (
             <div className="py-24 text-center space-y-3">
               <div className="w-10 h-10 border-2 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-xs text-slate-500 font-mono font-medium">
+              <p className="text-xs text-text-secondary font-mono font-medium">
                 Calculating brand &amp; vehicle procurement decision scores from purchase orders...
               </p>
             </div>
@@ -179,7 +179,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                       <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
                         Brand-Level Buy Decision Matrix
                       </h3>
-                      <p className="text-xs text-slate-500 font-medium">
+                      <p className="text-xs text-text-secondary font-medium">
                         Evaluates which automobile manufacturers yield the fastest turnover and highest margins
                       </p>
                     </div>
@@ -206,7 +206,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                               <span className="text-lg font-black text-slate-900 block">
                                 {b.brand}
                               </span>
-                              <span className="text-[11px] text-slate-500 font-medium">
+                              <span className="text-[11px] text-text-secondary font-medium">
                                 {b.totalProcured} past purchase orders • {b.totalSold} sold • {b.inStock} on lot
                               </span>
                             </div>
@@ -216,7 +216,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                                 <span className="text-3xl font-black text-purple-700 font-mono leading-none">
                                   {b.decision_score}
                                 </span>
-                                <span className="text-[10px] text-slate-400 font-bold">/100</span>
+                                <span className="text-[10px] text-text-secondary font-bold">/100</span>
                               </div>
                               <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${badge.color}`}>
                                 {badge.label}
@@ -234,7 +234,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                               <div className="h-1.5 w-full bg-slate-200 rounded-full mt-1.5 overflow-hidden">
                                 <div className="h-full bg-purple-600 rounded-full" style={{ width: `${b.components?.turnoverScore}%` }} />
                               </div>
-                              <span className="text-[9px] text-slate-400 mt-1 block font-medium">Avg {b.avgDaysToSell} days to sell</span>
+                              <span className="text-[9px] text-text-secondary mt-1 block font-medium">Avg {b.avgDaysToSell} days to sell</span>
                             </div>
 
                             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
@@ -245,7 +245,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                               <div className="h-1.5 w-full bg-slate-200 rounded-full mt-1.5 overflow-hidden">
                                 <div className="h-full bg-emerald-600 rounded-full" style={{ width: `${b.components?.marginScore}%` }} />
                               </div>
-                              <span className="text-[9px] text-slate-400 mt-1 block font-medium">{b.grossMarginPct}% gross margin</span>
+                              <span className="text-[9px] text-text-secondary mt-1 block font-medium">{b.grossMarginPct}% gross margin</span>
                             </div>
 
                             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
@@ -256,7 +256,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                               <div className="h-1.5 w-full bg-slate-200 rounded-full mt-1.5 overflow-hidden">
                                 <div className="h-full bg-blue-600 rounded-full" style={{ width: `${b.components?.demandScore}%` }} />
                               </div>
-                              <span className="text-[9px] text-slate-400 mt-1 block font-medium">{b.leadsCount} leads • {b.testDrivesCount} drives</span>
+                              <span className="text-[9px] text-text-secondary mt-1 block font-medium">{b.leadsCount} leads • {b.testDrivesCount} drives</span>
                             </div>
 
                             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
@@ -267,14 +267,14 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                               <div className="h-1.5 w-full bg-slate-200 rounded-full mt-1.5 overflow-hidden">
                                 <div className="h-full bg-amber-500 rounded-full" style={{ width: `${b.components?.riskScore}%` }} />
                               </div>
-                              <span className="text-[9px] text-slate-400 mt-1 block font-medium">{b.inStock} units in stock</span>
+                              <span className="text-[9px] text-text-secondary mt-1 block font-medium">{b.inStock} units in stock</span>
                             </div>
                           </div>
 
                           {/* Purchase Order Guidance */}
                           <div className="rounded-xl bg-slate-50 p-3 border border-slate-200 flex items-center justify-between text-xs">
                             <div>
-                              <span className="text-[10px] text-slate-500 uppercase font-bold block">
+                              <span className="text-[10px] text-text-secondary uppercase font-bold block">
                                 Recommended Max Buy Price
                               </span>
                               <span className="font-mono font-black text-emerald-700 text-sm">
@@ -282,7 +282,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                               </span>
                             </div>
                             <div className="text-right">
-                              <span className="text-[10px] text-slate-500 uppercase font-bold block">
+                              <span className="text-[10px] text-text-secondary uppercase font-bold block">
                                 Past Avg Selling Price
                               </span>
                               <span className="font-mono font-bold text-slate-900">
@@ -309,7 +309,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                       <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
                         Vehicle Model Procurement Decision Table
                       </h3>
-                      <p className="text-xs text-slate-500 font-medium">
+                      <p className="text-xs text-text-secondary font-medium">
                         Specific vehicle models ranked by procurement viability from previous purchase orders
                       </p>
                     </div>
@@ -325,7 +325,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                   <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-2xs">
                     <div className="overflow-x-auto">
                       <table className="w-full text-left text-xs">
-                        <thead className="bg-slate-50 border-b border-slate-200 text-[11px] text-slate-500 font-bold uppercase tracking-wider">
+                        <thead className="bg-slate-50 border-b border-slate-200 text-[11px] text-text-secondary font-bold uppercase tracking-wider">
                           <tr>
                             <th className="py-3 px-4">Vehicle Model</th>
                             <th className="py-3 px-4 text-center">Score</th>
@@ -344,7 +344,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                               <tr key={v.displayName} className="hover:bg-slate-50 transition-colors">
                                 <td className="py-3 px-4 font-bold text-slate-900">
                                   <div className="text-xs">{v.displayName}</div>
-                                  <span className="text-[10px] text-slate-500 font-normal">
+                                  <span className="text-[10px] text-text-secondary font-normal">
                                     {v.totalProcured} procured • {v.totalSold} sold • {v.inStock} lot
                                   </span>
                                 </td>
@@ -461,22 +461,22 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                       <div className="p-3 rounded-xl bg-white border border-emerald-200 shadow-2xs">
                         <strong className="text-emerald-700 block font-mono text-sm font-black">85 – 100 pts</strong>
                         <span className="text-slate-900 font-bold block mt-1">STRONG BUY</span>
-                        <p className="text-[10px] text-slate-500 mt-1 font-medium">Issue Purchase Order immediately. Maximum stock allocation.</p>
+                        <p className="text-[10px] text-text-secondary mt-1 font-medium">Issue Purchase Order immediately. Maximum stock allocation.</p>
                       </div>
                       <div className="p-3 rounded-xl bg-white border border-blue-200 shadow-2xs">
                         <strong className="text-blue-700 block font-mono text-sm font-black">70 – 84 pts</strong>
                         <span className="text-slate-900 font-bold block mt-1">BUY</span>
-                        <p className="text-[10px] text-slate-500 mt-1 font-medium">Standard procurement at benchmark trade-in pricing.</p>
+                        <p className="text-[10px] text-text-secondary mt-1 font-medium">Standard procurement at benchmark trade-in pricing.</p>
                       </div>
                       <div className="p-3 rounded-xl bg-white border border-amber-200 shadow-2xs">
                         <strong className="text-amber-700 block font-mono text-sm font-black">55 – 69 pts</strong>
                         <span className="text-slate-900 font-bold block mt-1">CAUTION</span>
-                        <p className="text-[10px] text-slate-500 mt-1 font-medium">Only procure if acquired at &gt;=10% below standard valuation.</p>
+                        <p className="text-[10px] text-text-secondary mt-1 font-medium">Only procure if acquired at &gt;=10% below standard valuation.</p>
                       </div>
                       <div className="p-3 rounded-xl bg-white border border-rose-200 shadow-2xs">
                         <strong className="text-rose-700 block font-mono text-sm font-black">&lt; 55 pts</strong>
                         <span className="text-slate-900 font-bold block mt-1">DO NOT BUY</span>
-                        <p className="text-[10px] text-slate-500 mt-1 font-medium">Avoid purchasing. Reallocate capital to high-turnover models.</p>
+                        <p className="text-[10px] text-text-secondary mt-1 font-medium">Avoid purchasing. Reallocate capital to high-turnover models.</p>
                       </div>
                     </div>
                   </div>
@@ -492,7 +492,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                         <span className="text-2xl font-black font-mono text-slate-900 leading-none">
                           {data?.decision_score || 82}
                         </span>
-                        <span className="text-[9px] font-extrabold text-slate-400 uppercase mt-0.5">/ 100</span>
+                        <span className="text-[9px] font-extrabold text-text-secondary uppercase mt-0.5">/ 100</span>
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-1">
@@ -501,7 +501,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                             High Confidence
                           </span>
                         </div>
-                        <p className="text-xs text-slate-500 font-medium max-w-md">
+                        <p className="text-xs text-text-secondary font-medium max-w-md">
                           Overall dealership operations score across sales execution, inventory health, and margin yields.
                         </p>
                       </div>
@@ -514,7 +514,7 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
                       <div key={key} className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-2">
                         <div className="flex items-center justify-between text-xs">
                           <span className="font-bold text-slate-800 capitalize">
-                            {key.replace('_', ' ')} <small className="text-slate-400 font-normal">({p.weight})</small>
+                            {key.replace('_', ' ')} <small className="text-text-secondary font-normal">({p.weight})</small>
                           </span>
                           <span className="font-mono font-black text-slate-900">{p.score}/100</span>
                         </div>
@@ -537,12 +537,12 @@ export function DecisionScoreModal({ isOpen, onClose }: DecisionScoreModalProps)
 
         {/* Modal Footer */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center text-xs">
-          <span className="text-slate-500 font-mono text-[11px] font-medium">
+          <span className="text-text-secondary font-mono text-[11px] font-medium">
             CarRevive Procurement Engine • Based on historical purchase orders &amp; verified sales
           </span>
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-black text-white font-bold transition-all cursor-pointer shadow-xs"
+            className="px-5 py-2 rounded-xl bg-bg-surface-alt hover:bg-black text-text-primary font-bold transition-all cursor-pointer shadow-xs"
           >
             Close Intelligence
           </button>

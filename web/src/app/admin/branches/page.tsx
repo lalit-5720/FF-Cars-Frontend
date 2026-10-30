@@ -5,6 +5,7 @@ import { RequireRole } from '../../../components/auth/RequireRole';
 import { api } from '../../../services/api';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { showLocalToast } from '../../../components/Toast';
+import { firstError, email as checkEmail, phone as checkPhone, pincode as checkPincode, maxLen } from '../../../lib/validation';
 import { 
   Building2, 
   RefreshCw, 
@@ -82,10 +83,26 @@ export default function AdminBranchesPage() {
     return `₹${val.toLocaleString('en-IN')}`;
   };
 
+  const branchError = (f: { branch_name: string; manager_name: string; phone: string; email: string; address: string; city: string; pincode: string }) =>
+    firstError(
+      maxLen(f.branch_name.trim(), 100, 'Branch name'),
+      maxLen(f.manager_name, 100, 'Manager name'),
+      maxLen(f.city, 50, 'City'),
+      maxLen(f.address, 500, 'Address'),
+      checkPhone(f.phone),
+      checkEmail(f.email),
+      checkPincode(f.pincode),
+    );
+
   const handleCreateBranch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.branch_name || !formData.city) {
+    if (!formData.branch_name.trim() || !formData.city.trim()) {
       showLocalToast('Branch name and City are required.', 'error');
+      return;
+    }
+    const brErr = branchError(formData);
+    if (brErr) {
+      showLocalToast(brErr, 'error');
       return;
     }
     setSubmitting(true);
@@ -115,6 +132,11 @@ export default function AdminBranchesPage() {
   const handleUpdateBranch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingBranch) return;
+    const brEditErr = branchError(formData);
+    if (brEditErr) {
+      showLocalToast(brEditErr, 'error');
+      return;
+    }
     setSubmitting(true);
     try {
       await api.patch(`/branches/${editingBranch.branch_id}`, formData);
@@ -339,7 +361,7 @@ export default function AdminBranchesPage() {
                   <input
                     type="text"
                     required
-                    value={formData.branch_name}
+                    value={formData.branch_name} maxLength={100}
                     onChange={(e) => setFormData({ ...formData, branch_name: e.target.value })}
                     placeholder="e.g. Madurai Ring Road Showroom"
                     className="w-full p-2.5 rounded-lg bg-bg-surface border border-border text-text-primary focus:border-accent focus:outline-none"
@@ -351,7 +373,7 @@ export default function AdminBranchesPage() {
                     <label className="block helper-text font-bold uppercase mb-1">Manager Name</label>
                     <input
                       type="text"
-                      value={formData.manager_name}
+                      value={formData.manager_name} maxLength={100}
                       onChange={(e) => setFormData({ ...formData, manager_name: e.target.value })}
                       placeholder="e.g. Rajesh Kannan"
                       className="w-full p-2.5 rounded-lg bg-bg-surface border border-border text-text-primary focus:border-accent focus:outline-none"
@@ -362,7 +384,7 @@ export default function AdminBranchesPage() {
                     <input
                       type="text"
                       required
-                      value={formData.city}
+                      value={formData.city} maxLength={50}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       placeholder="e.g. Madurai"
                       className="w-full p-2.5 rounded-lg bg-bg-surface border border-border text-text-primary focus:border-accent focus:outline-none"
@@ -375,7 +397,7 @@ export default function AdminBranchesPage() {
                     <label className="block helper-text font-bold uppercase mb-1">Phone</label>
                     <input
                       type="text"
-                      value={formData.phone}
+                      value={formData.phone} maxLength={15} inputMode="tel"
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="+91 98765 43210"
                       className="w-full p-2.5 rounded-lg bg-bg-surface border border-border text-text-primary focus:border-accent focus:outline-none"
@@ -385,7 +407,7 @@ export default function AdminBranchesPage() {
                     <label className="block helper-text font-bold uppercase mb-1">Email</label>
                     <input
                       type="email"
-                      value={formData.email}
+                      value={formData.email} maxLength={100}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="branch@carrevive.in"
                       className="w-full p-2.5 rounded-lg bg-bg-surface border border-border text-text-primary focus:border-accent focus:outline-none"

@@ -43,15 +43,15 @@ export function AdminSidebar() {
     { label: 'Showroom Overview', icon: LayoutDashboard, href: '/admin', show: permissions.canAccessOverview },
   ];
 
-  const fourStageWorkflow = [
+  const managerWorkflow = [
     { label: 'Stage 1: Leads & Assignments', icon: Target, href: '/admin/leads', show: permissions.canAccessLeads, stage: 'S1' },
     { label: 'Stage 2: Deals & Payments', icon: TrendingUp, href: '/admin/sales', show: permissions.canAccessSales, stage: 'S2' },
-    { label: 'Stage 3: Deliveries & PDI', icon: ShoppingCart, href: '/admin/deliveries', show: permissions.canAccessDeliveries, stage: 'S3' },
-    { label: 'Stage 4: BI & Analytics', icon: CircleDollarSign, href: '/admin/bi', show: permissions.canAccessOverview, stage: 'S4' },
+    { label: 'Stage 3: BI & Analytics', icon: CircleDollarSign, href: '/admin/bi', show: permissions.canAccessOverview, stage: 'S3' },
   ];
 
   const showroomAssets = [
     { label: 'Vehicle Inventory', icon: CarFront, href: '/admin/inventory', show: permissions.canAccessInventory },
+    { label: 'Vehicle Deliveries', icon: ShoppingCart, href: '/admin/deliveries', show: permissions.canAccessDeliveries },
     { label: 'Customer Directory', icon: Users, href: '/admin/customers', show: permissions.canAccessLeads },
     { label: 'Valuation & Sell Enquiries', icon: Calculator, href: '/admin/quotations', show: true, badge: 'New' },
   ];
@@ -68,7 +68,7 @@ export function AdminSidebar() {
     { label: 'Stage 1: Leads & Follow-ups', icon: Target, href: '/admin/leads', show: true },
     { label: 'Stage 1: Test Drives', icon: Gauge, href: '/admin/test-drives', show: true },
     { label: 'Valuation & Sell Enquiries', icon: Calculator, href: '/admin/quotations', show: true },
-    { label: 'Stage 3: Vehicle Deliveries', icon: ShoppingCart, href: '/admin/deliveries', show: true },
+    { label: 'Vehicle Deliveries', icon: ShoppingCart, href: '/admin/deliveries', show: true },
     { label: 'Vehicle Inventory', icon: CarFront, href: '/admin/inventory', show: true },
     { label: 'Customers', icon: Users, href: '/admin/customers', show: true },
   ];
@@ -155,18 +155,18 @@ export function AdminSidebar() {
               </div>
             </div>
 
-            {/* 2. 4-STAGE OPERATIONAL PIPELINE */}
+            {/* 2. OPERATIONAL PIPELINE */}
             <div>
               <div className="flex items-center justify-between px-3 mb-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-text-secondary">
-                  4-Stage Pipeline
+                  Operational Pipeline
                 </span>
                 <span className="badge badge-info text-[10px] px-1.5 py-0">
                   Core
                 </span>
               </div>
               <div className="space-y-1">
-                {fourStageWorkflow.filter(i => i.show).map(({ label, icon: Icon, href, stage }) => {
+                {managerWorkflow.filter(i => i.show).map(({ label, icon: Icon, href, stage }) => {
                   const active = pathname === href;
                   return (
                     <button

@@ -8,6 +8,7 @@ import { api } from '../../services/api';
 import { showLocalToast } from '../../components/Toast';
 import { User as UserIcon, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 
+import { firstError, required, email as checkEmail, password as checkPassword, maxLen } from '../../lib/validation';
 export default function RegisterPage() {
   const router = useRouter();
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -19,8 +20,13 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !password || !confirmPassword) {
+    if (!name.trim() || !email || !password || !confirmPassword) {
       showLocalToast('Please fill in all fields');
+      return;
+    }
+    const regErr = firstError(maxLen(name.trim(), 100, 'Name'), checkEmail(email, 'Email', true), checkPassword(password));
+    if (regErr) {
+      showLocalToast(regErr);
       return;
     }
 
@@ -72,7 +78,7 @@ export default function RegisterPage() {
               <input
                 type="text"
                 required
-                value={name}
+                value={name} maxLength={100}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
                 className="w-full bg-bg-surface border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent focus:outline-none"
@@ -89,7 +95,7 @@ export default function RegisterPage() {
               <input
                 type="email"
                 required
-                value={email}
+                value={email} maxLength={100}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="john@example.com"
                 className="w-full bg-bg-surface border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent focus:outline-none"
@@ -106,7 +112,7 @@ export default function RegisterPage() {
               <input
                 type="password"
                 required
-                value={password}
+                value={password} minLength={6} maxLength={100}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Minimum 6 characters"
                 className="w-full bg-bg-surface border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent focus:outline-none"
@@ -123,7 +129,7 @@ export default function RegisterPage() {
               <input
                 type="password"
                 required
-                value={confirmPassword}
+                value={confirmPassword} minLength={6} maxLength={100}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Repeat password"
                 className="w-full bg-bg-surface border border-border rounded-lg pl-9 pr-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:border-accent focus:outline-none"

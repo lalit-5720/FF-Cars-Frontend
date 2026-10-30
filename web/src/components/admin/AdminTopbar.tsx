@@ -27,6 +27,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useNotificationStore } from '../../store/useNotificationStore';
 import { useThemeStore } from '../../store/useThemeStore';
 import { showLocalToast } from '../Toast';
+import { usePermissions } from '../../hooks/usePermissions';
 
 interface AdminTopbarProps {
   onOpenDecisionScore?: () => void;
@@ -57,6 +58,7 @@ export function AdminTopbar({ onOpenDecisionScore, searchQuery, onSearchChange }
   const urlSearch = searchParams.get('search') || '';
 
   const { user, clearAuth } = useAuthStore();
+  const permissions = usePermissions();
   const { notifications, unreadCount, markAllAsRead } = useNotificationStore();
   const { theme, toggleTheme } = useThemeStore();
 
@@ -364,7 +366,7 @@ export function AdminTopbar({ onOpenDecisionScore, searchQuery, onSearchChange }
             >
               <Bell size={16} />
               {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 grid h-3.5 min-w-3.5 place-items-center rounded-full bg-status-danger text-[8px] font-bold text-white px-1">
+                <span className="absolute top-1 right-1 grid h-3.5 min-w-3.5 place-items-center rounded-full bg-status-danger text-[8px] font-bold text-text-primary px-1">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -391,7 +393,11 @@ export function AdminTopbar({ onOpenDecisionScore, searchQuery, onSearchChange }
                     className="p-2.5 hover:bg-bg-surface-alt rounded-lg transition-colors cursor-pointer"
                     onClick={() => {
                       setShowNotifMenu(false);
-                      router.push('/admin/deliveries');
+                      if (permissions.canAccessDeliveries) {
+                        router.push('/admin/deliveries');
+                      } else {
+                        router.push('/admin/inventory');
+                      }
                     }}
                   >
                     <div className="flex items-center gap-1.5 font-bold text-text-primary">

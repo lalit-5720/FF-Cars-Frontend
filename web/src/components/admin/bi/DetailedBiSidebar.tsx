@@ -118,12 +118,12 @@ export function DetailedBiSidebar({
                 <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-extrabold uppercase border border-blue-200">
                   Detailed Intelligence Side Panel
                 </span>
-                <span className="text-xs text-slate-500 font-medium">Deep-Dive Analytics</span>
+                <span className="text-xs text-text-secondary font-medium">Deep-Dive Analytics</span>
               </div>
               <h2 className="text-lg font-black text-slate-900">
                 Business Intelligence &amp; Technical Breakdown
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5 font-medium">
+              <p className="text-xs text-text-secondary mt-0.5 font-medium">
                 Inspect 4-pillar algorithms, procurement price ceilings, and market demand models.
               </p>
             </div>
@@ -139,7 +139,7 @@ export function DetailedBiSidebar({
               </button>
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-500 transition-colors border border-slate-200 cursor-pointer"
+                className="p-2 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-text-secondary transition-colors border border-slate-200 cursor-pointer"
                 title="Close Sidebar"
               >
                 <X size={16} />
@@ -232,7 +232,7 @@ export function DetailedBiSidebar({
                     </button>
                   </div>
 
-                  <span className="text-[11px] text-slate-500 pr-2 hidden sm:inline font-medium">
+                  <span className="text-[11px] text-text-secondary pr-2 hidden sm:inline font-medium">
                     Live Dealership Data
                   </span>
                 </div>
@@ -240,7 +240,7 @@ export function DetailedBiSidebar({
                 {/* Search & Filter */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   <div className="relative">
-                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
                     <input
                       type="text"
                       placeholder={`Search ${segregationMode === 'model' ? 'models (e.g. EcoSport, i20)...' : 'brands...'}`}
@@ -296,7 +296,7 @@ export function DetailedBiSidebar({
                               )}
                             </div>
                             <h4 className="text-sm font-black text-slate-900">{itemKey}</h4>
-                            <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
+                            <p className="text-[11px] text-text-secondary mt-0.5 font-medium">
                               {item.rationale || 'Derived from live dealership sales velocity & margin history.'}
                             </p>
                           </div>
@@ -317,15 +317,15 @@ export function DetailedBiSidebar({
                         {/* Quick Stats Grid */}
                         <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-[11px]">
                           <div className="bg-slate-50 p-2 rounded-xl border border-slate-200/80">
-                            <span className="text-slate-400 block text-[9px] font-bold">Avg Selling Price</span>
+                            <span className="text-text-secondary block text-[9px] font-bold">Avg Selling Price</span>
                             <strong className="text-slate-800 font-mono">{formatCurrency(item.avgSellingPrice)}</strong>
                           </div>
                           <div className="bg-slate-50 p-2 rounded-xl border border-slate-200/80">
-                            <span className="text-slate-400 block text-[9px] font-bold">Dealer Margin</span>
+                            <span className="text-text-secondary block text-[9px] font-bold">Dealer Margin</span>
                             <strong className="text-emerald-700 font-mono">+{item.grossMarginPct}%</strong>
                           </div>
                           <div className="bg-slate-50 p-2 rounded-xl border border-slate-200/80">
-                            <span className="text-slate-400 block text-[9px] font-bold">Turnover Velocity</span>
+                            <span className="text-text-secondary block text-[9px] font-bold">Turnover Velocity</span>
                             <strong className="text-blue-700 font-mono">{item.avgDaysToSell} Days</strong>
                           </div>
                         </div>
@@ -338,24 +338,24 @@ export function DetailedBiSidebar({
                             </span>
                             <div className="grid grid-cols-2 gap-2 text-[10px]">
                               <div className="bg-white p-2 rounded-lg border border-slate-200/90 shadow-2xs">
-                                <span className="text-slate-400 block font-bold">Turnover (30%)</span>
+                                <span className="text-text-secondary block font-bold">Turnover (30%)</span>
                                 <strong className="text-slate-900 font-mono">{item.components?.turnoverScore ?? 70}/100</strong>
-                                <span className="text-[9px] text-slate-500 block">{item.avgDaysToSell} days on lot</span>
+                                <span className="text-[9px] text-text-secondary block">{item.avgDaysToSell} days on lot</span>
                               </div>
                               <div className="bg-white p-2 rounded-lg border border-slate-200/90 shadow-2xs">
-                                <span className="text-slate-400 block font-bold">Margin (30%)</span>
+                                <span className="text-text-secondary block font-bold">Margin (30%)</span>
                                 <strong className="text-emerald-700 font-mono">{item.components?.marginScore ?? 65}/100</strong>
-                                <span className="text-[9px] text-slate-500 block">+{item.grossMarginPct}% profit</span>
+                                <span className="text-[9px] text-text-secondary block">+{item.grossMarginPct}% profit</span>
                               </div>
                               <div className="bg-white p-2 rounded-lg border border-slate-200/90 shadow-2xs">
-                                <span className="text-slate-400 block font-bold">Demand (25%)</span>
+                                <span className="text-text-secondary block font-bold">Demand (25%)</span>
                                 <strong className="text-blue-700 font-mono">{item.components?.demandScore ?? 60}/100</strong>
-                                <span className="text-[9px] text-slate-500 block">{item.leadsCount} buyer leads</span>
+                                <span className="text-[9px] text-text-secondary block">{item.leadsCount} buyer leads</span>
                               </div>
                               <div className="bg-white p-2 rounded-lg border border-slate-200/90 shadow-2xs">
-                                <span className="text-slate-400 block font-bold">Stock Risk (15%)</span>
+                                <span className="text-text-secondary block font-bold">Stock Risk (15%)</span>
                                 <strong className="text-amber-800 font-mono">{item.components?.riskScore ?? 75}/100</strong>
-                                <span className="text-[9px] text-slate-500 block">{item.inStock} currently in lot</span>
+                                <span className="text-[9px] text-text-secondary block">{item.inStock} currently in lot</span>
                               </div>
                             </div>
                             <p className="text-[10px] text-slate-600 pt-1 font-medium">
@@ -489,7 +489,7 @@ export function DetailedBiSidebar({
                     <BarChart3 size={16} className="text-blue-600" />
                     Market Preference Curves
                   </h4>
-                  <p className="text-xs text-slate-500 mt-1 font-medium">
+                  <p className="text-xs text-text-secondary mt-1 font-medium">
                     Historical customer demand segregated by manufacture year and target budget band.
                   </p>
                 </div>
@@ -501,7 +501,7 @@ export function DetailedBiSidebar({
           </div>
 
           {/* Footer Bar */}
-          <div className="p-4 border-t border-slate-200 bg-white flex items-center justify-between text-xs text-slate-500">
+          <div className="p-4 border-t border-slate-200 bg-white flex items-center justify-between text-xs text-text-secondary">
             <span>CarRevive Intelligence Engine &bull; v2.4</span>
             <button
               onClick={onClose}

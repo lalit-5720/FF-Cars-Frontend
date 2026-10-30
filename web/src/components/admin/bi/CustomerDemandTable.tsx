@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '../../../services/api';
 import {
   Users,
@@ -19,6 +20,11 @@ import {
   CircleDollarSign,
   Loader2,
   TrendingUp,
+  X,
+  Phone,
+  Mail,
+  MapPin,
+  ExternalLink,
 } from 'lucide-react';
 
 interface CustomerDemandTableProps {
@@ -28,12 +34,15 @@ interface CustomerDemandTableProps {
 }
 
 export function CustomerDemandTable({ branchId, startDate, endDate }: CustomerDemandTableProps) {
+  const router = useRouter();
   const [demandData, setDemandData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [fuelFilter, setFuelFilter] = useState('ALL');
   const [transmissionFilter, setTransmissionFilter] = useState('ALL');
   const [sortBy, setSortBy] = useState<'demandScore' | 'customers' | 'stock' | 'enquiries'>('demandScore');
+  const [selectedModelForCustomers, setSelectedModelForCustomers] = useState<any | null>(null);
+  const [selectedModelForViewers, setSelectedModelForViewers] = useState<any | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -94,11 +103,11 @@ export function CustomerDemandTable({ branchId, startDate, endDate }: CustomerDe
           </div>
           <div className="grid grid-cols-2 gap-2 text-[11px]">
             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-              <span className="text-slate-500 block text-[10px] font-semibold">Petrol</span>
+              <span className="text-text-secondary block text-[10px] font-semibold">Petrol</span>
               <strong className="text-slate-900 text-sm font-mono font-bold">{fuels.Petrol ?? 0} units</strong>
             </div>
             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-              <span className="text-slate-500 block text-[10px] font-semibold">Diesel</span>
+              <span className="text-text-secondary block text-[10px] font-semibold">Diesel</span>
               <strong className="text-slate-900 text-sm font-mono font-bold">{fuels.Diesel ?? 0} units</strong>
             </div>
           </div>
@@ -112,11 +121,11 @@ export function CustomerDemandTable({ branchId, startDate, endDate }: CustomerDe
           </div>
           <div className="grid grid-cols-2 gap-2 text-[11px]">
             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-              <span className="text-slate-500 block text-[10px] font-semibold">Automatic</span>
+              <span className="text-text-secondary block text-[10px] font-semibold">Automatic</span>
               <strong className="text-slate-900 text-sm font-mono font-bold">{transmissions.Automatic ?? 0} units</strong>
             </div>
             <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
-              <span className="text-slate-500 block text-[10px] font-semibold">Manual</span>
+              <span className="text-text-secondary block text-[10px] font-semibold">Manual</span>
               <strong className="text-slate-900 text-sm font-mono font-bold">{transmissions.Manual ?? 0} units</strong>
             </div>
           </div>
@@ -137,7 +146,7 @@ export function CustomerDemandTable({ branchId, startDate, endDate }: CustomerDe
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
         <div className="relative flex-1 max-w-sm">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
           <input
             type="text"
             placeholder="Search by Make or Model (e.g. BMW, City)..."
@@ -203,14 +212,14 @@ export function CustomerDemandTable({ branchId, startDate, endDate }: CustomerDe
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="py-16 text-center text-slate-400">
+                  <td colSpan={9} className="py-16 text-center text-text-secondary">
                     <Loader2 size={24} className="animate-spin mx-auto text-blue-600 mb-2" />
                     <span className="font-medium">Aggregating real showroom customer demand signals...</span>
                   </td>
                 </tr>
               ) : filteredModels.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-slate-400 font-medium">
+                  <td colSpan={9} className="py-12 text-center text-text-secondary font-medium">
                     No models matching your selected filters.
                   </td>
                 </tr>
@@ -224,10 +233,10 @@ export function CustomerDemandTable({ branchId, startDate, endDate }: CustomerDe
                       {/* Model & Make */}
                       <td className="py-3.5 px-4">
                         <div className="font-extrabold text-slate-900 text-sm flex items-center gap-1.5">
-                          <span className="text-[10px] font-mono text-slate-400">#{idx + 1}</span>
+                          <span className="text-[10px] font-mono text-text-secondary">#{idx + 1}</span>
                           <span>{item.make} {item.model}</span>
                         </div>
-                        <div className="flex items-center gap-2 mt-0.5 text-[10px] text-slate-500 font-medium">
+                        <div className="flex items-center gap-2 mt-0.5 text-[10px] text-text-secondary font-medium">
                           {item.samplePrice > 0 && (
                             <span>Avg ₹{(item.samplePrice / 100000).toFixed(1)}L</span>
                           )}
@@ -237,15 +246,35 @@ export function CustomerDemandTable({ branchId, startDate, endDate }: CustomerDe
 
                       {/* Distinct Customers */}
                       <td className="py-3.5 px-4 text-center">
-                        <span className="inline-flex items-center gap-1 font-bold font-mono text-slate-800 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-xs">
-                          <Users size={11} className="text-blue-600" />
-                          {item.distinctInterestedCustomers}
-                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedModelForCustomers(item)}
+                          className="inline-flex items-center gap-1.5 font-bold font-mono text-blue-700 hover:text-blue-900 px-3 py-1 rounded-full bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-all cursor-pointer shadow-2xs hover:scale-105 active:scale-95 group"
+                          title="Click to view interested customer details & contact"
+                        >
+                          <Users size={12} className="text-blue-600 group-hover:scale-110 transition-transform" />
+                          <span>{item.distinctInterestedCustomers}</span>
+                          <span className="text-[10px] text-blue-600 font-sans font-semibold underline decoration-blue-300 ml-0.5">
+                            View
+                          </span>
+                        </button>
                       </td>
 
                       {/* Views */}
-                      <td className="py-3.5 px-3 text-center font-mono text-slate-600 font-semibold">
-                        {item.views}
+                      <td className="py-3.5 px-3 text-center">
+                        {item.views > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedModelForViewers(item)}
+                            className="inline-flex items-center gap-1 font-mono font-semibold text-slate-700 hover:text-blue-700 px-2 py-0.5 rounded-full hover:bg-blue-50 border border-transparent hover:border-blue-200 transition cursor-pointer"
+                            title="See who viewed this car's detail page"
+                          >
+                            <Eye size={12} className="text-text-secondary" />
+                            <span>{item.views}</span>
+                          </button>
+                        ) : (
+                          <span className="font-mono text-slate-400 font-semibold">0</span>
+                        )}
                       </td>
 
                       {/* Wishlists */}
@@ -311,6 +340,332 @@ export function CustomerDemandTable({ branchId, startDate, endDate }: CustomerDe
           </table>
         </div>
       </div>
+
+      {/* INTERESTED CUSTOMERS DRILLDOWN MODAL */}
+      {selectedModelForCustomers && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-150">
+            
+            {/* Modal Header */}
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shrink-0">
+                  <Users size={20} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-extrabold text-slate-900">
+                      Interested Customers: {selectedModelForCustomers.make} {selectedModelForCustomers.model}
+                    </h3>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                      selectedModelForCustomers.demandIndicator === 'HIGH_DEMAND'
+                        ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                        : selectedModelForCustomers.demandIndicator === 'MODERATE_DEMAND'
+                        ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                        : 'bg-slate-100 text-slate-700 border border-slate-200'
+                    }`}>
+                      {selectedModelForCustomers.demandIndicator.replace('_', ' ')}
+                    </span>
+                  </div>
+                  <p className="text-xs text-text-secondary mt-0.5">
+                    {selectedModelForCustomers.distinctInterestedCustomers} distinct customer(s) evaluated this vehicle ({selectedModelForCustomers.enquiries} enquiries • {selectedModelForCustomers.testDrives} test drives • {selectedModelForCustomers.wishlists} wishlists)
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedModelForCustomers(null)}
+                className="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-text-secondary hover:text-slate-900 flex items-center justify-center transition cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Modal Body: Customer List */}
+            <div className="p-5 overflow-y-auto space-y-3.5 flex-1">
+              {(!selectedModelForCustomers.interestedCustomers || selectedModelForCustomers.interestedCustomers.length === 0) ? (
+                <div className="p-8 text-center text-text-secondary space-y-2">
+                  <Users size={32} className="mx-auto text-text-primary" />
+                  <p className="text-xs font-medium text-slate-600">
+                    Demand telemetry for this model is currently recorded from anonymous online visitor browsing &amp; view interactions.
+                  </p>
+                  <p className="text-[11px] text-text-secondary">
+                    Once a visitor fills an enquiry form or schedules a test drive, their profile, phone number, and conversation notes will appear here immediately.
+                  </p>
+                </div>
+              ) : (
+                selectedModelForCustomers.interestedCustomers.map((cust: any, cIdx: number) => {
+                  const initials = (cust.name || 'C')
+                    .split(' ')
+                    .map((n: string) => n[0])
+                    .slice(0, 2)
+                    .join('')
+                    .toUpperCase();
+
+                  const isLead = cust.type === 'Lead Inquiry';
+                  const isTestDrive = cust.type === 'Scheduled Test Drive';
+
+                  return (
+                    <div
+                      key={cust.id || cIdx}
+                      className="p-4 rounded-xl border border-slate-200/90 bg-slate-50/50 hover:bg-white hover:border-blue-200 transition-all shadow-2xs space-y-3"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-extrabold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                            {initials}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-extrabold text-slate-900 text-sm">
+                                {cust.name}
+                              </span>
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                isLead
+                                  ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                                  : isTestDrive
+                                  ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                  : 'bg-blue-50 text-blue-700 border border-blue-200'
+                              }`}>
+                                {cust.type}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-text-secondary mt-0.5">
+                              {cust.city && (
+                                <span className="flex items-center gap-1">
+                                  <MapPin size={11} className="text-text-secondary" />
+                                  {cust.city}
+                                </span>
+                              )}
+                              {cust.date && (
+                                <span className="text-[11px] text-text-secondary">
+                                  • {new Date(cust.date).toLocaleDateString()}
+                                </span>
+                              )}
+                              {cust.status && (
+                                <span className="text-[11px] font-semibold text-slate-600">
+                                  ({cust.status})
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Quick Contact Actions */}
+                        <div className="flex items-center gap-2 self-start sm:self-auto">
+                          {cust.phone && (
+                            <a
+                              href={`tel:${cust.phone}`}
+                              className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 flex items-center gap-1.5 transition"
+                              title="Call customer"
+                            >
+                              <Phone size={12} />
+                              <span>{cust.phone}</span>
+                            </a>
+                          )}
+                          {cust.email && (
+                            <a
+                              href={`mailto:${cust.email}`}
+                              className="p-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200 flex items-center justify-center transition"
+                              title={`Email: ${cust.email}`}
+                            >
+                              <Mail size={13} />
+                            </a>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedModelForCustomers(null);
+                              router.push(`/admin/leads?search=${encodeURIComponent(cust.name)}`);
+                            }}
+                            className="px-2.5 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-blue-600 text-xs font-bold border border-slate-200 flex items-center gap-1 transition cursor-pointer"
+                            title="Open in Leads Management"
+                          >
+                            <span>Leads</span>
+                            <ExternalLink size={11} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {cust.remarks && (
+                        <div className="p-2.5 rounded-lg bg-white border border-slate-200/70 text-xs text-slate-600">
+                          <span className="font-bold text-slate-700 text-[10px] uppercase block mb-0.5">Customer Notes / Interest</span>
+                          {cust.remarks}
+                        </div>
+                      )}
+
+                      {cust.assignedTo && (
+                        <div className="text-[11px] text-text-secondary font-medium flex items-center justify-between pt-1 border-t border-slate-100">
+                          <span>Assigned Sales Executive: <strong>{cust.assignedTo}</strong></span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-slate-100 bg-slate-50/70 flex items-center justify-between">
+              <span className="text-xs text-text-secondary font-medium">
+                Tip: Follow up proactively while buyer intent is warm.
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedModelForCustomers(null)}
+                className="px-4 py-2 rounded-xl bg-bg-surface-alt hover:bg-black text-text-primary text-xs font-bold transition shadow-xs cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* VIEWED BY DRILLDOWN MODAL */}
+      {selectedModelForViewers && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-150">
+
+            {/* Modal Header */}
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shrink-0">
+                  <Eye size={20} />
+                </div>
+                <div>
+                  <h3 className="text-base font-extrabold text-slate-900">
+                    Viewed By: {selectedModelForViewers.make} {selectedModelForViewers.model}
+                  </h3>
+                  <p className="text-xs text-text-secondary mt-0.5">
+                    {selectedModelForViewers.views} view(s) • {(selectedModelForViewers.viewers || []).length} logged-in visitor(s) • {selectedModelForViewers.anonymousViews ?? 0} anonymous view(s)
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedModelForViewers(null)}
+                className="w-8 h-8 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-text-secondary hover:text-slate-900 flex items-center justify-center transition cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Modal Body: Viewer List */}
+            <div className="p-5 overflow-y-auto space-y-3.5 flex-1">
+              {(!selectedModelForViewers.viewers || selectedModelForViewers.viewers.length === 0) ? (
+                <div className="p-8 text-center text-text-secondary space-y-2">
+                  <Eye size={32} className="mx-auto text-text-primary" />
+                  <p className="text-xs font-medium text-slate-600">
+                    All views for this model came from visitors who were not logged in.
+                  </p>
+                  <p className="text-[11px] text-text-secondary">
+                    Visitors are identified only when they view a car while signed in to their customer account.
+                  </p>
+                </div>
+              ) : (
+                selectedModelForViewers.viewers.map((viewer: any) => {
+                  const initials = (viewer.name || 'C')
+                    .split(' ')
+                    .map((n: string) => n[0])
+                    .slice(0, 2)
+                    .join('')
+                    .toUpperCase();
+
+                  return (
+                    <div
+                      key={viewer.id}
+                      className="p-4 rounded-xl border border-slate-200/90 bg-slate-50/50 hover:bg-white hover:border-blue-200 transition-all shadow-2xs space-y-3"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-extrabold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                            {initials}
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-extrabold text-slate-900 text-sm">{viewer.name}</span>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                {viewer.viewCount} view{viewer.viewCount === 1 ? '' : 's'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-text-secondary mt-0.5">
+                              {viewer.city && (
+                                <span className="flex items-center gap-1">
+                                  <MapPin size={11} className="text-text-secondary" />
+                                  {viewer.city}
+                                </span>
+                              )}
+                              {viewer.lastViewedAt && (
+                                <span className="text-[11px] text-text-secondary">
+                                  • Last viewed {new Date(viewer.lastViewedAt).toLocaleString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Quick Contact Actions */}
+                        <div className="flex items-center gap-2 self-start sm:self-auto">
+                          {viewer.phone && (
+                            <a
+                              href={`tel:${viewer.phone}`}
+                              className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 flex items-center gap-1.5 transition"
+                              title="Call customer"
+                            >
+                              <Phone size={12} />
+                              <span>{viewer.phone}</span>
+                            </a>
+                          )}
+                          {viewer.email && (
+                            <a
+                              href={`mailto:${viewer.email}`}
+                              className="p-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-600 text-xs font-bold border border-slate-200 flex items-center justify-center transition"
+                              title={`Email: ${viewer.email}`}
+                            >
+                              <Mail size={13} />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+
+                      {viewer.vehiclesViewed?.length > 0 && (
+                        <div className="p-2.5 rounded-lg bg-white border border-slate-200/70 text-xs text-slate-600 space-y-1">
+                          <span className="font-bold text-slate-700 text-[10px] uppercase block">Listings Viewed</span>
+                          {viewer.vehiclesViewed.map((listing: any) => (
+                            <div key={listing.vehicleId} className="flex items-center justify-between gap-2">
+                              <span>{listing.label}</span>
+                              <span className="font-mono text-[11px] text-text-secondary">{listing.viewCount}×</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-slate-100 bg-slate-50/70 flex items-center justify-between">
+              <span className="text-xs text-text-secondary font-medium">
+                Repeat views within 5 minutes are counted once.
+              </span>
+              <button
+                type="button"
+                onClick={() => setSelectedModelForViewers(null)}
+                className="px-4 py-2 rounded-xl bg-bg-surface-alt hover:bg-black text-text-primary text-xs font-bold transition shadow-xs cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }

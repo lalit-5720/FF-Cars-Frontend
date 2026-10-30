@@ -33,7 +33,7 @@ export default function LeadsCustomersPage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-card border border-border p-5 rounded-2xl">
           <div>
             <h1 className="text-xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
-              <Target className="w-5 h-5 text-sky-400" /> Leads & Customer Pipeline
+              <Target className="w-5 h-5 text-sky-700 dark:text-sky-400" /> Leads & Customer Pipeline
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
               Track customer inquiries, lead sources, and sales rep assignments
@@ -81,17 +81,17 @@ export default function LeadsCustomersPage() {
                 ) : (
                   leads.map((l) => (
                     <tr key={l.lead_id} className="hover:bg-secondary/40 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-sky-400">#LEAD-{l.lead_id}</td>
+                      <td className="py-3.5 px-4 font-mono font-bold text-sky-700 dark:text-sky-400">#LEAD-{l.lead_id}</td>
                       <td className="py-3.5 px-4 font-bold text-foreground">
                         {l.customers ? `${l.customers.first_name} ${l.customers.last_name || ''}` : `Customer #${l.customer_id}`}
                       </td>
-                      <td className="py-3.5 px-4 text-slate-300">
+                      <td className="py-3.5 px-4 text-text-primary">
                         {l.vehicles ? `${l.vehicles.make} ${l.vehicles.model}` : `Vehicle #${l.vehicle_id}`}
                       </td>
-                      <td className="py-3.5 px-4 text-slate-300">
+                      <td className="py-3.5 px-4 text-text-primary">
                         {l.employees ? `${l.employees.first_name} ${l.employees.last_name || ''}` : `Rep #${l.employee_id}`}
                       </td>
-                      <td className="py-3.5 px-4 font-semibold text-slate-300">{l.source || 'Website'}</td>
+                      <td className="py-3.5 px-4 font-semibold text-text-primary">{l.source || 'Website'}</td>
                       <td className="py-3.5 px-4">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
                           l.interest_level === 'High' || l.interest_level === 'Hot' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :

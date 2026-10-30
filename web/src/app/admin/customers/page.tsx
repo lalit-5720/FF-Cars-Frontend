@@ -5,6 +5,7 @@ import { api } from '../../../services/api';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { RequireRole } from '../../../components/auth/RequireRole';
 import { showLocalToast } from '../../../components/Toast';
+import { firstError, required, email as checkEmail, phone as checkPhone, maxLen } from '../../../lib/validation';
 import {
   Users,
   Search,
@@ -159,8 +160,18 @@ export default function AdminCustomersPage() {
 
   const handleCreateCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.first_name || !formData.email) {
+    if (!formData.first_name.trim() || !formData.email) {
       showLocalToast('Please enter first name and email.', 'error');
+      return;
+    }
+    const custErr = firstError(
+      maxLen(formData.first_name.trim(), 50, 'First name'),
+      maxLen(formData.last_name, 50, 'Last name'),
+      checkEmail(formData.email, 'Email', true),
+      checkPhone(formData.phone),
+    );
+    if (custErr) {
+      showLocalToast(custErr, 'error');
       return;
     }
 
@@ -608,7 +619,16 @@ export default function AdminCustomersPage() {
                         const deposit = Number(sale.deposit_amount ?? 0);
                         const pStatus = String(sale.payment_status || '').toLowerCase();
                         const isCancelled = pStatus.includes('cancel');
-                        const dueAmount = isCancelled ? 0 : Math.max(0, finalAmount - deposit);
+
+                        // Accurately compute payments credited
+                        const paymentsList = Array.isArray(sale.payments) ? sale.payments : [];
+                        const completedPaid = paymentsList
+                          .filter((p: any) => (p.payment_status || '').toLowerCase() === 'completed')
+                          .reduce((sum: number, p: any) => sum + Number(p.amount_paid || 0), 0);
+                        const effectivePaid = Math.max(completedPaid, deposit);
+                        const isPaid = pStatus === 'paid' || (finalAmount > 0 && effectivePaid >= finalAmount);
+                        const dueAmount = isCancelled || isPaid ? 0 : Math.max(0, finalAmount - effectivePaid);
+
                         const car = sale.vehicles || {};
                         const carName = car.make ? `${car.manufacture_year || ''} ${car.make} ${car.model || ''}`.trim() : 'Contracted Vehicle';
                         const reg = car.registration_number || 'Showroom Vehicle';
@@ -636,11 +656,11 @@ export default function AdminCustomersPage() {
                               <div className="text-[12px] text-text-secondary flex items-center gap-3 pt-1">
                                 <span>Agreed Price: <strong className="text-text-primary font-bold">₹{finalAmount.toLocaleString('en-IN')}</strong></span>
                                 <span>&bull;</span>
-                                <span>Token Paid: <strong className="text-status-success font-bold">₹{deposit.toLocaleString('en-IN')}</strong></span>
+                                <span>Total Paid: <strong className="text-status-success font-bold">₹{effectivePaid.toLocaleString('en-IN')}</strong></span>
                               </div>
                             </div>
 
-                            {/* Dues & Branch Manager Action */}
+                            {/* Dues & Paid Status (Automatic Update, No Collect Balance button) */}
                             <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-t-0 pt-3 md:pt-0 border-border">
                               <div className="text-left md:text-right">
                                 <span className="text-[12px] uppercase font-bold text-text-secondary block">Remaining Due</span>
@@ -648,21 +668,13 @@ export default function AdminCustomersPage() {
                                   {dueAmount > 0 ? `₹${dueAmount.toLocaleString('en-IN')}` : '✓ Fully Settled'}
                                 </span>
                               </div>
-
-                              {dueAmount > 0 && permissions.canManageSales && (
-                                <button
-                                  onClick={() => handleCollectBalance(sale.sale_id)}
-                                  disabled={settlingSaleId === sale.sale_id}
-                                  className="btn-primary flex items-center gap-1.5"
-                                >
-                                  {settlingSaleId === sale.sale_id ? (
-                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                  ) : (
-                                    <Check className="w-3.5 h-3.5" />
-                                  )}
-                                  <span>Collect Balance</span>
-                                </button>
-                              )}
+                              <span className={`px-2.5 py-1 rounded-[6px] text-[11px] font-bold border ${
+                                dueAmount === 0 || isPaid
+                                  ? 'bg-status-success/10 text-status-success border-status-success/30'
+                                  : 'bg-status-warning/10 text-status-warning border-status-warning/30'
+                              }`}>
+                                {dueAmount === 0 || isPaid ? 'Paid in Full' : 'Pending in Deals'}
+                              </span>
                             </div>
                           </div>
                         );
@@ -877,7 +889,7 @@ export default function AdminCustomersPage() {
                   <input
                     type="text"
                     required
-                    value={formData.first_name}
+                    value={formData.first_name} maxLength={50}
                     onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
                     className="input-base w-full"
                     placeholder="e.g. Ramesh"
@@ -888,7 +900,7 @@ export default function AdminCustomersPage() {
                   <label className="text-text-secondary font-bold block mb-1 text-[12px]">Last Name</label>
                   <input
                     type="text"
-                    value={formData.last_name}
+                    value={formData.last_name} maxLength={50}
                     onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
                     className="input-base w-full"
                     placeholder="e.g. Krishnan"
@@ -900,7 +912,7 @@ export default function AdminCustomersPage() {
                   <input
                     type="email"
                     required
-                    value={formData.email}
+                    value={formData.email} maxLength={100}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="input-base w-full"
                     placeholder="e.g. ramesh@gmail.com"
@@ -911,7 +923,7 @@ export default function AdminCustomersPage() {
                   <label className="text-text-secondary font-bold block mb-1 text-[12px]">Phone Number</label>
                   <input
                     type="text"
-                    value={formData.phone}
+                    value={formData.phone} maxLength={15} inputMode="tel"
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="input-base w-full"
                     placeholder="e.g. 9840123456"

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/useAuthStore';
 import { showLocalToast } from './Toast';
+import { firstError, regNo, email as checkEmail, phone as checkPhone, money, intRange, maxLen } from '../lib/validation';
 import {
   X,
   CarFront,
@@ -76,6 +77,22 @@ export const SellCarValuationModal: React.FC<SellCarValuationModalProps> = ({
     const cleanReg = regNumber.trim().toUpperCase();
     if (!cleanReg) {
       showLocalToast('Please enter your vehicle registration number.', 'error');
+      return;
+    }
+    const sellErr = firstError(
+      regNo(cleanReg),
+      maxLen(customerName.trim(), 100, 'Name'),
+      checkPhone(phone, 'Mobile number', true),
+      checkEmail(email),
+      intRange(year, 'Manufacture year', 1980, new Date().getFullYear() + 1),
+      intRange(kmDriven, 'Kilometres driven', 0, 2_000_000),
+      money(expectedPrice, 'Expected price', { mandatory: false }),
+      maxLen(make, 50, 'Make'),
+      maxLen(model, 50, 'Model'),
+      maxLen(notes, 2000, 'Notes'),
+    );
+    if (sellErr) {
+      showLocalToast(sellErr, 'error');
       return;
     }
 
@@ -224,7 +241,7 @@ export const SellCarValuationModal: React.FC<SellCarValuationModalProps> = ({
                     type="text"
                     required
                     placeholder="e.g. TN02BV0258"
-                    value={regNumber}
+                    value={regNumber} maxLength={20}
                     onChange={(e) => setRegNumber(e.target.value.toUpperCase())}
                     className="w-full pl-9 pr-3 h-9 rounded-lg border border-border bg-bg-surface text-text-primary uppercase font-bold focus:border-accent focus:outline-none"
                   />
@@ -264,7 +281,7 @@ export const SellCarValuationModal: React.FC<SellCarValuationModalProps> = ({
                     type="text"
                     required
                     placeholder="e.g. Arun Kumar"
-                    value={customerName}
+                    value={customerName} maxLength={100}
                     onChange={(e) => setCustomerName(e.target.value)}
                     className="w-full pl-9 pr-3 h-9 rounded-lg border border-border bg-bg-surface text-text-primary focus:border-accent focus:outline-none"
                   />
@@ -281,7 +298,7 @@ export const SellCarValuationModal: React.FC<SellCarValuationModalProps> = ({
                     type="tel"
                     required
                     placeholder="e.g. 9876543210"
-                    value={phone}
+                    value={phone} maxLength={15} inputMode="tel"
                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                     className="w-full pl-9 pr-3 h-9 rounded-lg border border-accent bg-bg-surface text-text-primary font-bold focus:border-accent focus:outline-none"
                   />
@@ -298,7 +315,7 @@ export const SellCarValuationModal: React.FC<SellCarValuationModalProps> = ({
                   <input
                     type="email"
                     placeholder="name@example.com"
-                    value={email}
+                    value={email} maxLength={100}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-9 pr-3 h-9 rounded-lg border border-border bg-bg-surface text-text-primary focus:border-accent focus:outline-none"
                   />
@@ -312,7 +329,7 @@ export const SellCarValuationModal: React.FC<SellCarValuationModalProps> = ({
                   <input
                     type="number"
                     placeholder="e.g. 750000"
-                    value={expectedPrice}
+                    value={expectedPrice} min={0} max={1000000000}
                     onChange={(e) => setExpectedPrice(e.target.value)}
                     className="w-full pl-9 pr-3 h-9 rounded-lg border border-border bg-bg-surface text-text-primary focus:border-accent focus:outline-none"
                   />
@@ -327,7 +344,7 @@ export const SellCarValuationModal: React.FC<SellCarValuationModalProps> = ({
                 <input
                   type="text"
                   placeholder="e.g. Hyundai"
-                  value={make}
+                  value={make} maxLength={50}
                   onChange={(e) => setMake(e.target.value)}
                   className="w-full px-2.5 h-9 rounded-lg border border-border bg-bg-surface text-text-primary focus:border-accent focus:outline-none"
                 />
@@ -338,7 +355,7 @@ export const SellCarValuationModal: React.FC<SellCarValuationModalProps> = ({
                 <input
                   type="text"
                   placeholder="e.g. Creta SX"
-                  value={model}
+                  value={model} maxLength={50}
                   onChange={(e) => setModel(e.target.value)}
                   className="w-full px-2.5 h-9 rounded-lg border border-border bg-bg-surface text-text-primary focus:border-accent focus:outline-none"
                 />
@@ -362,7 +379,7 @@ export const SellCarValuationModal: React.FC<SellCarValuationModalProps> = ({
                 <input
                   type="number"
                   placeholder="35000"
-                  value={kmDriven}
+                  value={kmDriven} min={0} max={2000000}
                   onChange={(e) => setKmDriven(e.target.value)}
                   className="w-full px-2.5 h-9 rounded-lg border border-border bg-bg-surface text-text-primary focus:border-accent focus:outline-none"
                 />
@@ -417,7 +434,7 @@ export const SellCarValuationModal: React.FC<SellCarValuationModalProps> = ({
               <textarea
                 rows={2}
                 placeholder="e.g. Single owner, complete company service records, insurance valid till Dec 2026..."
-                value={notes}
+                value={notes} maxLength={2000}
                 onChange={(e) => setNotes(e.target.value)}
                 className="w-full p-2.5 rounded-lg border border-border bg-bg-surface text-text-primary focus:border-accent focus:outline-none"
               />

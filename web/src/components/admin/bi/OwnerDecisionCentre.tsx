@@ -144,7 +144,7 @@ export function OwnerDecisionCentre({ branchId, onDecisionMade }: OwnerDecisionC
               {isOwner ? 'Owner Authorized' : 'Read-Only Mode'}
             </span>
           </div>
-          <p className="text-xs text-slate-500 font-medium">
+          <p className="text-xs text-text-secondary font-medium">
             Transparent, rule-driven business decisions for inventory sourcing, showroom transfers, and slow-moving repricing.
           </p>
         </div>
@@ -209,7 +209,7 @@ export function OwnerDecisionCentre({ branchId, onDecisionMade }: OwnerDecisionC
 
         {/* Type Filter */}
         <div className="flex items-center gap-2 text-xs">
-          <Filter size={13} className="text-slate-400" />
+          <Filter size={13} className="text-text-secondary" />
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
@@ -227,7 +227,7 @@ export function OwnerDecisionCentre({ branchId, onDecisionMade }: OwnerDecisionC
 
       {/* Recommendations Cards List */}
       {loading ? (
-        <div className="py-16 text-center text-slate-400 space-y-2">
+        <div className="py-16 text-center text-text-secondary space-y-2">
           <Loader2 size={24} className="animate-spin mx-auto text-blue-600" />
           <p className="text-xs font-medium">Evaluating inventory demand and generating recommendations...</p>
         </div>
@@ -235,7 +235,7 @@ export function OwnerDecisionCentre({ branchId, onDecisionMade }: OwnerDecisionC
         <div className="py-16 text-center border border-dashed border-slate-300 rounded-2xl bg-white space-y-2">
           <CheckCircle2 size={32} className="mx-auto text-emerald-500" />
           <h3 className="font-bold text-slate-900 text-sm">No {activeTab.toLowerCase()} recommendations</h3>
-          <p className="text-xs text-slate-500 max-w-md mx-auto">
+          <p className="text-xs text-text-secondary max-w-md mx-auto">
             {activeTab === 'PENDING'
               ? 'All current inventory and demand rules are balanced. No pending actions required by the owner.'
               : 'No items recorded in this decision bracket.'}
@@ -269,7 +269,7 @@ export function OwnerDecisionCentre({ branchId, onDecisionMade }: OwnerDecisionC
                     >
                       {rec.priority} PRIORITY
                     </span>
-                    <span className="text-[11px] text-slate-400 font-medium">
+                    <span className="text-[11px] text-text-secondary font-medium">
                       {new Date(rec.created_at).toLocaleDateString('en-IN', {
                         day: 'numeric',
                         month: 'short',
@@ -305,7 +305,7 @@ export function OwnerDecisionCentre({ branchId, onDecisionMade }: OwnerDecisionC
                   <h3 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
                     <span>{rec.title}</span>
                   </h3>
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-[11px] text-slate-500">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-[11px] text-text-secondary">
                     {rec.make && rec.model && (
                       <span className="flex items-center gap-1 text-slate-700 font-bold">
                         <CarFront size={12} className="text-purple-600" />
@@ -329,11 +329,11 @@ export function OwnerDecisionCentre({ branchId, onDecisionMade }: OwnerDecisionC
                 {/* Reason & Evidence */}
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs space-y-1">
                   <div className="font-medium text-slate-800">
-                    <span className="text-slate-500 font-normal">Business Rationale: </span>
+                    <span className="text-text-secondary font-normal">Business Rationale: </span>
                     {rec.reason}
                   </div>
                   <div className="text-[11px] text-emerald-700 font-bold">
-                    <span className="text-slate-500 font-normal">Recommended Action: </span>
+                    <span className="text-text-secondary font-normal">Recommended Action: </span>
                     {rec.suggested_action}
                   </div>
                 </div>
@@ -416,7 +416,7 @@ export function OwnerDecisionCentre({ branchId, onDecisionMade }: OwnerDecisionC
                 <h3 className="font-extrabold text-slate-900 text-sm">
                   {decisionAction === 'APPROVE' ? 'Approve Recommendation' : 'Reject Recommendation'}
                 </h3>
-                <p className="text-[11px] text-slate-500 font-medium">
+                <p className="text-[11px] text-text-secondary font-medium">
                   Recommendation #{selectedRec.recommendation_id}: {selectedRec.title}
                 </p>
               </div>
@@ -444,7 +444,7 @@ export function OwnerDecisionCentre({ branchId, onDecisionMade }: OwnerDecisionC
               />
             </div>
 
-            <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
+            <p className="text-[10px] text-text-secondary leading-relaxed font-medium">
               Recording this decision registers the owner audit log and updates the executive decision register. No irreversible third-party financial transaction is executed automatically.
             </p>
 
@@ -461,7 +461,7 @@ export function OwnerDecisionCentre({ branchId, onDecisionMade }: OwnerDecisionC
                 type="button"
                 onClick={handleExecuteDecision}
                 disabled={submittingDecision}
-                className={`px-4 py-1.5 rounded-xl text-white text-xs font-bold shadow-sm transition cursor-pointer flex items-center gap-1.5 ${
+                className={`px-4 py-1.5 rounded-xl text-text-primary text-xs font-bold shadow-sm transition cursor-pointer flex items-center gap-1.5 ${
                   decisionAction === 'APPROVE' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'
                 }`}
               >

@@ -25,6 +25,7 @@ import { api } from '../../../services/api';
 import { showLocalToast } from '../../Toast';
 import { useAuthStore } from '../../../store/useAuthStore';
 
+import { maxLen } from '../../../lib/validation';
 interface PaymentVerificationModalProps {
   sale: any | null;
   isOpen: boolean;
@@ -110,9 +111,10 @@ export function PaymentVerificationModal({
     ? sale.outstanding_balance
     : Math.max(0, finalPrice - totalPaidSoFar);
 
-  const targetCollectionAmount = isLoanDeal
-    ? (remainingDownPayment > 0 ? remainingDownPayment : balanceDue)
-    : balanceDue;
+  // On a loan deal the customer only owes the remaining down payment; the bank pays the loan part.
+  const targetCollectionAmount = isLoanDeal ? remainingDownPayment : balanceDue;
+  const outstandingCash = isLoanDeal ? 0 : Number(balanceDue || 0);
+  const isLoanDisbursed = !!sale?.is_loan_disbursed;
 
   // Form State
   const [paymentMethod, setPaymentMethod] = useState<string>('Bank Transfer (NEFT/RTGS)');
@@ -154,6 +156,19 @@ export function PaymentVerificationModal({
     const numericAmount = Number(amount);
     if (!numericAmount || numericAmount <= 0) {
       setValidationError('Please enter a valid payment amount greater than ₹0.');
+      return;
+    }
+    if (isLoanDeal && numericAmount > targetCollectionAmount) {
+      setValidationError(`Customer only owes ${formatINR(targetCollectionAmount)} down payment. The loan amount is paid by the bank.`);
+      return;
+    }
+
+    if (!isLoanDeal && outstandingCash > 0 && numericAmount > outstandingCash) {
+      setValidationError(`The customer only owes ${formatINR(outstandingCash)}. The amount cannot exceed the outstanding balance.`);
+      return;
+    }
+    if (transactionRef.trim().length > 100) {
+      setValidationError('Reference must be at most 100 characters.');
       return;
     }
 
@@ -204,15 +219,15 @@ export function PaymentVerificationModal({
         {/* Header */}
         <div className="p-5 sm:p-6 border-b border-border bg-gradient-to-r from-emerald-950/30 via-secondary/40 to-card flex items-start justify-between relative">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shadow-inner">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shadow-inner">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-bold">
                   Deal #CR-{sale.sale_id}
                 </span>
-                <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold">
+                <span className="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/20 text-[10px] font-bold">
                   {isLoanDeal ? 'Bank Loan Deal' : 'Full Cash Purchase'}
                 </span>
               </div>
@@ -257,28 +272,28 @@ export function PaymentVerificationModal({
               <strong className="text-sm font-extrabold text-foreground font-mono mt-0.5 block">
                 {formatINR(finalPrice)}
               </strong>
-              <span className="text-[10px] text-emerald-400 block font-medium">
+              <span className="text-[10px] text-emerald-700 dark:text-emerald-400 block font-medium">
                 Paid so far: {formatINR(totalPaidSoFar)}
               </span>
             </div>
 
             <div className="sm:border-l sm:border-border sm:pl-3">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-400 block">
                 {isLoanDeal ? 'Remaining Down Payment Due' : 'Remaining Balance Due'}
               </span>
-              <strong className="text-base font-black text-amber-400 font-mono mt-0.5 block">
+              <strong className="text-base font-black text-amber-800 dark:text-amber-400 font-mono mt-0.5 block">
                 {formatINR(targetCollectionAmount)}
               </strong>
               <span className="text-[10px] text-muted-foreground block">
-                {isLoanDeal ? `Bank Loan (${formatINR(loanAmount)}) pending` : 'Target settlement amount'}
+                {isLoanDeal ? `Bank Loan (${formatINR(loanAmount)}) ${isLoanDisbursed ? 'disbursed' : 'pending'}` : 'Target settlement amount'}
               </span>
             </div>
           </div>
 
           {/* Validation Alert */}
           {validationError && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs flex items-center gap-2">
-              <AlertCircle size={16} className="shrink-0 text-rose-400" />
+            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-400 text-xs flex items-center gap-2">
+              <AlertCircle size={16} className="shrink-0 text-rose-700 dark:text-rose-400" />
               <span>{validationError}</span>
             </div>
           )}
@@ -332,7 +347,7 @@ export function PaymentVerificationModal({
                   >
                     <div className="flex items-center justify-between w-full mb-1">
                       <Icon className={`w-4 h-4 ${isSelected ? 'text-emerald-400' : 'text-muted-foreground'}`} />
-                      {isSelected && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                      {isSelected && <Check className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400" />}
                     </div>
                     <div>
                       <strong className="text-xs font-bold block leading-tight text-foreground">
@@ -354,13 +369,13 @@ export function PaymentVerificationModal({
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-foreground flex items-center justify-between">
                 <span>Amount Received (₹) *</span>
-                {balanceDue > 0 && amount !== balanceDue && (
+                {targetCollectionAmount > 0 && amount !== targetCollectionAmount && (
                   <button
                     type="button"
-                    onClick={() => setAmount(balanceDue)}
-                    className="text-[10px] text-emerald-400 font-bold hover:underline cursor-pointer"
+                    onClick={() => setAmount(targetCollectionAmount)}
+                    className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold hover:underline cursor-pointer"
                   >
-                    Set Full Balance ({formatINR(balanceDue)})
+                    Set Full Balance ({formatINR(targetCollectionAmount)})
                   </button>
                 )}
               </label>
@@ -371,7 +386,7 @@ export function PaymentVerificationModal({
                 <input
                   type="number"
                   min="1"
-                  max={finalPrice * 1.5}
+                  max={isLoanDeal ? targetCollectionAmount : (outstandingCash > 0 ? outstandingCash : finalPrice)}
                   value={amount || ''}
                   onChange={(e) => setAmount(Number(e.target.value))}
                   required
@@ -380,9 +395,9 @@ export function PaymentVerificationModal({
                 />
               </div>
               <span className="text-[10px] text-muted-foreground block">
-                {amount >= balanceDue
-                  ? '✓ This payment will satisfy 100% of the remaining balance'
-                  : `⚠️ Partial collection: Leaves ₹${Math.max(0, balanceDue - amount).toLocaleString('en-IN')} pending`}
+                {amount >= targetCollectionAmount
+                  ? (isLoanDeal ? '✓ This payment completes the customer down payment' : '✓ This payment will satisfy 100% of the remaining balance')
+                  : `⚠️ Partial collection: Leaves ₹${Math.max(0, targetCollectionAmount - amount).toLocaleString('en-IN')} pending`}
               </span>
             </div>
 
@@ -390,7 +405,7 @@ export function PaymentVerificationModal({
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-foreground flex items-center justify-between">
                 <span>{currentMethodConfig.refLabel} *</span>
-                <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Required</span>
+                <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Required</span>
               </label>
               <input
                 type="text"
@@ -413,7 +428,7 @@ export function PaymentVerificationModal({
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-foreground flex items-center justify-between">
                   <span>{currentMethodConfig.bankLabel || 'Bank Name'} *</span>
-                  <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wider">Required</span>
+                  <span className="text-[10px] text-emerald-700 dark:text-emerald-400 font-bold uppercase tracking-wider">Required</span>
                 </label>
                 <input
                   type="text"
@@ -507,12 +522,12 @@ export function PaymentVerificationModal({
           {/* Footer Sign-off */}
           <div className="p-3 rounded-xl bg-secondary/30 border border-border text-[11px] text-muted-foreground flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <User size={14} className="text-emerald-400" />
+              <User size={14} className="text-emerald-700 dark:text-emerald-400" />
               <span>
                 Verification Officer: <strong className="text-foreground">{user?.name || 'Showroom Manager'}</strong> ({user?.role || 'ADMIN'})
               </span>
             </div>
-            <span className="text-[10px] font-mono text-emerald-400 font-bold">
+            <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 font-bold">
               Status: Verified Clearance
             </span>
           </div>

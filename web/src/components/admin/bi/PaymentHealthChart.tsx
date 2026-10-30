@@ -65,20 +65,20 @@ export function PaymentHealthChart({ data, loading }: PaymentHealthChartProps) {
         <div className="flex-1 w-full space-y-3">
           <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between">
             <div>
-              <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-bold block">Total Collected</span>
+              <span className="text-[10px] uppercase tracking-wider text-emerald-700 dark:text-emerald-400 font-bold block">Total Collected</span>
               <strong className="text-lg font-mono font-extrabold text-foreground">{formatCurrency(collected)}</strong>
             </div>
-            <span className="text-xs font-bold text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded">
+            <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded">
               Paid
             </span>
           </div>
 
           <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
             <div>
-              <span className="text-[10px] uppercase tracking-wider text-amber-400 font-bold block">Outstanding Balance</span>
+              <span className="text-[10px] uppercase tracking-wider text-amber-800 dark:text-amber-400 font-bold block">Outstanding Balance</span>
               <strong className="text-lg font-mono font-extrabold text-foreground">{formatCurrency(outstanding)}</strong>
             </div>
-            <span className="text-xs font-bold text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded">
+            <span className="text-xs font-bold text-amber-800 dark:text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded">
               Receivable
             </span>
           </div>

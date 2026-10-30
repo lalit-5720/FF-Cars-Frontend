@@ -1,18 +1,22 @@
 @import "tailwindcss";
 
+/* Make Tailwind `dark:` classes follow the app's theme toggle (data-theme),
+   not the operating system setting. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* ─────────────────────────────────────────────────────────────
    DESIGN SYSTEM SPECIFICATION - CARREVIVE
    Colors, typography, spacing, tables, buttons, and badges.
    ───────────────────────────────────────────────────────────── */
 
 :root {
-  /* LIGHT THEME */
-  --bg-page: #F5F7FA;
+  /* LIGHT THEME - Maximum readability and WCAG AAA contrast */
+  --bg-page: #F8FAFC;
   --bg-surface: #FFFFFF;
-  --bg-surface-alt: #F0F2F5;
-  --border: #D9DEE5;
-  --text-primary: #111827;
-  --text-secondary: #4B5563;
+  --bg-surface-alt: #F1F5F9;
+  --border: #CBD5E1;
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
   --accent: #1D4ED8;
   --accent-text: #FFFFFF;
 
@@ -54,10 +58,10 @@
   --bg-surface: #1E293B;
   --bg-surface-alt: #273449;
   --border: #334155;
-  --text-primary: #F1F5F9;
+  --text-primary: #F8FAFC;
   --text-secondary: #CBD5E1;
   --accent: #60A5FA;
-  --accent-text: #0F172A; /* Contrast ratio 8.5:1 against #60A5FA meets WCAG AA */
+  --accent-text: #0F172A;
 
   /* STATUS COLORS (Dark) */
   --status-success: #4ADE80;
@@ -120,19 +124,6 @@
   --font-sans: Arial, Helvetica, sans-serif;
   --font-display: Arial, Helvetica, sans-serif;
   --font-mono: Arial, Helvetica, sans-serif;
-
-  /* Aliasing slate palette to our CSS variables to protect against un-themed Tailwind classes */
-  --color-slate-50: var(--bg-surface-alt);
-  --color-slate-100: var(--bg-surface-alt);
-  --color-slate-200: var(--border);
-  --color-slate-300: var(--border);
-  --color-slate-400: var(--text-secondary);
-  --color-slate-500: var(--text-secondary);
-  --color-slate-600: var(--text-secondary);
-  --color-slate-700: var(--text-secondary);
-  --color-slate-800: var(--border);
-  --color-slate-900: var(--text-primary);
-  --color-slate-950: var(--text-primary);
 }
 
 /* ── Global Typography & Plain Styling ───────────────────────────── */
@@ -178,7 +169,6 @@ h1, .page-title {
   font-size: 24px !important;
   font-weight: 700 !important;
   line-height: 32px !important;
-  color: var(--text-primary);
   margin: 0;
 }
 
@@ -186,7 +176,6 @@ h2, h3, .section-heading {
   font-size: 18px !important;
   font-weight: 700 !important;
   line-height: 24px !important;
-  color: var(--text-primary);
   margin: 0;
 }
 
@@ -194,7 +183,6 @@ h4, h5, h6 {
   font-size: 14px !important;
   font-weight: 700 !important;
   line-height: 20px !important;
-  color: var(--text-primary);
   margin: 0;
 }
 
@@ -202,7 +190,6 @@ h4, h5, h6 {
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
-  color: var(--text-primary);
 }
 
 .helper-text, .text-helper, small {
@@ -478,6 +465,20 @@ button.p-0 svg,
   border: 1px solid var(--status-info);
 }
 
+.badge-neutral {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+  background-color: var(--bg-surface-alt);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+
 /* Legacy badge compatibility */
 .badge-available {
   background-color: var(--status-success-bg);
@@ -520,15 +521,15 @@ thead tr {
 
 thead th {
   background-color: var(--bg-surface-alt) !important;
-  color: var(--text-secondary) !important;
+  color: var(--text-primary) !important;
   font-family: Arial, Helvetica, sans-serif !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.05em;
-  padding: 16px 16px !important;
+  padding: 14px 16px !important;
   text-align: left;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
   vertical-align: middle;
 }
 
@@ -544,12 +545,13 @@ tbody tr:hover {
 }
 
 tbody td {
-  padding: 16px 16px !important;
+  padding: 14px 16px !important;
   vertical-align: middle;
   font-family: Arial, Helvetica, sans-serif !important;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 20px;
   color: var(--text-primary);
+  font-weight: 500;
 }
 
 tbody tr:last-child {

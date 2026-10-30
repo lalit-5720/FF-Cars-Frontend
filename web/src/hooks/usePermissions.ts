@@ -34,7 +34,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<string, Partial<PermissionMatrix>> = {
     canManageInventory: true,
     canAccessSales: true,
     canManageSales: true,
-    canAccessDeliveries: true,
+    canAccessDeliveries: true, // Vehicle deliveries visible to Admin & Sales Executive; hidden from Branch Manager
     canManageDeliveries: true,
     canAccessLeads: true,
     canManageLeads: true,
@@ -53,7 +53,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<string, Partial<PermissionMatrix>> = {
     canManageInventory: true,
     canAccessSales: true,
     canManageSales: true,
-    canAccessDeliveries: true,
+    canAccessDeliveries: true, // Vehicle deliveries visible to Admin & Sales Executive; hidden from Branch Manager
     canManageDeliveries: true,
     canAccessLeads: true,
     canManageLeads: true,
@@ -72,8 +72,8 @@ const DEFAULT_ROLE_PERMISSIONS: Record<string, Partial<PermissionMatrix>> = {
     canManageInventory: true,
     canAccessSales: true, // Branch manager handles all payment, token advance, loan & full cash
     canManageSales: true,
-    canAccessDeliveries: true, // Manager assigns delivery entry to sales executive
-    canManageDeliveries: true,
+    canAccessDeliveries: false, // Vehicle delivery is handled by Sales Executives
+    canManageDeliveries: false,
     canAccessLeads: true, // Branch manager assigns leads to sales executives
     canManageLeads: true,
     canAccessTestDrives: false, // Manager & Admin do not need to see test drive requests

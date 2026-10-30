@@ -5,6 +5,7 @@ import { X, ShoppingBag, CheckCircle2, Building2, Calendar, FileText, Send } fro
 import { api } from '../../../services/api';
 import { showLocalToast } from '../../Toast';
 
+import { firstError, required, money, intRange, maxLen } from '../../../lib/validation';
 interface PurchaseOrderModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -34,6 +35,21 @@ export function PurchaseOrderModal({ isOpen, onClose, initialData, onSuccess }: 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const poErr = firstError(
+      required(formData.title, 'Order title'),
+      maxLen(formData.title, 200, 'Order title'),
+      maxLen(formData.manufacture_year_range, 50, 'Year range'),
+      maxLen(formData.price_band, 50, 'Price band'),
+      maxLen(formData.vehicle_category, 100, 'Vehicle category'),
+      maxLen(formData.vendor_name, 200, 'Vendor'),
+      intRange(formData.quantity, 'Quantity', 1, 1000, true),
+      money(formData.estimated_budget, 'Estimated budget', { min: 1 }),
+      maxLen(formData.notes, 2000, 'Notes'),
+    );
+    if (poErr) {
+      showLocalToast(poErr, 'error');
+      return;
+    }
     setLoading(true);
     try {
       await api.post('/analytics/purchase-orders', formData);
@@ -67,7 +83,7 @@ export function PurchaseOrderModal({ isOpen, onClose, initialData, onSuccess }: 
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-text-secondary hover:bg-slate-100 hover:text-slate-800 transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -79,7 +95,7 @@ export function PurchaseOrderModal({ isOpen, onClose, initialData, onSuccess }: 
             <label className="block text-slate-700 font-bold mb-1">Order Title</label>
             <input
               type="text"
-              value={formData.title}
+              value={formData.title} maxLength={200}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
               className="w-full rounded-xl bg-slate-50 border border-slate-200 p-2.5 text-slate-900 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
@@ -148,7 +164,7 @@ export function PurchaseOrderModal({ isOpen, onClose, initialData, onSuccess }: 
               <label className="block text-slate-700 font-bold mb-1">Auction / Vendor Partner</label>
               <input
                 type="text"
-                value={formData.vendor_name}
+                value={formData.vendor_name} maxLength={200}
                 onChange={(e) => setFormData({ ...formData, vendor_name: e.target.value })}
                 required
                 className="w-full rounded-xl bg-slate-50 border border-slate-200 p-2.5 text-slate-900 font-semibold focus:border-blue-500 focus:bg-white focus:outline-none transition"
@@ -172,7 +188,7 @@ export function PurchaseOrderModal({ isOpen, onClose, initialData, onSuccess }: 
             <label className="block text-slate-700 font-bold mb-1">Internal Procurement Notes</label>
             <textarea
               rows={2}
-              value={formData.notes}
+              value={formData.notes} maxLength={2000}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               className="w-full rounded-xl bg-slate-50 border border-slate-200 p-2.5 text-slate-900 font-medium focus:border-blue-500 focus:bg-white focus:outline-none resize-none transition"
             />

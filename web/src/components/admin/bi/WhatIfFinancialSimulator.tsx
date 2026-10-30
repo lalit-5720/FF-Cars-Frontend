@@ -62,7 +62,7 @@ export function WhatIfFinancialSimulator({
                 DECISION MODEL
               </span>
             </h3>
-            <p className="text-xs text-slate-500 font-medium">Simulate pricing markdown impact on aging inventory liquidity, holding cost savings &amp; capital velocity</p>
+            <p className="text-xs text-text-secondary font-medium">Simulate pricing markdown impact on aging inventory liquidity, holding cost savings &amp; capital velocity</p>
           </div>
         </div>
 
@@ -160,7 +160,7 @@ export function WhatIfFinancialSimulator({
             onChange={(e) => setDiscountPercent(Number(e.target.value))}
             className="w-full accent-amber-600 cursor-pointer h-2 bg-slate-200 rounded-lg"
           />
-          <div className="flex justify-between text-[10px] text-slate-500 font-semibold">
+          <div className="flex justify-between text-[10px] text-text-secondary font-semibold">
             <span>2% Mild</span>
             <span>10% Recommended</span>
             <span>20% Clearance</span>
@@ -186,7 +186,7 @@ export function WhatIfFinancialSimulator({
             onChange={(e) => setTargetUnits(Number(e.target.value))}
             className="w-full accent-blue-600 cursor-pointer h-2 bg-slate-200 rounded-lg"
           />
-          <div className="flex justify-between text-[10px] text-slate-500 font-semibold">
+          <div className="flex justify-between text-[10px] text-text-secondary font-semibold">
             <span>1 Selective Vehicle</span>
             <span>50% Scope</span>
             <span>All {agingCount60Plus} Aging Stock</span>
@@ -219,7 +219,7 @@ export function WhatIfFinancialSimulator({
           <div className="text-xl font-black text-slate-900 font-mono">
             +{calculations.estimatedVelocityIncrease}%
           </div>
-          <p className="text-[10px] text-slate-500 mt-1 font-semibold">
+          <p className="text-[10px] text-text-secondary mt-1 font-semibold">
             Lead inquiry conversion speed
           </p>
         </div>

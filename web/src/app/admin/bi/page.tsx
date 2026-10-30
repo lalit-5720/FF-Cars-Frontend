@@ -168,12 +168,12 @@ export default function BiOverviewPage() {
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">
               Showroom BI • Owner Decision Support
             </span>
-            <span className="text-[11px] text-slate-400 font-medium">• Live Telemetry</span>
+            <span className="text-[11px] text-text-secondary font-medium">• Live Telemetry</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
             Business Intelligence &amp; Decision Support
           </h1>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500 font-medium">
+          <p className="mt-1 text-xs sm:text-sm text-text-secondary font-medium">
             Live database analytics for customer demand tracking, multi-branch stock allocation, and owner-approved procurement.
           </p>
         </div>
@@ -210,7 +210,7 @@ export default function BiOverviewPage() {
 
           {/* Date pickers */}
           <label className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-2xs">
-            <CalendarDays size={13} className="text-slate-400" />
+            <CalendarDays size={13} className="text-text-secondary" />
             <input
               type="date"
               value={startDate}
@@ -218,7 +218,7 @@ export default function BiOverviewPage() {
               className="w-[110px] bg-transparent text-xs font-medium text-slate-800 outline-none cursor-pointer"
               aria-label="Start date"
             />
-            <span className="text-slate-400 font-medium">to</span>
+            <span className="text-text-secondary font-medium">to</span>
             <input
               type="date"
               value={endDate}
@@ -230,7 +230,7 @@ export default function BiOverviewPage() {
 
           {/* Branch selector */}
           <label className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-2xs">
-            <Building2 size={13} className="text-slate-400" />
+            <Building2 size={13} className="text-text-secondary" />
             <select
               value={branch}
               onChange={(e) => setBranch(e.target.value)}
@@ -243,7 +243,7 @@ export default function BiOverviewPage() {
                 </option>
               ))}
             </select>
-            <ChevronDown size={13} className="text-slate-400" />
+            <ChevronDown size={13} className="text-text-secondary" />
           </label>
 
           <button
@@ -270,14 +270,14 @@ export default function BiOverviewPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
         {/* 1. Unique Interested Customers */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-1">
-          <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+          <div className="flex items-center justify-between text-[11px] text-text-secondary font-semibold">
             <span>Interested Buyers</span>
             <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
               <Users size={13} />
             </div>
           </div>
           <strong className="block text-2xl font-black font-mono text-slate-900">{uniqueInterested}</strong>
-          <div className="text-[10px] text-slate-500 font-medium">
+          <div className="text-[10px] text-text-secondary font-medium">
             {comp.enquiriesDelta != null ? (
               <span className={`font-bold mr-1 ${comp.enquiriesDelta >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                 {comp.enquiriesDelta >= 0 ? '↑ +' : '↓ '}{comp.enquiriesDelta}%
@@ -289,7 +289,7 @@ export default function BiOverviewPage() {
 
         {/* 2. Most Viewed Car Model */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-1">
-          <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+          <div className="flex items-center justify-between text-[11px] text-text-secondary font-semibold">
             <span>Top Viewed Model</span>
             <div className="w-6 h-6 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
               <Eye size={13} />
@@ -305,26 +305,26 @@ export default function BiOverviewPage() {
 
         {/* 3. Wishlist Additions */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-1">
-          <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+          <div className="flex items-center justify-between text-[11px] text-text-secondary font-semibold">
             <span>Wishlist Adds</span>
             <div className="w-6 h-6 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
               <Heart size={13} />
             </div>
           </div>
           <strong className="block text-2xl font-black font-mono text-slate-900">{wishlists}</strong>
-          <div className="text-[10px] text-slate-500 font-medium">Saved vehicle intent</div>
+          <div className="text-[10px] text-text-secondary font-medium">Saved vehicle intent</div>
         </div>
 
         {/* 4. Customer Enquiries */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-1">
-          <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+          <div className="flex items-center justify-between text-[11px] text-text-secondary font-semibold">
             <span>Enquiries</span>
             <div className="w-6 h-6 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
               <MessageSquare size={13} />
             </div>
           </div>
           <strong className="block text-2xl font-black font-mono text-slate-900">{enquiries}</strong>
-          <div className="text-[10px] text-slate-500 font-medium">
+          <div className="text-[10px] text-text-secondary font-medium">
             {comp.enquiriesDelta != null ? (
               <span className={`font-bold mr-1 ${comp.enquiriesDelta >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                 {comp.enquiriesDelta >= 0 ? '↑ +' : '↓ '}{comp.enquiriesDelta}%
@@ -336,14 +336,14 @@ export default function BiOverviewPage() {
 
         {/* 5. Test-Drive Bookings */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-1">
-          <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+          <div className="flex items-center justify-between text-[11px] text-text-secondary font-semibold">
             <span>Test Drives</span>
             <div className="w-6 h-6 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
               <CarFront size={13} />
             </div>
           </div>
           <strong className="block text-2xl font-black font-mono text-slate-900">{testDrives}</strong>
-          <div className="text-[10px] text-slate-500 font-medium">
+          <div className="text-[10px] text-text-secondary font-medium">
             {comp.testDrivesDelta != null ? (
               <span className={`font-bold mr-1 ${comp.testDrivesDelta >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                 {comp.testDrivesDelta >= 0 ? '↑ +' : '↓ '}{comp.testDrivesDelta}%
@@ -358,28 +358,28 @@ export default function BiOverviewPage() {
           onClick={() => setIsBreakdownOpen(true)}
           className="p-4 rounded-2xl bg-white border border-slate-200/90 hover:border-emerald-300 shadow-2xs hover:shadow-md transition-all space-y-1 cursor-pointer group"
         >
-          <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+          <div className="flex items-center justify-between text-[11px] text-text-secondary font-semibold">
             <span className="group-hover:text-emerald-700 font-bold transition-colors">Sales Rev ↗</span>
             <div className="w-6 h-6 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <CircleDollarSign size={13} />
             </div>
           </div>
           <strong className="block text-2xl font-black font-mono text-emerald-600">{money(revenue)}</strong>
-          <div className="text-[10px] text-slate-500 font-medium">
+          <div className="text-[10px] text-text-secondary font-medium">
             {totalSales} sold &bull; Click split
           </div>
         </div>
 
         {/* 7. Available Inventory */}
         <div className="p-4 rounded-2xl bg-white border border-slate-200/90 shadow-2xs hover:shadow-md transition-all space-y-1">
-          <div className="flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+          <div className="flex items-center justify-between text-[11px] text-text-secondary font-semibold">
             <span>Available Stock</span>
             <div className="w-6 h-6 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
               <CarFront size={13} />
             </div>
           </div>
           <strong className="block text-2xl font-black font-mono text-slate-900">{currentStockCount} Cars</strong>
-          <div className="text-[10px] text-slate-500 font-medium">{money(inventoryValue)} capital</div>
+          <div className="text-[10px] text-text-secondary font-medium">{money(inventoryValue)} capital</div>
         </div>
 
         {/* 8. Pending Decisions */}
@@ -551,7 +551,7 @@ export default function BiOverviewPage() {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 pt-4 text-[11px] text-slate-400 mt-8 flex flex-col sm:flex-row items-center justify-between gap-2 font-medium">
+      <footer className="border-t border-slate-200 pt-4 text-[11px] text-text-secondary mt-8 flex flex-col sm:flex-row items-center justify-between gap-2 font-medium">
         <span>&copy; {new Date().getFullYear()} CARREVIVE Automotive Dealership ERP &bull; Owner Decision Support</span>
         <span className="font-mono text-[10px]">Secure Owner Module v2.0</span>
       </footer>

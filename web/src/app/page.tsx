@@ -748,9 +748,13 @@ export default function HomePage() {
                       </div>
 
                       {/* Badges on image */}
-                      <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
-                        <span className="badge badge-info">{year}</span>
-                        <span className="badge badge-success">Available</span>
+                      <div className="absolute bottom-3 left-3 flex items-center gap-2 z-10">
+                        <span className="px-2.5 py-1 rounded-full text-xs font-black tracking-wide bg-white/95 dark:bg-slate-900/95 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 shadow-sm backdrop-blur-md">
+                          {year}
+                        </span>
+                        <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-white/95 dark:bg-slate-900/95 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shadow-sm backdrop-blur-md">
+                          Available
+                        </span>
                       </div>
                     </div>
 

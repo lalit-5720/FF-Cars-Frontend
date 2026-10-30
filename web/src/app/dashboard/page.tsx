@@ -7,6 +7,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useWishlistStore } from '../../store/useWishlistStore';
 import { showLocalToast } from '../../components/Toast';
 import Link from 'next/link';
+import { firstError, required, email as checkEmail, phone as checkPhone, pincode as checkPincode, maxLen } from '../../lib/validation';
 import { 
   Heart, 
   Calendar, 
@@ -258,6 +259,22 @@ function CustomerDashboard() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    const profErr = firstError(
+      required(profileForm.first_name, 'First name'),
+      maxLen(profileForm.first_name, 50, 'First name'),
+      maxLen(profileForm.last_name, 50, 'Last name'),
+      checkPhone(profileForm.phone),
+      checkEmail(profileForm.email, 'Email'),
+      checkPincode(profileForm.pincode),
+      maxLen(profileForm.city, 50, 'City'),
+      maxLen(profileForm.state, 50, 'State'),
+      maxLen(profileForm.address, 500, 'Address'),
+      maxLen(profileForm.occupation, 100, 'Occupation'),
+    );
+    if (profErr) {
+      showLocalToast(profErr, 'error');
+      return;
+    }
     setSavingProfile(true);
     try {
       await api.patch('/customers/me', profileForm);
@@ -440,48 +457,34 @@ function CustomerDashboard() {
       showLocalToast('Please write a short comment about your experience.', 'error');
       return;
     }
+    if (reviewComment.length > 2000) {
+      showLocalToast('Your review must be at most 2000 characters.', 'error');
+      return;
+    }
 
     setSubmittingReview(true);
 
     try {
       const car = selectedBookingForReview?.vehicles || selectedBookingForReview?.car || {};
       const carId = car.vehicle_id || car.id || selectedBookingForReview?.vehicle_id || 1;
-      const testDriveId = selectedBookingForReview?.test_drive_id || selectedBookingForReview?.id;
 
-      // 1. Submit directly to test drive record so rating & feedback persist dynamically
-      if (testDriveId && !selectedBookingForReview?.sale_id) {
-        await api.patch(`/test-drives/${testDriveId}`, {
-          rating: Number(reviewRating),
-          feedback: reviewComment,
-        }).catch((err) => console.log('Test drive rating patch error:', err));
-
-        // Update in local bookings state immediately
-        setBookings((prev) =>
-          prev.map((b) =>
-            (b.test_drive_id === testDriveId || b.id === testDriveId)
-              ? { ...b, rating: Number(reviewRating), feedback: reviewComment }
-              : b
-          )
-        );
-      }
-
-      // 2. Submit to backend reviews table
+      // Submit verified car purchase review to backend reviews table
       await api.post('/reviews', {
         customer_id: user?.id,
         vehicle_id: carId,
         rating: reviewRating,
-        comment: reviewComment,
-      }).catch((err) => console.log('Backend review POST note:', err));
+        comment: reviewComment.trim(),
+      });
 
-      const reviewKey = String(testDriveId || selectedBookingForReview?.sale_id || carId);
+      const reviewKey = String(selectedBookingForReview?.sale_id || carId);
       setSubmittedReviews((prev) => ({ ...prev, [reviewKey]: true }));
 
-      const isDelivery = Boolean(selectedBookingForReview?.delivery_status || selectedBookingForReview?.sale_id);
-      showLocalToast(`⭐ Thank you! Your ${reviewRating}-star ${isDelivery ? 'delivery' : 'test drive'} review has been submitted successfully.`, 'success');
+      showLocalToast(`⭐ Thank you! Your ${reviewRating}-star vehicle purchase review has been submitted for moderation.`, 'success');
       setIsReviewModalOpen(false);
       setSelectedBookingForReview(null);
-    } catch (err) {
-      showLocalToast('Review submitted successfully.', 'success');
+      fetchUserReviews();
+    } catch (err: any) {
+      showLocalToast(err.response?.data?.message || 'Failed to submit review.', 'error');
       setIsReviewModalOpen(false);
     } finally {
       setSubmittingReview(false);
@@ -832,10 +835,10 @@ function CustomerDashboard() {
                         </div>
                       </div>
 
-                      {/* Action Buttons: Cancel Request, Rate Test Drive, Reserve Car */}
+                      {/* Action Buttons: Cancel Request, Write Review, Reserve Car */}
                       <div className="flex items-center gap-3 justify-end border-t md:border-t-0 pt-4 md:pt-0 border-border flex-wrap">
                         
-                        {/* 1. TEST DRIVE ACTIONS: RATING (IF COMPLETED) OR CANCEL REQUEST (OTHERWISE) */}
+                        {/* 1. TEST DRIVE ACTIONS: REVIEW (IF COMPLETED) OR CANCEL REQUEST (OTHERWISE) */}
                         {isDriveCompleted ? (
                           booking.rating || isReviewed ? (
                             <div className="flex items-center gap-2 p-2 px-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-500">
@@ -858,7 +861,7 @@ function CustomerDashboard() {
                                 onClick={() => openWriteReviewModal(booking)}
                                 className="text-[10px] underline font-bold text-amber-600 hover:text-amber-500 cursor-pointer ml-1"
                               >
-                                Edit Rating
+                                Edit Review
                               </button>
                             </div>
                           ) : (
@@ -867,7 +870,7 @@ function CustomerDashboard() {
                               className="px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 shadow-md shadow-amber-500/20 active:scale-95"
                             >
                               <Star className="w-4 h-4 fill-slate-950" />
-                              Rate Test Drive ⭐
+                              Write Review
                             </button>
                           )
                         ) : testDriveStatus === 'CANCELLED' ? (
@@ -1170,7 +1173,7 @@ function CustomerDashboard() {
                             title={isDelivered ? 'Share your delivery handover experience and feedback for CarRevive concierge' : 'Review car'}
                           >
                             <Star className={`w-3.5 h-3.5 fill-current ${isDelivered ? 'text-slate-950' : 'text-amber-400'}`} />
-                            {isDelivered ? '⭐ Review Delivery Experience' : 'Review Car'}
+                            Write Review
                           </button>
                         </div>
                       </div>
@@ -1982,10 +1985,10 @@ function CustomerDashboard() {
                     <div>
                       <h4 className="font-bold text-sm text-foreground flex items-center gap-1.5">
                         <Award className="w-4 h-4 text-amber-500" />
-                        <span>Have you driven your recent purchase?</span>
+                        <span>Have you purchased a vehicle from CarRevive?</span>
                       </h4>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Share your authentic ownership and test drive feedback to help other buyers.
+                        Share your authentic car purchase ownership review and dealership buying experience.
                       </p>
                     </div>
                     <button
@@ -1996,13 +1999,14 @@ function CustomerDashboard() {
                             vehicles: firstEligible.vehicles,
                             vehicle_id: firstEligible.vehicle_id,
                             branches: firstEligible.branches,
+                            sale_id: firstEligible.sale_id,
                           });
                           setIsReviewModalOpen(true);
                         }
                       }}
                       className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all shrink-0 cursor-pointer shadow-sm"
                     >
-                      Write a Review
+                      Write Purchase Review
                     </button>
                   </div>
                 )}
@@ -2013,9 +2017,9 @@ function CustomerDashboard() {
                       <Star className="w-8 h-8" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg text-foreground font-display">No Reviews Submitted Yet</h3>
+                      <h3 className="font-bold text-lg text-foreground font-display">No Purchase Reviews Submitted Yet</h3>
                       <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
-                        Once you complete a purchase or test drive, you can submit verified ratings and written reviews.
+                        Once you purchase a vehicle, you can submit verified ratings and written ownership reviews.
                       </p>
                     </div>
                   </div>
@@ -2086,7 +2090,7 @@ function CustomerDashboard() {
                       <input
                         type="text"
                         required
-                        value={profileForm.first_name}
+                        value={profileForm.first_name} maxLength={50}
                         onChange={(e) => setProfileForm({ ...profileForm, first_name: e.target.value })}
                         className="w-full p-2.5 rounded-xl bg-secondary border border-border text-foreground focus:outline-none focus:border-sky-500"
                       />
@@ -2095,7 +2099,7 @@ function CustomerDashboard() {
                       <label className="block text-muted-foreground font-bold mb-1">Last Name</label>
                       <input
                         type="text"
-                        value={profileForm.last_name}
+                        value={profileForm.last_name} maxLength={50}
                         onChange={(e) => setProfileForm({ ...profileForm, last_name: e.target.value })}
                         className="w-full p-2.5 rounded-xl bg-secondary border border-border text-foreground focus:outline-none focus:border-sky-500"
                       />
@@ -2107,7 +2111,7 @@ function CustomerDashboard() {
                       <label className="block text-muted-foreground font-bold mb-1">Phone Number</label>
                       <input
                         type="text"
-                        value={profileForm.phone}
+                        value={profileForm.phone} maxLength={15} inputMode="tel"
                         onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
                         placeholder="+91 98765 43210"
                         className="w-full p-2.5 rounded-xl bg-secondary border border-border text-foreground focus:outline-none focus:border-sky-500"
@@ -2129,7 +2133,7 @@ function CustomerDashboard() {
                       <label className="block text-muted-foreground font-bold mb-1">City</label>
                       <input
                         type="text"
-                        value={profileForm.city}
+                        value={profileForm.city} maxLength={50}
                         onChange={(e) => setProfileForm({ ...profileForm, city: e.target.value })}
                         placeholder="Chennai"
                         className="w-full p-2.5 rounded-xl bg-secondary border border-border text-foreground focus:outline-none focus:border-sky-500"
@@ -2139,7 +2143,7 @@ function CustomerDashboard() {
                       <label className="block text-muted-foreground font-bold mb-1">State</label>
                       <input
                         type="text"
-                        value={profileForm.state}
+                        value={profileForm.state} maxLength={50}
                         onChange={(e) => setProfileForm({ ...profileForm, state: e.target.value })}
                         placeholder="Tamil Nadu"
                         className="w-full p-2.5 rounded-xl bg-secondary border border-border text-foreground focus:outline-none focus:border-sky-500"
@@ -2149,7 +2153,7 @@ function CustomerDashboard() {
                       <label className="block text-muted-foreground font-bold mb-1">Pincode</label>
                       <input
                         type="text"
-                        value={profileForm.pincode}
+                        value={profileForm.pincode} maxLength={10}
                         onChange={(e) => setProfileForm({ ...profileForm, pincode: e.target.value })}
                         placeholder="600040"
                         className="w-full p-2.5 rounded-xl bg-secondary border border-border text-foreground focus:outline-none focus:border-sky-500"
@@ -2161,7 +2165,7 @@ function CustomerDashboard() {
                     <label className="block text-muted-foreground font-bold mb-1">Address</label>
                     <input
                       type="text"
-                      value={profileForm.address}
+                      value={profileForm.address} maxLength={500}
                       onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
                       placeholder="Door no, Street name, Area"
                       className="w-full p-2.5 rounded-xl bg-secondary border border-border text-foreground focus:outline-none focus:border-sky-500"
@@ -2173,7 +2177,7 @@ function CustomerDashboard() {
                       <label className="block text-muted-foreground font-bold mb-1">Occupation</label>
                       <input
                         type="text"
-                        value={profileForm.occupation}
+                        value={profileForm.occupation} maxLength={100}
                         onChange={(e) => setProfileForm({ ...profileForm, occupation: e.target.value })}
                         placeholder="e.g. Software Engineer / Business"
                         className="w-full p-2.5 rounded-xl bg-secondary border border-border text-foreground focus:outline-none focus:border-sky-500"
@@ -2217,7 +2221,7 @@ function CustomerDashboard() {
               <div className="flex items-center gap-2">
                 <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
                 <h3 className="text-lg font-bold text-foreground font-display">
-                  Write Vehicle Review &amp; Rating
+                  Vehicle Purchase &amp; Ownership Review
                 </h3>
               </div>
               <button
@@ -2262,21 +2266,21 @@ function CustomerDashboard() {
                   ))}
                 </div>
                 <span className="text-xs font-bold text-amber-600">
-                  {reviewRating === 5 ? '5 Stars - Outstanding Experience! ⭐⭐⭐⭐⭐' : `${reviewRating} Stars Rating`}
+                  {reviewRating === 5 ? '5 Stars - Outstanding Vehicle! ⭐⭐⭐⭐⭐' : `${reviewRating} Stars Rating`}
                 </span>
               </div>
 
               {/* REVIEW COMMENT */}
               <div>
                 <label className="block text-[10px] font-bold uppercase text-muted-foreground mb-1">
-                  Your Review &amp; Dealership Feedback
+                  Your Vehicle Purchase &amp; Ownership Feedback
                 </label>
                 <textarea
                   rows={4}
                   required
-                  value={reviewComment}
+                  value={reviewComment} maxLength={2000}
                   onChange={(e) => setReviewComment(e.target.value)}
-                  placeholder="Share your driving feedback, vehicle performance, sales executive courtesy, and overall dealership satisfaction..."
+                  placeholder="Share your authentic driving feedback, vehicle performance, condition, and dealership buying satisfaction..."
                   className="w-full px-4 py-3 rounded-xl bg-secondary border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-slate-900 font-medium"
                 />
               </div>

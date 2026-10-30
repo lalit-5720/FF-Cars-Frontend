@@ -102,3 +102,19 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// 3. Validation errors arrive as { message: string[] }. Forms show `message` directly, so join the
+//    list into one readable sentence (the raw list stays available as `messages`).
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const data = error?.response?.data;
+    if (data && Array.isArray(data.message)) {
+      data.messages = data.message;
+      data.message = data.message
+        .map((m: unknown) => String(m).replace(/^./, (c) => c.toUpperCase()).replace(/\.$/, ''))
+        .join('. ') + '.';
+    }
+    return Promise.reject(error);
+  }
+);

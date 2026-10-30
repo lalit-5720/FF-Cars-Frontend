@@ -90,7 +90,7 @@ export function KpiCards({ data, loading }: KpiCardsProps) {
               }`}
             >
               <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1.5">
                   {card.title}
                   {isRevenue && (
                     <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-extrabold border border-emerald-200">

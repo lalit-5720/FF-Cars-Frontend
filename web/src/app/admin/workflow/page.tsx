@@ -71,7 +71,7 @@ export default function AdminWorkflowPage() {
       shortName: 'Discovery & Trial',
       tagline: 'Lead capture, staff assignment, qualification & test-drive feedback',
       icon: Users,
-      color: 'text-blue-400',
+      color: 'text-blue-700 dark:text-blue-400',
       gradient: 'from-blue-500/20 via-indigo-500/10 to-transparent',
       badge: 'CRM & Customer Experience',
       operationalLink: '/admin/leads',
@@ -117,7 +117,7 @@ export default function AdminWorkflowPage() {
       shortName: 'Contract & Payments',
       tagline: 'Sales contract, token advance, down payment & bank loan reconciliation',
       icon: CreditCard,
-      color: 'text-amber-400',
+      color: 'text-amber-800 dark:text-amber-400',
       gradient: 'from-amber-500/20 via-orange-500/10 to-transparent',
       badge: 'Contract & Dual-Payment Engine',
       operationalLink: '/admin/sales',
@@ -165,7 +165,7 @@ export default function AdminWorkflowPage() {
       shortName: 'Fulfillment & Delivery',
       tagline: 'Pre-delivery inspection, digital gate-pass & customer handover sign-off',
       icon: Truck,
-      color: 'text-emerald-400',
+      color: 'text-emerald-700 dark:text-emerald-400',
       gradient: 'from-emerald-500/20 via-teal-500/10 to-transparent',
       badge: 'Security & Title Transfer',
       operationalLink: '/admin/deliveries',
@@ -213,7 +213,7 @@ export default function AdminWorkflowPage() {
       shortName: 'Retention & BI Analytics',
       tagline: 'Customer review moderation, GAAP gross profit & algorithmic procurement buy scoring',
       icon: TrendingUp,
-      color: 'text-purple-400',
+      color: 'text-purple-700 dark:text-purple-400',
       gradient: 'from-purple-500/20 via-pink-500/10 to-transparent',
       badge: 'Social Proof & Executive BI',
       operationalLink: '/admin/bi',
@@ -263,10 +263,10 @@ export default function AdminWorkflowPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <span className="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/20">
+            <span className="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-500/20">
               Enterprise Operations Framework
             </span>
-            <span className="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
               Simplified 4-Stage Architecture
             </span>
           </div>
@@ -291,7 +291,7 @@ export default function AdminWorkflowPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 text-[10px] font-black uppercase tracking-wider border border-amber-500/20">
+              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-800 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider border border-amber-500/20">
                 Operating Model
               </span>
               <span className="text-xs text-muted-foreground font-semibold">
@@ -311,68 +311,68 @@ export default function AdminWorkflowPage() {
           {/* Step 1 */}
           <div className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-1.5 relative overflow-hidden">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-black text-blue-400 uppercase tracking-wider">Step 01 &bull; Intake</span>
-              <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-blue-500/10 text-blue-400 border border-blue-500/20">System / Web</span>
+              <span className="text-[10px] font-mono font-black text-blue-700 dark:text-blue-400 uppercase tracking-wider">Step 01 &bull; Intake</span>
+              <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-blue-500/10 text-blue-700 dark:text-blue-400 border border-blue-500/20">System / Web</span>
             </div>
             <h4 className="font-extrabold text-foreground text-sm font-display">New Lead Created</h4>
             <p className="text-muted-foreground leading-relaxed">
-              Customer inquiry is registered online or via walk-in and marked as <strong className="text-white">"New"</strong> in the unassigned triage queue.
+              Customer inquiry is registered online or via walk-in and marked as <strong className="text-text-primary">"New"</strong> in the unassigned triage queue.
             </p>
           </div>
 
           {/* Step 2 */}
           <div className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-1.5 relative overflow-hidden">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-black text-purple-400 uppercase tracking-wider">Step 02 &bull; Delegation</span>
-              <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-purple-500/10 text-purple-400 border border-purple-500/20">Branch Manager</span>
+              <span className="text-[10px] font-mono font-black text-purple-700 dark:text-purple-400 uppercase tracking-wider">Step 02 &bull; Delegation</span>
+              <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-500/20">Branch Manager</span>
             </div>
             <h4 className="font-extrabold text-foreground text-sm font-display">Assign Lead to Executive</h4>
             <p className="text-muted-foreground leading-relaxed">
-              Branch Manager reviews showroom capacity and assigns the lead to a Sales Executive (status updates to <strong className="text-white">"Assigned"</strong>).
+              Branch Manager reviews showroom capacity and assigns the lead to a Sales Executive (status updates to <strong className="text-text-primary">"Assigned"</strong>).
             </p>
           </div>
 
           {/* Step 3 */}
           <div className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-1.5 relative overflow-hidden">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-black text-sky-400 uppercase tracking-wider">Step 03 &bull; Engagement</span>
-              <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-sky-500/10 text-sky-400 border border-sky-500/20">Sales Executive</span>
+              <span className="text-[10px] font-mono font-black text-sky-700 dark:text-sky-400 uppercase tracking-wider">Step 03 &bull; Engagement</span>
+              <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/20">Sales Executive</span>
             </div>
             <h4 className="font-extrabold text-foreground text-sm font-display">Follow-Up Note &amp; Test Drive</h4>
             <p className="text-muted-foreground leading-relaxed">
-              Sales Executive records follow-up notes, calls customer, and conducts the test drive. <em className="text-slate-400">(Hidden from Branch Manager &amp; Admin sidebar)</em>.
+              Sales Executive records follow-up notes, calls customer, and conducts the test drive. <em className="text-text-secondary">(Hidden from Branch Manager &amp; Admin sidebar)</em>.
             </p>
           </div>
 
           {/* Step 4 */}
           <div className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-1.5 relative overflow-hidden">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-black text-amber-400 uppercase tracking-wider">Step 04 &bull; Finance</span>
-              <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-amber-500/10 text-amber-400 border border-amber-500/20">Branch Manager</span>
+              <span className="text-[10px] font-mono font-black text-amber-800 dark:text-amber-400 uppercase tracking-wider">Step 04 &bull; Finance</span>
+              <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/20">Branch Manager</span>
             </div>
             <h4 className="font-extrabold text-foreground text-sm font-display">Token Advance &amp; Payment</h4>
             <p className="text-muted-foreground leading-relaxed">
-              Drive completed &rarr; deal moves to Branch Manager to collect token advance, reserve car, and process full cash or bank loans. <em className="text-slate-400">(Hidden from Executive)</em>.
+              Drive completed &rarr; deal moves to Branch Manager to collect token advance, reserve car, and process full cash or bank loans. <em className="text-text-secondary">(Hidden from Executive)</em>.
             </p>
           </div>
 
           {/* Step 5 */}
           <div className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-1.5 relative overflow-hidden">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-black text-emerald-400 uppercase tracking-wider">Step 05 &bull; Handover</span>
-              <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Manager &rarr; Exec</span>
+              <span className="text-[10px] font-mono font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Step 05 &bull; Handover</span>
+              <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">Manager &rarr; Exec</span>
             </div>
             <h4 className="font-extrabold text-foreground text-sm font-display">Delivery Based on Customer Dates</h4>
             <p className="text-muted-foreground leading-relaxed">
-              Payment cleared &rarr; Manager assigns delivery entry to Sales Executive with customer date. Executive conducts PDI, logs odometer, and hands over keys (<strong className="text-white">"Sold"</strong>).
+              Payment cleared &rarr; Manager assigns delivery entry to Sales Executive with customer date. Executive conducts PDI, logs odometer, and hands over keys (<strong className="text-text-primary">"Sold"</strong>).
             </p>
           </div>
 
           {/* Step 6 */}
           <div className="p-4 rounded-2xl bg-secondary/40 border border-border space-y-1.5 relative overflow-hidden">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-black text-rose-400 uppercase tracking-wider">Step 06 &bull; Social Proof</span>
-              <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-rose-500/10 text-rose-400 border border-rose-500/20">Manager &amp; Admin</span>
+              <span className="text-[10px] font-mono font-black text-rose-700 dark:text-rose-400 uppercase tracking-wider">Step 06 &bull; Social Proof</span>
+              <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20">Manager &amp; Admin</span>
             </div>
             <h4 className="font-extrabold text-foreground text-sm font-display">Approve &amp; Publish Reviews</h4>
             <p className="text-muted-foreground leading-relaxed">
@@ -442,7 +442,7 @@ export default function AdminWorkflowPage() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-extrabold text-purple-400">STAGE {activeStage.id}</span>
+                <span className="text-xs font-mono font-extrabold text-purple-700 dark:text-purple-400">STAGE {activeStage.id}</span>
                 <span className="text-muted-foreground">&bull;</span>
                 <span className="text-xs font-bold text-muted-foreground uppercase">{activeStage.badge}</span>
               </div>
@@ -471,13 +471,13 @@ export default function AdminWorkflowPage() {
           <div className="space-y-6">
             <div className="p-6 rounded-2xl bg-secondary/20 border border-border space-y-4">
               <h4 className="text-xs font-extrabold uppercase tracking-wider text-foreground font-display flex items-center gap-2">
-                <CheckCircle2 size={15} className="text-emerald-400" />
+                <CheckCircle2 size={15} className="text-emerald-700 dark:text-emerald-400" />
                 Operational Requirements &amp; Checklist
               </h4>
               <ul className="space-y-2.5 text-xs">
                 {activeStage.checklist.map((item, idx) => (
                   <li key={idx} className="flex items-start gap-2.5 text-muted-foreground leading-relaxed">
-                    <span className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-400 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
                       ✓
                     </span>
                     <span className="text-foreground font-medium">{item}</span>
@@ -488,7 +488,7 @@ export default function AdminWorkflowPage() {
 
             <div className="p-6 rounded-2xl bg-secondary/20 border border-border space-y-4">
               <h4 className="text-xs font-extrabold uppercase tracking-wider text-foreground font-display flex items-center gap-2">
-                <Sparkles size={15} className="text-purple-400" />
+                <Sparkles size={15} className="text-purple-700 dark:text-purple-400" />
                 Internal Processing &amp; Business Logic
               </h4>
               <div className="space-y-3">
@@ -526,7 +526,7 @@ export default function AdminWorkflowPage() {
                 <div className="space-y-2 text-xs">
                   {activeStage.outputs.map((out, idx) => (
                     <div key={idx} className="border-b border-border/40 pb-1.5 last:border-0 last:pb-0">
-                      <strong className="text-emerald-400 block text-[11px]">{out.name}</strong>
+                      <strong className="text-emerald-700 dark:text-emerald-400 block text-[11px]">{out.name}</strong>
                       <span className="text-[10px] text-muted-foreground">{out.desc}</span>
                     </div>
                   ))}
@@ -537,7 +537,7 @@ export default function AdminWorkflowPage() {
             {/* RELATIONAL DATABASE STATE TRANSITIONS */}
             <div className="p-5 rounded-2xl bg-secondary/20 border border-border space-y-3">
               <h4 className="text-xs font-extrabold uppercase tracking-wider text-foreground font-display flex items-center gap-2">
-                <FileText size={14} className="text-sky-400" />
+                <FileText size={14} className="text-sky-700 dark:text-sky-400" />
                 Relational Database State Transitions
               </h4>
               <div className="overflow-x-auto">
@@ -553,9 +553,9 @@ export default function AdminWorkflowPage() {
                   <tbody className="divide-y divide-border/40 font-mono">
                     {activeStage.stateTransitions.map((tr, idx) => (
                       <tr key={idx} className="text-foreground">
-                        <td className="py-2 font-bold text-purple-400">{tr.entity}</td>
+                        <td className="py-2 font-bold text-purple-700 dark:text-purple-400">{tr.entity}</td>
                         <td className="py-2 text-muted-foreground">{tr.from}</td>
-                        <td className="py-2 text-emerald-400 font-bold">{tr.to}</td>
+                        <td className="py-2 text-emerald-700 dark:text-emerald-400 font-bold">{tr.to}</td>
                         <td className="py-2 text-[10px] text-muted-foreground font-sans">{tr.trigger}</td>
                       </tr>
                     ))}
@@ -586,7 +586,7 @@ export default function AdminWorkflowPage() {
       <div className="p-6 sm:p-8 rounded-3xl bg-card border border-border shadow-xl space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/20">
               <Calculator className="w-6 h-6" />
             </div>
             <div>
@@ -647,7 +647,7 @@ export default function AdminWorkflowPage() {
             <div>
               <div className="flex justify-between font-bold mb-1">
                 <span className="text-muted-foreground">Token Advance Received Upfront</span>
-                <span className="text-emerald-400 font-mono">{formatINR(simToken)}</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-mono">{formatINR(simToken)}</span>
               </div>
               <input
                 type="range"
@@ -667,7 +667,7 @@ export default function AdminWorkflowPage() {
               <div>
                 <div className="flex justify-between font-bold mb-1">
                   <span className="text-muted-foreground">Total Required Down Payment</span>
-                  <span className="text-amber-400 font-mono">{formatINR(simDownPayment)}</span>
+                  <span className="text-amber-800 dark:text-amber-400 font-mono">{formatINR(simDownPayment)}</span>
                 </div>
                 <input
                   type="range"
@@ -702,7 +702,7 @@ export default function AdminWorkflowPage() {
               <span className="text-[10px] uppercase font-bold text-muted-foreground block">
                 Token Advance Received
               </span>
-              <span className="text-lg font-mono font-black text-emerald-400 block mt-1">
+              <span className="text-lg font-mono font-black text-emerald-700 dark:text-emerald-400 block mt-1">
                 {formatINR(simToken)}
               </span>
               <span className="text-[9px] text-emerald-500/80">Stored separately in ledger</span>
@@ -714,7 +714,7 @@ export default function AdminWorkflowPage() {
                   <span className="text-[10px] uppercase font-bold text-muted-foreground block">
                     Required Down Payment
                   </span>
-                  <span className="text-lg font-mono font-black text-amber-400 block mt-1">
+                  <span className="text-lg font-mono font-black text-amber-800 dark:text-amber-400 block mt-1">
                     {formatINR(simDownPayment)}
                   </span>
                   <span className="text-[9px] text-muted-foreground">Total upfront required</span>
@@ -736,7 +736,7 @@ export default function AdminWorkflowPage() {
                   <span className="text-[10px] uppercase font-bold text-muted-foreground block">
                     Financed Loan Amount
                   </span>
-                  <span className="text-lg font-mono font-black text-sky-400 block mt-1">
+                  <span className="text-lg font-mono font-black text-sky-700 dark:text-sky-400 block mt-1">
                     {formatINR(simLoanAmount)}
                   </span>
                   <span className="text-[9px] text-sky-500/80">Awaiting Bank Disbursal</span>
@@ -758,7 +758,7 @@ export default function AdminWorkflowPage() {
                   <span className="text-[10px] uppercase font-bold text-muted-foreground block">
                     Total Amount Paid
                   </span>
-                  <span className="text-lg font-mono font-black text-emerald-400 block mt-1">
+                  <span className="text-lg font-mono font-black text-emerald-700 dark:text-emerald-400 block mt-1">
                     {formatINR(simToken)}
                   </span>
                   <span className="text-[9px] text-muted-foreground">Current verified receipts</span>
@@ -784,7 +784,7 @@ export default function AdminWorkflowPage() {
 
         {/* AUDIT NOTE ON PAYMENT RULES */}
         <div className="p-4 rounded-2xl bg-secondary/30 border border-border text-xs flex items-start gap-3">
-          <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+          <ShieldCheck className="w-5 h-5 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <strong className="text-foreground">Audited Accounting Safeguards Enforced:</strong>
             <p className="text-muted-foreground text-[11px] leading-relaxed">
@@ -815,32 +815,32 @@ export default function AdminWorkflowPage() {
             <tbody className="divide-y divide-border/50">
               <tr>
                 <td className="py-3 px-4 font-bold text-foreground">Pipeline Stages</td>
-                <td className="py-3 px-4 text-rose-400">7 fragmented, micro-gated steps</td>
-                <td className="py-3 px-4 text-emerald-400 font-bold">4 unified, domain-aligned stages</td>
+                <td className="py-3 px-4 text-rose-700 dark:text-rose-400">7 fragmented, micro-gated steps</td>
+                <td className="py-3 px-4 text-emerald-700 dark:text-emerald-400 font-bold">4 unified, domain-aligned stages</td>
                 <td className="py-3 px-4 text-muted-foreground">43% reduction in pipeline friction</td>
               </tr>
               <tr>
                 <td className="py-3 px-4 font-bold text-foreground">Token Advance Handling</td>
-                <td className="py-3 px-4 text-rose-400">Overwrote contract price or down payment</td>
-                <td className="py-3 px-4 text-emerald-400 font-bold">Stored separately in payment ledger</td>
+                <td className="py-3 px-4 text-rose-700 dark:text-rose-400">Overwrote contract price or down payment</td>
+                <td className="py-3 px-4 text-emerald-700 dark:text-emerald-400 font-bold">Stored separately in payment ledger</td>
                 <td className="py-3 px-4 text-muted-foreground">Zero double counting; true receivables audit</td>
               </tr>
               <tr>
                 <td className="py-3 px-4 font-bold text-foreground">Loan Approval State</td>
-                <td className="py-3 px-4 text-rose-400">Parsed from free-form text remarks</td>
-                <td className="py-3 px-4 text-emerald-400 font-bold">Explicit ledger disbursal payment type</td>
+                <td className="py-3 px-4 text-rose-700 dark:text-rose-400">Parsed from free-form text remarks</td>
+                <td className="py-3 px-4 text-emerald-700 dark:text-emerald-400 font-bold">Explicit ledger disbursal payment type</td>
                 <td className="py-3 px-4 text-muted-foreground">100% type-safe; zero runtime string bugs</td>
               </tr>
               <tr>
                 <td className="py-3 px-4 font-bold text-foreground">Vehicle Title Transfer</td>
-                <td className="py-3 px-4 text-rose-400">Flipped to Sold prematurely at schedule</td>
-                <td className="py-3 px-4 text-emerald-400 font-bold">Flipped to Sold only on customer handover</td>
+                <td className="py-3 px-4 text-rose-700 dark:text-rose-400">Flipped to Sold prematurely at schedule</td>
+                <td className="py-3 px-4 text-emerald-700 dark:text-emerald-400 font-bold">Flipped to Sold only on customer handover</td>
                 <td className="py-3 px-4 text-muted-foreground">Prevents accounting discrepancies on rejected PDI</td>
               </tr>
               <tr>
                 <td className="py-3 px-4 font-bold text-foreground">BI Ingestion</td>
-                <td className="py-3 px-4 text-rose-400">Mixed as manual operational step (Stage 7)</td>
-                <td className="py-3 px-4 text-emerald-400 font-bold">Automated, event-driven reactive aggregation</td>
+                <td className="py-3 px-4 text-rose-700 dark:text-rose-400">Mixed as manual operational step (Stage 7)</td>
+                <td className="py-3 px-4 text-emerald-700 dark:text-emerald-400 font-bold">Automated, event-driven reactive aggregation</td>
                 <td className="py-3 px-4 text-muted-foreground">Clean separation of transaction vs analytics</td>
               </tr>
             </tbody>

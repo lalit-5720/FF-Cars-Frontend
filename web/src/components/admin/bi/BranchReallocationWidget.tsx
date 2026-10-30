@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowRightLeft, Building2, CheckCircle2, ArrowRight, RefreshCw, CarFront } from 'lucide-react';
 import { api } from '../../../services/api';
 import { showLocalToast } from '../../Toast';
+import { usePermissions } from '../../../hooks/usePermissions';
 
 interface ReallocationItem {
   suggestion_id: string;
@@ -23,6 +24,7 @@ interface ReallocationItem {
 
 export function BranchReallocationWidget() {
   const router = useRouter();
+  const permissions = usePermissions();
   const [loading, setLoading] = useState(true);
   const [transferringId, setTransferringId] = useState<number | null>(null);
   const [reallocationList, setReallocationList] = useState<ReallocationItem[]>([]);
@@ -141,19 +143,21 @@ export function BranchReallocationWidget() {
 
               {/* Action Buttons */}
               <div className="flex flex-wrap items-center gap-2 shrink-0">
-                <button
-                  onClick={() => {
-                    router.push(
-                      `/admin/deliveries?view=5-deliveries-available&branch=${encodeURIComponent(
-                        item.target_branch_name
-                      )}&model=${encodeURIComponent(item.make + ' ' + item.model)}`
-                    );
-                  }}
-                  className="btn-secondary text-xs flex items-center justify-center gap-1.5"
-                >
-                  <span>View 5 Deliveries Available</span>
-                  <ArrowRight size={14} />
-                </button>
+                {permissions.canAccessDeliveries && (
+                  <button
+                    onClick={() => {
+                      router.push(
+                        `/admin/deliveries?view=5-deliveries-available&branch=${encodeURIComponent(
+                          item.target_branch_name
+                        )}&model=${encodeURIComponent(item.make + ' ' + item.model)}`
+                      );
+                    }}
+                    className="btn-secondary text-xs flex items-center justify-center gap-1.5"
+                  >
+                    <span>View 5 Deliveries Available</span>
+                    <ArrowRight size={14} />
+                  </button>
+                )}
 
                 <button
                   onClick={() => handleTransferVehicle(item.vehicle_id, item.target_branch_id, item.target_branch_name)}

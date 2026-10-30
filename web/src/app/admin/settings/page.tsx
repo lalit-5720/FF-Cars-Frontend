@@ -5,6 +5,7 @@ import { api } from '../../../services/api';
 import { usePermissions } from '../../../hooks/usePermissions';
 import { RequireRole } from '../../../components/auth/RequireRole';
 import { showLocalToast } from '../../../components/Toast';
+import { firstError, email as checkEmail, phone as checkPhone, pincode as checkPincode, maxLen } from '../../../lib/validation';
 import {
   Settings,
   Building2,
@@ -150,6 +151,18 @@ export default function SettingsPage() {
       showLocalToast('Please enter a branch name.');
       return;
     }
+    const nbErr = firstError(
+      maxLen(newBranch.branch_name.trim(), 100, 'Branch name'),
+      maxLen(newBranch.manager_name, 100, 'Manager name'),
+      checkPhone(newBranch.phone),
+      checkEmail(newBranch.email),
+      checkPincode(newBranch.pincode),
+      maxLen(newBranch.address, 500, 'Address'),
+    );
+    if (nbErr) {
+      showLocalToast(nbErr);
+      return;
+    }
 
     setSubmittingBranch(true);
     try {
@@ -179,6 +192,11 @@ export default function SettingsPage() {
     e.preventDefault();
     if (!newRole.name.trim()) {
       showLocalToast('Please enter a role title.');
+      return;
+    }
+    const roleErr = firstError(maxLen(newRole.name.trim(), 100, 'Role title'), maxLen(newRole.description, 500, 'Description'));
+    if (roleErr) {
+      showLocalToast(roleErr);
       return;
     }
 
@@ -451,7 +469,7 @@ export default function SettingsPage() {
                     type="text"
                     required
                     placeholder="e.g. OMR Sholinganallur Showroom"
-                    value={newBranch.branch_name}
+                    value={newBranch.branch_name} maxLength={100}
                     onChange={(e) => setNewBranch({ ...newBranch, branch_name: e.target.value })}
                     className="input-base w-full"
                   />
@@ -463,7 +481,7 @@ export default function SettingsPage() {
                     <input
                       type="text"
                       placeholder="e.g. Ramesh V"
-                      value={newBranch.manager_name}
+                      value={newBranch.manager_name} maxLength={100}
                       onChange={(e) => setNewBranch({ ...newBranch, manager_name: e.target.value })}
                       className="input-base w-full"
                     />
@@ -473,7 +491,7 @@ export default function SettingsPage() {
                     <input
                       type="text"
                       placeholder="+91 98401 23456"
-                      value={newBranch.phone}
+                      value={newBranch.phone} maxLength={15} inputMode="tel"
                       onChange={(e) => setNewBranch({ ...newBranch, phone: e.target.value })}
                       className="input-base w-full"
                     />
@@ -486,7 +504,7 @@ export default function SettingsPage() {
                     <input
                       type="email"
                       placeholder="omr@carrevive.in"
-                      value={newBranch.email}
+                      value={newBranch.email} maxLength={100}
                       onChange={(e) => setNewBranch({ ...newBranch, email: e.target.value })}
                       className="input-base w-full"
                     />
@@ -496,7 +514,7 @@ export default function SettingsPage() {
                     <input
                       type="text"
                       placeholder="600119"
-                      value={newBranch.pincode}
+                      value={newBranch.pincode} maxLength={10}
                       onChange={(e) => setNewBranch({ ...newBranch, pincode: e.target.value })}
                       className="input-base w-full"
                     />
@@ -508,7 +526,7 @@ export default function SettingsPage() {
                   <input
                     type="text"
                     placeholder="Plot 14, Rajiv Gandhi Salai, OMR"
-                    value={newBranch.address}
+                    value={newBranch.address} maxLength={500}
                     onChange={(e) => setNewBranch({ ...newBranch, address: e.target.value })}
                     className="input-base w-full"
                   />
@@ -555,7 +573,7 @@ export default function SettingsPage() {
                     type="text"
                     required
                     placeholder="e.g. Quality Assurance & PDI Inspector"
-                    value={newRole.name}
+                    value={newRole.name} maxLength={100}
                     onChange={(e) => setNewRole({ ...newRole, name: e.target.value })}
                     className="input-base w-full"
                   />
@@ -566,7 +584,7 @@ export default function SettingsPage() {
                   <textarea
                     rows={2}
                     placeholder="Briefly describe what this staff member is responsible for..."
-                    value={newRole.description}
+                    value={newRole.description} maxLength={500}
                     onChange={(e) => setNewRole({ ...newRole, description: e.target.value })}
                     className="input-base w-full resize-none"
                   />

@@ -93,14 +93,14 @@ export function BranchEvidenceReportWidget() {
                 <ShieldCheck size={12} />
                 5 Deliveries &amp; Test Drives Available
               </span>
-              <span className="text-[11px] text-slate-500 font-medium hidden sm:inline">
+              <span className="text-[11px] text-text-secondary font-medium hidden sm:inline">
                 Branch Reallocation Audit Trail
               </span>
             </div>
             <h2 className="text-xl font-black text-slate-900 tracking-tight mt-1">
               Branch Reallocation &amp; 5 Delivery Availability Audit
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5 font-medium">
+            <p className="text-xs text-text-secondary mt-0.5 font-medium">
               Live customer preference signals &amp; scheduled test drives supporting stock transfers
             </p>
           </div>
@@ -135,19 +135,19 @@ export function BranchEvidenceReportWidget() {
       {/* Branch Stats Banner */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200/90 text-xs">
         <div>
-          <span className="text-[10px] text-slate-500 block font-bold">BRANCH MANAGER</span>
+          <span className="text-[10px] text-text-secondary block font-bold">BRANCH MANAGER</span>
           <strong className="text-slate-900 font-extrabold">{activeBranchReport.manager_name}</strong>
         </div>
         <div>
-          <span className="text-[10px] text-slate-500 block font-bold">LOCATION</span>
+          <span className="text-[10px] text-text-secondary block font-bold">LOCATION</span>
           <strong className="text-blue-600 font-extrabold">{activeBranchReport.city}</strong>
         </div>
         <div>
-          <span className="text-[10px] text-slate-500 block font-bold">AVAILABLE INVENTORY</span>
+          <span className="text-[10px] text-text-secondary block font-bold">AVAILABLE INVENTORY</span>
           <strong className="text-emerald-700 font-extrabold">{activeBranchReport.active_vehicles_count} Vehicles</strong>
         </div>
         <div>
-          <span className="text-[10px] text-slate-500 block font-bold">VERIFIED EVIDENCE ITEMS</span>
+          <span className="text-[10px] text-text-secondary block font-bold">VERIFIED EVIDENCE ITEMS</span>
           <strong className="text-amber-800 font-extrabold">{activeBranchReport.customer_evidence_records.length} Customer Audits</strong>
         </div>
       </div>
@@ -183,15 +183,15 @@ export function BranchEvidenceReportWidget() {
 
                 <div>
                   <h4 className="text-xs font-extrabold text-slate-900 leading-tight">{item.customer_name}</h4>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5 font-medium">
+                  <div className="flex items-center gap-2 text-[10px] text-text-secondary mt-0.5 font-medium">
                     <span className="flex items-center gap-0.5"><Phone size={10} /> {item.customer_phone}</span>
                   </div>
                 </div>
 
                 <div className="pt-2 border-t border-slate-100">
-                  <span className="text-[10px] text-slate-400 block font-bold">PREFERRED CAR</span>
+                  <span className="text-[10px] text-text-secondary block font-bold">PREFERRED CAR</span>
                   <p className="text-xs font-extrabold text-blue-700 leading-snug">{item.vehicle_preferred}</p>
-                  <span className="text-[10px] text-slate-500 font-bold">{formatRupees(item.vehicle_price)}</span>
+                  <span className="text-[10px] text-text-secondary font-bold">{formatRupees(item.vehicle_price)}</span>
                 </div>
 
                 <div className="bg-slate-50 p-2 rounded-lg border border-slate-200/80 text-[10px] text-slate-600 italic leading-relaxed">
@@ -199,7 +199,7 @@ export function BranchEvidenceReportWidget() {
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-400 font-medium">
+              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[9px] text-text-secondary font-medium">
                 <span className="flex items-center gap-1"><Calendar size={10} /> {item.date}</span>
                 <span className="flex items-center gap-0.5 text-amber-600 font-extrabold">
                   <Star size={10} className="fill-amber-500 text-amber-500" /> {item.rating}/5

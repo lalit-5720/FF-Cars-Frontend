@@ -35,6 +35,7 @@ import { SaleLifecycleModal } from '../../../components/admin/sales/SaleLifecycl
 import { TokenAdvancePaymentModal } from '../../../components/admin/sales/TokenAdvancePaymentModal';
 import { PaymentVerificationModal } from '../../../components/admin/sales/PaymentVerificationModal';
 
+import { firstError, money, maxLen } from '../../../lib/validation';
 export default function SalesPage() {
   const router = useRouter();
   const permissions = usePermissions();
@@ -136,6 +137,26 @@ export default function SalesPage() {
       showLocalToast('Please select an available vehicle');
       return;
     }
+    if (!createForm.customerId) {
+      showLocalToast('Please select the customer for this deal');
+      return;
+    }
+    {
+      const price = Number(createForm.sellingPrice);
+      const saleErr = firstError(
+        money(price, 'Selling price', { min: 1 }),
+        createForm.paymentType === 'LOAN'
+          ? firstError(
+              money(createForm.requiredDownPayment, 'Down payment', { min: 0, max: price }),
+              money(createForm.tokenAdvance, 'Token advance', { min: 0, max: Number(createForm.requiredDownPayment) }),
+            )
+          : money(createForm.tokenAdvance, 'Token advance', { min: 0, max: price }),
+      );
+      if (saleErr) {
+        showLocalToast(saleErr, 'error');
+        return;
+      }
+    }
 
     setCreatingSale(true);
     try {
@@ -208,15 +229,36 @@ export default function SalesPage() {
   };
 
   // --- QUICK ACTION: MOVE TO DELIVERY ---
+  // Branch Manager: one click, no date. The Sales Executive sets the delivery date in Deliveries.
+  const handleDirectMoveToDelivery = async (s: any) => {
+    setActionLoading(true);
+    try {
+      await api.post(`/sales/${s.sale_id}/move-to-delivery`, {});
+      showLocalToast('Moved to Deliveries. The Sales Executive will schedule and complete the handover.', 'success');
+      await fetchSales();
+    } catch (err: any) {
+      showLocalToast(err.response?.data?.message || 'Failed to move to delivery', 'error');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const confirmMoveToDelivery = async () => {
     if (!saleToDeliver) return;
     setActionLoading(true);
     try {
       await api.post(`/sales/${saleToDeliver.sale_id}/move-to-delivery`, { delivery_date: deliveryDate });
-      showLocalToast(`Delivery scheduled! Navigating to Deliveries handover hub...`, 'success');
+      showLocalToast(
+        permissions.canAccessDeliveries
+          ? 'Delivery scheduled!'
+          : 'Moved to Deliveries. The Sales Executive will complete the customer handover.',
+        'success',
+      );
       setSaleToDeliver(null);
       await fetchSales();
-      router.push('/admin/deliveries');
+      if (permissions.canAccessDeliveries) {
+        router.push('/admin/deliveries');
+      }
     } catch (err: any) {
       showLocalToast(err.response?.data?.message || 'Failed to schedule delivery', 'error');
     } finally {
@@ -232,6 +274,16 @@ export default function SalesPage() {
     .filter(s => !(s.payment_status || '').toLowerCase().includes('cancel'))
     .reduce((sum, s) => sum + (s.bank_commission_amount || (Number(s.loan_amount || 0) > 0 ? Math.round(Number(s.loan_amount) * 0.02) : 0)), 0);
 
+  // Customer's unpaid share on a loan deal (required down payment - token - later down payments)
+  const getRemainingDownPayment = (s: any) => {
+    if (Number(s.loan_amount || 0) <= 0) return 0;
+    if (typeof s.remaining_down_payment === 'number') return s.remaining_down_payment;
+    const finalAmt = Number(s.final_amount || s.selling_price || 0);
+    const reqDown = Math.max(0, finalAmt - Number(s.loan_amount || 0));
+    const tokenAmt = Number(s.token_advance ?? s.deposit_amount ?? 0);
+    return Math.max(0, reqDown - tokenAmt);
+  };
+
   const waitingBankSales = sales.filter(s => {
     const isLoan = Number(s.loan_amount || 0) > 0;
     const isCancelled = (s.payment_status || '').toLowerCase().includes('cancel');
@@ -246,7 +298,8 @@ export default function SalesPage() {
     const finalAmt = Number(s.final_amount || s.selling_price || 0);
     const totalPaid = Number(s.total_amount_paid ?? s.total_paid ?? s.deposit_amount ?? 0);
     const bal = typeof s.outstanding_balance === 'number' ? s.outstanding_balance : (finalAmt - totalPaid);
-    return !isLoan && !isCancelled && !isPaid && bal > 0;
+    if (isLoan) return !isCancelled && totalPaid > 0 && getRemainingDownPayment(s) > 0;
+    return !isCancelled && !isPaid && bal > 0;
   });
 
   const readyDeliverySales = sales.filter(s => {
@@ -256,7 +309,7 @@ export default function SalesPage() {
     const isPaid = (s.payment_status || '').toLowerCase() === 'paid';
     const finalAmt = Number(s.final_amount || s.selling_price || 0);
     const totalPaid = Number(s.total_amount_paid ?? s.total_paid ?? s.deposit_amount ?? 0);
-    const isLoanCleared = s.is_loan_disbursed || (s.loan_status === 'Approved' && isPaid);
+    const isLoanCleared = (s.is_loan_disbursed || (s.loan_status === 'Approved' && isPaid)) && getRemainingDownPayment(s) === 0;
     const isCashCleared = isPaid || totalPaid >= finalAmt;
     const isFinanciallyCleared = isLoan ? isLoanCleared : isCashCleared;
     return !isCancelled && isFinanciallyCleared && !isDelivered;
@@ -277,12 +330,18 @@ export default function SalesPage() {
     const totalPaid = Number(s.total_amount_paid ?? s.total_paid ?? s.deposit_amount ?? 0);
     const isCancelled = (s.payment_status || '').toLowerCase().includes('cancel');
     const isPaid = (s.payment_status || '').toLowerCase() === 'paid' || (!isLoan && totalPaid >= finalAmt);
-    const isLoanCleared = s.is_loan_disbursed || (s.loan_status === 'Approved' && isPaid);
+    const isLoanDisbursedFlag = s.is_loan_disbursed || (s.loan_status === 'Approved' && isPaid);
+    const remDownDue = getRemainingDownPayment(s);
+    const isLoanCleared = isLoanDisbursedFlag && remDownDue === 0;
     const isDelivered = (s.delivery_status || '').toLowerCase().includes('deliver') || (s.delivery_status || '').toLowerCase().includes('schedule');
     const isFinanciallyCleared = isLoan ? isLoanCleared : isPaid;
 
-    if (stageFilter === 'WAITING_BANK' && (!isLoan || isCancelled || isLoanCleared)) return false;
-    if (stageFilter === 'PENDING_BALANCE' && (isLoan || isCancelled || isPaid || totalPaid >= finalAmt)) return false;
+    if (stageFilter === 'WAITING_BANK' && (!isLoan || isCancelled || isLoanDisbursedFlag)) return false;
+    if (stageFilter === 'PENDING_BALANCE') {
+      if (isCancelled) return false;
+      if (isLoan && !(totalPaid > 0 && remDownDue > 0)) return false;
+      if (!isLoan && (isPaid || totalPaid >= finalAmt)) return false;
+    }
     if (stageFilter === 'READY_DELIVERY' && (isCancelled || !isFinanciallyCleared || isDelivered)) return false;
     if (stageFilter === 'DELIVERED' && (isCancelled || !isDelivered)) return false;
     if (stageFilter === 'CANCELLED' && !isCancelled) return false;
@@ -306,7 +365,7 @@ export default function SalesPage() {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-card border border-border p-5 rounded-2xl shadow-sm">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider border border-emerald-500/20">
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-extrabold uppercase tracking-wider border border-emerald-500/20">
                 Simple Deal Tracker
               </span>
               <span className="text-xs text-muted-foreground font-semibold">
@@ -314,7 +373,7 @@ export default function SalesPage() {
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-foreground flex items-center gap-2 mt-1 font-display">
-              <TrendingUp className="w-6 h-6 text-emerald-400" /> Car Sales &amp; Easy 4-Step Loan Manager
+              <TrendingUp className="w-6 h-6 text-emerald-700 dark:text-emerald-400" /> Car Sales &amp; Easy 4-Step Loan Manager
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
               Easily track any car purchase step-by-step: Down Payment &rarr; Bank Check &rarr; Loan Approval &rarr; Hand Over Car
@@ -326,7 +385,7 @@ export default function SalesPage() {
               onClick={() => setIsBreakdownOpen(true)}
               className="px-3.5 py-2 bg-secondary hover:bg-secondary/80 text-foreground border border-border font-bold rounded-xl text-xs transition-colors flex items-center gap-2 cursor-pointer shadow-sm"
             >
-              <PieChart className="w-4 h-4 text-emerald-400" /> Revenue Split (Cash vs Loan)
+              <PieChart className="w-4 h-4 text-emerald-700 dark:text-emerald-400" /> Revenue Split (Cash vs Loan)
             </button>
 
             {permissions.canManageSales && (
@@ -347,7 +406,7 @@ export default function SalesPage() {
             className="p-4 bg-secondary/30 flex items-center justify-between cursor-pointer select-none hover:bg-secondary/50 transition-colors"
           >
             <div className="flex items-center gap-2.5">
-              <HelpCircle className="w-4 h-4 text-blue-400" />
+              <HelpCircle className="w-4 h-4 text-blue-700 dark:text-blue-400" />
               <span className="font-extrabold text-xs text-foreground uppercase tracking-wider font-display">
                 How Car Sales Work (Simple 4-Step Guide)
               </span>
@@ -366,7 +425,7 @@ export default function SalesPage() {
               {/* Step 1 */}
               <div className="p-3.5 rounded-xl bg-secondary/40 border border-emerald-500/20 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between text-xs font-bold text-emerald-400 mb-1">
+                  <div className="flex items-center justify-between text-xs font-bold text-emerald-700 dark:text-emerald-400 mb-1">
                     <span>Step 1: Down Payment</span>
                     <CheckCircle2 className="w-4 h-4" />
                   </div>
@@ -375,7 +434,7 @@ export default function SalesPage() {
                     The car is marked <strong>Reserved</strong> so no other customer can book it.
                   </p>
                 </div>
-                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mt-3">
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider mt-3">
                   ✓ Token in Hand
                 </span>
               </div>
@@ -383,7 +442,7 @@ export default function SalesPage() {
               {/* Step 2 */}
               <div className="p-3.5 rounded-xl bg-secondary/40 border border-amber-500/20 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between text-xs font-bold text-amber-400 mb-1">
+                  <div className="flex items-center justify-between text-xs font-bold text-amber-800 dark:text-amber-400 mb-1">
                     <span>Step 2: Bank Check</span>
                     <Clock className="w-4 h-4" />
                   </div>
@@ -392,7 +451,7 @@ export default function SalesPage() {
                     Buyer can still cancel if needed. If cancelled, the car goes right back to the showroom.
                   </p>
                 </div>
-                <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mt-3">
+                <span className="text-[10px] font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider mt-3">
                   ⏳ Underwriting Review
                 </span>
               </div>
@@ -400,7 +459,7 @@ export default function SalesPage() {
               {/* Step 3 */}
               <div className="p-3.5 rounded-xl bg-secondary/40 border border-blue-500/20 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between text-xs font-bold text-blue-400 mb-1">
+                  <div className="flex items-center justify-between text-xs font-bold text-blue-700 dark:text-blue-400 mb-1">
                     <span>Step 3: Bank Approved!</span>
                     <ShieldCheck className="w-4 h-4" />
                   </div>
@@ -409,7 +468,7 @@ export default function SalesPage() {
                     Deal is 100% paid. <strong>Cancellation is locked</strong> to protect bank agreement.
                   </p>
                 </div>
-                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mt-3">
+                <span className="text-[10px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-wider mt-3">
                   🔒 Locked &amp; Settled
                 </span>
               </div>
@@ -417,7 +476,7 @@ export default function SalesPage() {
               {/* Step 4 */}
               <div className="p-3.5 rounded-xl bg-secondary/40 border border-sky-500/20 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between text-xs font-bold text-sky-400 mb-1">
+                  <div className="flex items-center justify-between text-xs font-bold text-sky-700 dark:text-sky-400 mb-1">
                     <span>Step 4: Car Handover</span>
                     <Truck className="w-4 h-4" />
                   </div>
@@ -426,20 +485,20 @@ export default function SalesPage() {
                     Vehicle status is updated to <strong>Sold</strong>. The deal is complete!
                   </p>
                 </div>
-                <span className="text-[10px] font-bold text-sky-400 uppercase tracking-wider mt-3">
+                <span className="text-[10px] font-bold text-sky-700 dark:text-sky-400 uppercase tracking-wider mt-3">
                   🏁 Delivery Done
                 </span>
               </div>
 
               {/* 2% Bonus & Cancellation Tip strip */}
               <div className="col-span-1 sm:col-span-2 lg:col-span-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
-                <div className="flex items-center gap-2 text-amber-300 font-bold">
-                  <Percent className="w-4 h-4 text-amber-400 shrink-0" />
+                <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold">
+                  <Percent className="w-4 h-4 text-amber-800 dark:text-amber-400 shrink-0" />
                   <span>
                     Showroom 2% Bank Bonus: For every loan deal, your showroom receives 2% of the loan directly from the bank as extra profit!
                   </span>
                 </div>
-                <span className="text-[11px] font-mono font-extrabold text-amber-400 shrink-0">
+                <span className="text-[11px] font-mono font-extrabold text-amber-800 dark:text-amber-400 shrink-0">
                   Total Earned: {formatCurrency(totalBankCommission)}
                 </span>
               </div>
@@ -487,7 +546,7 @@ export default function SalesPage() {
               }`}
             >
               <IndianRupee className="w-3.5 h-3.5" />
-              <span>Step 2: Pending Balance ({pendingBalanceSales.length})</span>
+              <span>Step 2: Pending Balance / Down Payment ({pendingBalanceSales.length})</span>
               {pendingBalanceSales.length > 0 && (
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
               )}
@@ -588,21 +647,21 @@ export default function SalesPage() {
                     const isLoanDisbursed = s.is_loan_disbursed || (isLoanApproved && isPaid);
                     const isDelivered = (s.delivery_status || '').toLowerCase().includes('deliver');
                     const isScheduled = (s.delivery_status || '').toLowerCase().includes('schedule');
-                    const isStage2Complete = isLoan ? isLoanDisbursed : (isPaid || balanceDue === 0);
+                    const isStage2Complete = isLoan ? (isLoanDisbursed && remDown === 0 && balanceDue === 0) : (isPaid || balanceDue === 0);
                     const canCancel = s.can_cancel && !isCancelled && !isStage2Complete;
 
                     return (
                       <tr key={s.sale_id} className="hover:bg-secondary/30 transition-colors">
                         
                         {/* Deal ID */}
-                        <td className="py-3.5 px-4 font-mono font-bold text-sky-400">
+                        <td className="py-3.5 px-4 font-mono font-bold text-sky-700 dark:text-sky-400">
                           #CR-{s.sale_id}
                         </td>
 
                         {/* Car Details */}
                         <td className="py-3.5 px-4">
                           <div className="font-extrabold text-foreground flex items-center gap-1.5">
-                            <Car className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                            <Car className="w-3.5 h-3.5 text-blue-700 dark:text-blue-400 shrink-0" />
                             <span>{s.vehicles ? `${s.vehicles.make} ${s.vehicles.model}` : `Vehicle #${s.vehicle_id}`}</span>
                           </div>
                           <div className="text-[10px] text-muted-foreground ml-5">
@@ -613,7 +672,7 @@ export default function SalesPage() {
                         {/* Customer */}
                         <td className="py-3.5 px-4">
                           <div className="font-bold text-foreground flex items-center gap-1.5">
-                            <User className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <User className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
                             <span>{s.customers ? `${s.customers.first_name} ${s.customers.last_name || ''}` : `Customer #${s.customer_id}`}</span>
                           </div>
                           <div className="text-[10px] text-muted-foreground ml-5">
@@ -631,32 +690,32 @@ export default function SalesPage() {
                               <div className="flex flex-col gap-0.5">
                                 <div className="flex items-center gap-1">
                                   <span className="text-muted-foreground">Token:</span>
-                                  <strong className="text-emerald-400 font-mono">{formatCurrency(tokenAmt)}</strong>
+                                  <strong className="text-emerald-700 dark:text-emerald-400 font-mono">{formatCurrency(tokenAmt)}</strong>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <span className="text-muted-foreground">Down Req:</span>
                                   <span className="font-mono font-bold text-foreground">{formatCurrency(reqDown)}</span>
                                   {remDown > 0 ? (
-                                    <span className="text-amber-400 font-mono text-[9px] font-bold">
+                                    <span className="text-amber-800 dark:text-amber-400 font-mono text-[9px] font-bold">
                                       (Due: {formatCurrency(remDown)})
                                     </span>
                                   ) : (
-                                    <span className="text-emerald-400 text-[9px] font-bold">✓ Met</span>
+                                    <span className="text-emerald-700 dark:text-emerald-400 text-[9px] font-bold">✓ Met</span>
                                   )}
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <span className="text-muted-foreground">Loan:</span>
-                                  <strong className="text-sky-400 font-mono">{formatCurrency(loanAmt)}</strong>
-                                  {isLoanDisbursed && <span className="text-emerald-400 text-[9px] font-bold">✓ Disbursed</span>}
+                                  <strong className="text-sky-700 dark:text-sky-400 font-mono">{formatCurrency(loanAmt)}</strong>
+                                  {isLoanDisbursed && <span className="text-emerald-700 dark:text-emerald-400 text-[9px] font-bold">✓ Disbursed</span>}
                                 </div>
-                                <div className="text-[9px] text-slate-400 border-t border-border/50 pt-0.5 mt-0.5">
-                                  Total Paid: <strong className="text-emerald-400 font-mono">{formatCurrency(totalPaid)}</strong>
-                                  {balanceDue > 0 && <span className="text-rose-400 font-mono ml-1 font-bold">Due: {formatCurrency(balanceDue)}</span>}
+                                <div className="text-[9px] text-text-secondary border-t border-border/50 pt-0.5 mt-0.5">
+                                  Total Paid: <strong className="text-emerald-700 dark:text-emerald-400 font-mono">{formatCurrency(totalPaid)}</strong>
+                                  {balanceDue > 0 && <span className="text-rose-700 dark:text-rose-400 font-mono ml-1 font-bold">Due: {formatCurrency(balanceDue)}</span>}
                                 </div>
                               </div>
                             ) : isPaid || balanceDue === 0 ? (
                               <div className="flex flex-col gap-0.5">
-                                <span className="text-emerald-400 font-bold flex items-center gap-1">
+                                <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1">
                                   <CheckCircle2 size={11} /> 100% Cash Paid ({formatCurrency(totalPaid)})
                                 </span>
                                 <span className="text-[9px] text-muted-foreground">
@@ -665,10 +724,10 @@ export default function SalesPage() {
                               </div>
                             ) : (
                               <div className="flex flex-col gap-0.5">
-                                <span className="text-emerald-400 font-bold">
+                                <span className="text-emerald-700 dark:text-emerald-400 font-bold">
                                   Token Advance: {formatCurrency(tokenAmt)}
                                 </span>
-                                <span className="text-rose-400 font-mono font-bold">
+                                <span className="text-rose-700 dark:text-rose-400 font-mono font-bold">
                                   Remaining Balance: {formatCurrency(balanceDue)}
                                 </span>
                                 <span className="text-[9px] text-muted-foreground">
@@ -683,7 +742,7 @@ export default function SalesPage() {
                         <td className="py-3.5 px-4">
                           {isLoan && !isCancelled ? (
                             <div className="flex flex-col">
-                              <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-500/10 text-amber-400 border border-amber-500/30 font-mono w-fit">
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-amber-500/10 text-amber-800 dark:text-amber-400 border border-amber-500/30 font-mono w-fit">
                                 +{formatCurrency(commission)}
                               </span>
                               <span className="text-[9px] text-muted-foreground mt-0.5">2% from Bank</span>
@@ -696,51 +755,51 @@ export default function SalesPage() {
                         {/* Current Step */}
                         <td className="py-3.5 px-4">
                           {isCancelled ? (
-                            <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-rose-500/10 text-rose-400 border-rose-500/20 flex items-center gap-1 w-fit">
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20 flex items-center gap-1 w-fit">
                               <Ban size={11} /> Cancelled &bull; Car in Stock
                             </span>
                           ) : isDelivered ? (
-                            <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-sky-500/10 text-sky-400 border-sky-500/20 flex items-center gap-1 w-fit">
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/20 flex items-center gap-1 w-fit">
                               <Truck size={11} /> Step 4: Delivered (Sold)
                             </span>
                           ) : isScheduled ? (
-                            <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-sky-500/10 text-sky-400 border-sky-500/20 flex items-center gap-1 w-fit">
+                            <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-sky-500/10 text-sky-700 dark:text-sky-400 border-sky-500/20 flex items-center gap-1 w-fit">
                               <Truck size={11} /> Step 4: Delivery Scheduled
                             </span>
                           ) : isLoan ? (
-                            isLoanDisbursed ? (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 flex items-center gap-1 w-fit">
-                                <CheckCircle2 size={11} /> Step 3: Loan Disbursed (Paid)
-                              </span>
-                            ) : isLoanApproved ? (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit">
-                                <Clock size={11} /> Step 2: Approved (Disbursal Pending)
-                              </span>
-                            ) : tokenAmt === 0 && totalPaid === 0 ? (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
+                            tokenAmt === 0 && totalPaid === 0 ? (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
                                 <Clock size={11} /> Step 1: Collect Token Advance
                               </span>
                             ) : remDown > 0 ? (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
-                                <Clock size={11} /> Step 2: Down Payment Pending
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
+                                <Clock size={11} /> Step 2: Collect Down Payment Balance{isLoanDisbursed ? ' (Loan Disbursed)' : ''}
+                              </span>
+                            ) : isLoanDisbursed ? (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 flex items-center gap-1 w-fit">
+                                <CheckCircle2 size={11} /> Step 3: Loan Disbursed (Paid)
+                              </span>
+                            ) : isLoanApproved ? (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit">
+                                <Clock size={11} /> Step 2: Approved (Disbursal Pending)
                               </span>
                             ) : (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
                                 <Clock size={11} /> Step 2: Waiting for Bank
                               </span>
                             )
                           ) : (
                             // Cash Deal
                             isPaid || balanceDue === 0 ? (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-emerald-500/10 text-emerald-400 border-emerald-500/20 flex items-center gap-1 w-fit">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20 flex items-center gap-1 w-fit">
                                 <CheckCircle2 size={11} /> Step 3: 100% Paid (Ready)
                               </span>
                             ) : tokenAmt === 0 && totalPaid === 0 ? (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
                                 <Clock size={11} /> Step 1: Collect Token Advance
                               </span>
                             ) : (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-extrabold border bg-amber-500/10 text-amber-800 dark:text-amber-400 border-amber-500/20 flex items-center gap-1 w-fit animate-pulse">
                                 <Clock size={11} /> Step 2: Collect Balance
                               </span>
                             )
@@ -752,7 +811,7 @@ export default function SalesPage() {
                           <div className="flex items-center justify-end gap-1.5 flex-wrap">
                             
                             {/* ACTION 0: COLLECT TOKEN ADVANCE (When advance is 0) */}
-                            {(permissions.isSystemAdmin || permissions.isBranchManager || permissions.isSalesExecutive) && !isCancelled && !isPaid && tokenAmt === 0 && totalPaid === 0 && (
+                            {(permissions.isSystemAdmin || permissions.isBranchManager) && !isCancelled && !isPaid && tokenAmt === 0 && totalPaid === 0 && (
                               <button
                                 onClick={() => setSaleForTokenAdvance(s)}
                                 className="px-2.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-[11px] rounded-lg transition-all shadow flex items-center gap-1 cursor-pointer animate-pulse"
@@ -760,6 +819,18 @@ export default function SalesPage() {
                               >
                                 <Lock className="w-3.5 h-3.5 text-slate-950" />
                                 <span>Collect Token Advance</span>
+                              </button>
+                            )}
+
+                            {/* ACTION 1C: COLLECT REMAINING DOWN PAYMENT ON LOAN DEALS (Admin & Branch Manager Only) */}
+                            {(permissions.isSystemAdmin || permissions.isBranchManager) && isLoan && !isCancelled && (tokenAmt > 0 || totalPaid > 0) && remDown > 0 && (
+                              <button
+                                onClick={() => handleDirectCollectBalance(s)}
+                                className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-[11px] rounded-lg transition-colors cursor-pointer shadow flex items-center gap-1 animate-pulse"
+                                title={`Collect customer's remaining down payment of ${formatCurrency(remDown)}`}
+                              >
+                                <IndianRupee className="w-3.5 h-3.5" />
+                                <span>Collect Down Payment {formatCurrency(remDown)}</span>
                               </button>
                             )}
 
@@ -791,38 +862,39 @@ export default function SalesPage() {
                               </button>
                             )}
 
-                            {/* QUICK ADVANCE SCREEN (For any active unfinalized deal) */}
-                            {(permissions.isSystemAdmin || permissions.isBranchManager || permissions.isSalesExecutive) && !isCancelled && !isPaid && tokenAmt > 0 && (
-                              <button
-                                onClick={() => setSaleForTokenAdvance(s)}
-                                className="px-2 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[11px] font-bold rounded-lg transition-colors cursor-pointer flex items-center gap-1"
-                                title="Manage or adjust token advance breakdown"
-                              >
-                                <Lock className="w-3 h-3" />
-                                <span>Advance</span>
-                              </button>
-                            )}
-
-                            {/* ACTION 2: SCHEDULE DELIVERY (Strictly unlocked after Stage 2 completion) */}
+                            {/* ACTION 2: MOVE TO DELIVERY (Branch Manager sends cleared deal to the Sales Executive's delivery queue) */}
                             {!isCancelled && !isDelivered && isStage2Complete && (
-                              isScheduled ? (
-                                <button
-                                  onClick={() => router.push('/admin/deliveries')}
-                                  className="px-2.5 py-1.5 bg-sky-500/15 hover:bg-sky-500/25 text-sky-400 border border-sky-500/30 font-bold text-[11px] rounded-lg transition-colors cursor-pointer flex items-center gap-1 shadow-sm"
-                                  title="Delivery already scheduled. Click to open Deliveries & Handover hub"
-                                >
-                                  <Truck className="w-3.5 h-3.5 text-sky-400" />
-                                  <span>Go to Delivery &rarr;</span>
-                                </button>
+                              isScheduled && !permissions.canAccessDeliveries ? (
+                                <span className="px-2.5 py-1 bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/20 font-bold text-[10px] rounded-lg flex items-center gap-1">
+                                  <Truck size={11} />
+                                  In Delivery &bull; With Sales Exec
+                                </span>
+                              ) : (permissions.canManageDeliveries || permissions.isBranchManager) ? (
+                                isScheduled ? (
+                                  <button
+                                    onClick={() => router.push('/admin/deliveries')}
+                                    className="px-2.5 py-1.5 bg-sky-500/15 hover:bg-sky-500/25 text-sky-700 dark:text-sky-400 border border-sky-500/30 font-bold text-[11px] rounded-lg transition-colors cursor-pointer flex items-center gap-1 shadow-sm"
+                                    title="Delivery already scheduled. Click to open Deliveries & Handover hub"
+                                  >
+                                    <Truck className="w-3.5 h-3.5 text-sky-700 dark:text-sky-400" />
+                                    <span>Go to Delivery &rarr;</span>
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => (permissions.canManageDeliveries ? setSaleToDeliver(s) : handleDirectMoveToDelivery(s))}
+                                    disabled={actionLoading}
+                                    className="px-2.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-[11px] rounded-lg transition-colors cursor-pointer shadow flex items-center gap-1"
+                                    title="Click to schedule vehicle delivery"
+                                  >
+                                    <Truck className="w-3.5 h-3.5" />
+                                    <span>Move to Delivery</span>
+                                  </button>
+                                )
                               ) : (
-                                <button
-                                  onClick={() => setSaleToDeliver(s)}
-                                  className="px-2.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-[11px] rounded-lg transition-colors cursor-pointer shadow flex items-center gap-1"
-                                  title="Click to schedule vehicle delivery"
-                                >
-                                  <Truck className="w-3.5 h-3.5" />
-                                  <span>Move to Delivery</span>
-                                </button>
+                                <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-bold text-[10px] rounded-lg flex items-center gap-1">
+                                  <CheckCircle2 size={11} />
+                                  Cleared &bull; Handover with Sales Exec
+                                </span>
                               )
                             )}
 
@@ -833,7 +905,7 @@ export default function SalesPage() {
                                   setCancelReason('Customer changed mind prior to financial settlement');
                                   setSaleToCancel(s);
                                 }}
-                                className="px-2 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-[11px] rounded-lg transition-colors cursor-pointer"
+                                className="px-2 py-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/30 font-bold text-[11px] rounded-lg transition-colors cursor-pointer"
                                 title="Cancel sale & return vehicle to showroom stock"
                               >
                                 <span>Cancel Deal</span>
@@ -870,7 +942,7 @@ export default function SalesPage() {
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
@@ -894,17 +966,17 @@ export default function SalesPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Bank Loan Amount:</span>
-                <strong className="text-amber-400 font-mono">{formatCurrency(saleToApprove.loan_amount)}</strong>
+                <strong className="text-amber-800 dark:text-amber-400 font-mono">{formatCurrency(saleToApprove.loan_amount)}</strong>
               </div>
               <div className="flex justify-between border-t border-border pt-2">
-                <span className="text-emerald-400 font-bold">Your 2% Extra Bank Bonus:</span>
-                <strong className="text-emerald-400 font-mono">
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold">Your 2% Extra Bank Bonus:</span>
+                <strong className="text-emerald-700 dark:text-emerald-400 font-mono">
                   +{formatCurrency(saleToApprove.bank_commission_amount || Math.round(Number(saleToApprove.loan_amount || 0) * 0.02))}
                 </strong>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300">
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-800 dark:text-amber-300">
               ⚠️ <strong>Note:</strong> Once approved, the deal is 100% paid and cancellation is locked.
             </div>
 
@@ -936,7 +1008,7 @@ export default function SalesPage() {
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-card border border-rose-500/30 rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
+              <div className="p-2.5 rounded-xl bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20">
                 <AlertTriangle className="w-6 h-6" />
               </div>
               <div>
@@ -957,7 +1029,7 @@ export default function SalesPage() {
               <label className="block text-xs font-bold text-foreground mb-1">Cancellation Reason</label>
               <input
                 type="text"
-                value={cancelReason}
+                value={cancelReason} maxLength={500}
                 onChange={(e) => setCancelReason(e.target.value)}
                 placeholder="e.g. Customer changed mind, loan denied, etc."
                 className="w-full p-2 bg-secondary border border-border rounded-xl text-xs text-foreground focus:outline-none focus:border-rose-500"
@@ -992,7 +1064,7 @@ export default function SalesPage() {
         <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-card border border-border rounded-2xl w-full max-w-md p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
+              <div className="p-2.5 rounded-xl bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/20">
                 <Truck className="w-6 h-6" />
               </div>
               <div>
@@ -1056,7 +1128,7 @@ export default function SalesPage() {
             
             <div className="p-5 border-b border-border flex items-center justify-between bg-secondary/30">
               <div className="flex items-center gap-2.5">
-                <Plus className="w-5 h-5 text-emerald-400" />
+                <Plus className="w-5 h-5 text-emerald-700 dark:text-emerald-400" />
                 <h3 className="font-extrabold text-base text-foreground font-display">
                   Create New Car Sale (Easy 3 Steps)
                 </h3>
@@ -1178,7 +1250,7 @@ export default function SalesPage() {
 
                   {/* Token Advance */}
                   <div>
-                    <label className="block font-bold text-emerald-400 mb-1">
+                    <label className="block font-bold text-emerald-700 dark:text-emerald-400 mb-1">
                       Token Advance Received (Credited toward Down Payment)
                     </label>
                     <input
@@ -1205,24 +1277,24 @@ export default function SalesPage() {
                     </div>
 
                     {createForm.tokenAdvance > createForm.requiredDownPayment && (
-                      <div className="text-[11px] text-blue-300 bg-blue-500/10 p-2 rounded-lg border border-blue-500/20">
+                      <div className="text-[11px] text-blue-700 dark:text-blue-300 bg-blue-500/10 p-2 rounded-lg border border-blue-500/20">
                         ℹ️ Token advance exceeds required down payment by <strong>{formatCurrency(createForm.tokenAdvance - createForm.requiredDownPayment)}</strong>. Excess will be credited to outstanding vehicle balance or refunded.
                       </div>
                     )}
 
                     <div className="flex justify-between items-center pt-1 border-t border-border/50">
                       <span className="text-muted-foreground">Bank Loan Principal:</span>
-                      <strong className="text-sky-400 font-mono font-bold">
+                      <strong className="text-sky-700 dark:text-sky-400 font-mono font-bold">
                         {formatCurrency(createForm.loanAmount)}
                       </strong>
                     </div>
                   </div>
 
                   <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-xs">
-                    <span className="text-emerald-400 font-bold flex items-center gap-1">
+                    <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1">
                       <Percent size={13} /> Your Showroom 2% Bank Profit:
                     </span>
-                    <strong className="text-emerald-400 font-mono font-black">
+                    <strong className="text-emerald-700 dark:text-emerald-400 font-mono font-black">
                       +{formatCurrency(Math.round(createForm.loanAmount * 0.02))}
                     </strong>
                   </div>
@@ -1262,7 +1334,7 @@ export default function SalesPage() {
                   {!createForm.fullUpfront ? (
                     <div className="space-y-2">
                       <div>
-                        <label className="block font-bold text-emerald-400 mb-1">
+                        <label className="block font-bold text-emerald-700 dark:text-emerald-400 mb-1">
                           Token Advance Amount Received
                         </label>
                         <input
@@ -1275,7 +1347,7 @@ export default function SalesPage() {
                           className="w-full p-2.5 bg-secondary border border-border rounded-xl text-foreground font-mono font-bold focus:outline-none focus:border-emerald-500"
                         />
                       </div>
-                      <div className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300">
+                      <div className="flex justify-between items-center text-xs p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300">
                         <span>Remaining Cash Balance Due:</span>
                         <strong className="font-mono text-sm font-bold">
                           {formatCurrency(Math.max(0, createForm.sellingPrice - createForm.tokenAdvance))}
@@ -1283,7 +1355,7 @@ export default function SalesPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400 font-bold flex items-center justify-between">
+                    <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-700 dark:text-emerald-400 font-bold flex items-center justify-between">
                       <span>Full contract settled upfront:</span>
                       <span className="font-mono text-sm">{formatCurrency(createForm.sellingPrice)}</span>
                     </div>

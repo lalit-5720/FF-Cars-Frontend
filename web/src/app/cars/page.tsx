@@ -464,10 +464,12 @@ function CarsListingPage() {
                         </div>
 
                         {/* Year & Branch Location Badges */}
-                        <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
-                          <span className="badge badge-info">{year}</span>
-                          <span className="badge badge-neutral flex items-center gap-1">
-                            <MapPin className="w-3 h-3 text-accent" />
+                        <div className="absolute bottom-3 left-3 flex items-center gap-2 z-10">
+                          <span className="px-2.5 py-1 rounded-full text-xs font-black tracking-wide bg-white/95 dark:bg-slate-900/95 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 shadow-sm backdrop-blur-md">
+                            {year}
+                          </span>
+                          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-white/95 dark:bg-slate-900/95 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 shadow-sm backdrop-blur-md flex items-center gap-1.5">
+                            <MapPin className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
                             <span>{branchCity || 'Showroom'}</span>
                           </span>
                         </div>
